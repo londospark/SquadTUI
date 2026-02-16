@@ -39,18 +39,7 @@ public static class TestAppBuilder
                             Screen.Charter => CharterScreen.Render(v, state, app),
                             Screen.NoSquad => NoSquadScreen.Render(v, state, app),
                             _ => v.Text("Unknown screen")
-                        }),
-
-                        v.InfoBar(s =>
-                        [
-                            s.Section("SquadTUI v0.2.0"),
-                            s.Spacer(),
-                            s.Section($"🎨 {ThemeManager.ThemeNames[state.SelectedThemeIndex % ThemeManager.ThemeNames.Length]}"),
-                            s.Spacer(),
-                            s.Section($"Screen: {state.CurrentScreen}"),
-                            s.Spacer(),
-                            s.Section("Esc:Back  j/k:Nav  h/l:Screen  T:Theme  Q:Quit")
-                        ])
+                        })
                     ]).WithInputBindings(keys =>
                     {
                         keys.Key(Hex1bKey.D1).Action(() => { state.CurrentScreen = Screen.Dashboard; }, "Dashboard");
@@ -81,7 +70,6 @@ public static class TestAppBuilder
                         }, "Edit Charter");
                         keys.Key(Hex1bKey.J).Action(() =>
                         {
-                            // Move selection down in current list
                             if (state.CurrentScreen == Screen.Roster)
                                 state.RosterSelectedIndex = Math.Min(state.RosterSelectedIndex + 1, (state.Members?.Count ?? 6) - 1);
                             else if (state.CurrentScreen == Screen.Decisions)
@@ -93,7 +81,6 @@ public static class TestAppBuilder
                         }, "Down");
                         keys.Key(Hex1bKey.K).Action(() =>
                         {
-                            // Move selection up in current list
                             if (state.CurrentScreen == Screen.Roster)
                                 state.RosterSelectedIndex = Math.Max(state.RosterSelectedIndex - 1, 0);
                             else if (state.CurrentScreen == Screen.Decisions)
@@ -102,7 +89,7 @@ public static class TestAppBuilder
                                 state.LogSelectedIndex = Math.Max(state.LogSelectedIndex - 1, 0);
                             else if (state.CurrentScreen == Screen.Skills)
                                 state.SkillSelectedIndex = Math.Max(state.SkillSelectedIndex - 1, 0);
-                        }, "Down");
+                        }, "Up");
                         keys.Key(Hex1bKey.H).Action(() =>
                         {
                             // Previous screen

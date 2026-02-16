@@ -67,20 +67,11 @@ await using var terminal = Hex1bTerminal.CreateBuilder()
                     Screen.ActivityLog => ActivityLogScreen.Render(v, state, app),
                     Screen.Metrics => MetricsScreen.Render(v, state, app),
                     Screen.Charter => CharterScreen.Render(v, state, app),
+                    Screen.Help => HelpScreen.Render(v, state, app),
                     Screen.NoSquad => NoSquadScreen.Render(v, state, app),
+                    Screen.Settings => SettingsScreen.Render(v, state, app, options),
                     _ => v.Text("Unknown screen")
-                }),
-
-                v.InfoBar(s =>
-                [
-                    s.Section($"\x1b[1mSquadTUI\x1b[0m \x1b[90mv0.2.0\x1b[0m"),
-                    s.Spacer(),
-                    s.Section($"\x1b[36m🎨 {ThemeManager.ThemeNames[state.SelectedThemeIndex % ThemeManager.ThemeNames.Length]}\x1b[0m"),
-                    s.Spacer(),
-                    s.Section($"\x1b[90mScreen:\x1b[0m \x1b[1m{state.CurrentScreen}\x1b[0m"),
-                    s.Spacer(),
-                    s.Section("\x1b[90mEsc:Back  j/k:↕  h/l:◀▶  T:Theme  Q:Quit\x1b[0m")
-                ])
+                })
             ]).WithInputBindings(keys =>
             {
                 keys.Key(Hex1bKey.D1).Action(() => { state.CurrentScreen = Screen.Dashboard; }, "Dashboard");
@@ -95,6 +86,7 @@ await using var terminal = Hex1bTerminal.CreateBuilder()
                     state.SelectedThemeIndex = (state.SelectedThemeIndex + 1) % ThemeManager.ThemeNames.Length;
                     options.Theme = ThemeManager.GetTheme(state.SelectedThemeIndex);
                 }, "Theme");
+                keys.Key(Hex1bKey.S).Action(() => { state.CurrentScreen = Screen.Settings; }, "Settings");
                 keys.Key(Hex1bKey.Escape).Action(() =>
                 {
                     if (state.CurrentScreen == Screen.MemberDetail)
@@ -111,7 +103,6 @@ await using var terminal = Hex1bTerminal.CreateBuilder()
                 }, "Edit Charter");
                 keys.Key(Hex1bKey.J).Action(() =>
                 {
-                    // Move selection down in current list
                     if (state.CurrentScreen == Screen.Roster)
                         state.RosterSelectedIndex = Math.Min(state.RosterSelectedIndex + 1, (state.Members?.Count ?? 6) - 1);
                     else if (state.CurrentScreen == Screen.Decisions)
@@ -120,10 +111,11 @@ await using var terminal = Hex1bTerminal.CreateBuilder()
                         state.LogSelectedIndex = Math.Min(state.LogSelectedIndex + 1, (state.LogEntries?.Count ?? 3) - 1);
                     else if (state.CurrentScreen == Screen.Skills)
                         state.SkillSelectedIndex = Math.Min(state.SkillSelectedIndex + 1, (state.Skills?.Count ?? 5) - 1);
+                    else if (state.CurrentScreen == Screen.Settings)
+                        state.SettingsSelectedIndex = Math.Min(state.SettingsSelectedIndex + 1, 4);
                 }, "Down");
                 keys.Key(Hex1bKey.K).Action(() =>
                 {
-                    // Move selection up in current list
                     if (state.CurrentScreen == Screen.Roster)
                         state.RosterSelectedIndex = Math.Max(state.RosterSelectedIndex - 1, 0);
                     else if (state.CurrentScreen == Screen.Decisions)
@@ -132,7 +124,9 @@ await using var terminal = Hex1bTerminal.CreateBuilder()
                         state.LogSelectedIndex = Math.Max(state.LogSelectedIndex - 1, 0);
                     else if (state.CurrentScreen == Screen.Skills)
                         state.SkillSelectedIndex = Math.Max(state.SkillSelectedIndex - 1, 0);
-                }, "Down");
+                    else if (state.CurrentScreen == Screen.Settings)
+                        state.SettingsSelectedIndex = Math.Max(state.SettingsSelectedIndex - 1, 0);
+                }, "Up");
                 keys.Key(Hex1bKey.H).Action(() =>
                 {
                     // Previous screen
@@ -162,9 +156,30 @@ await using var terminal = Hex1bTerminal.CreateBuilder()
                         state.CurrentScreen = Screen.Dashboard;
                     }
                 }, "Create Squad");
+                keys.Key(Hex1bKey.F1).Action(() =>
+                {
+                    if (state.CurrentScreen != Screen.Help)
+                    {
+                        state.PreviousScreen = state.CurrentScreen;
+                        state.CurrentScreen = Screen.Help;
+                    }
+                    else
+                    {
+                        if (state.PreviousScreen.HasValue)
+                        {
+                            state.CurrentScreen = state.PreviousScreen.Value;
+                            state.PreviousScreen = null;
+                        }
+                        else
+                        {
+                            state.CurrentScreen = Screen.Dashboard;
+                        }
+                    }
+                }, "Help");
             });
         };
     })
+    .WithDiagnostics()
     .Build();
 
 await terminal.RunAsync();

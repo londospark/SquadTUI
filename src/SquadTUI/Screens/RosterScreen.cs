@@ -14,11 +14,7 @@ public static class RosterScreen
 
         var selectedIdx = Math.Clamp(state.RosterSelectedIndex, 0, members.Count - 1);
         var selected = members[selectedIdx];
-        var ti = state.SelectedThemeIndex;
-        var c = ThemeManager.GetPanelColors(ti);
-        var p1 = c.PanelBg;
-        var p2 = c.NestedBg;
-        var acc = c.Accent;
+        var acc = ThemeManager.GetAccentCode(state.SelectedThemeIndex);
         var R = PanelRenderer.Reset;
 
         var charter = SampleData.GetCharterFor(selected.Name);
@@ -31,7 +27,7 @@ public static class RosterScreen
         [
             h.VStack(left =>
             [
-                left.Text($"{p1}  {PanelRenderer.Bold}{acc}👥 Team Roster{R}"),
+                left.Text($"  {PanelRenderer.Bold}{acc}👥 Team Roster{R}"),
                 left.List(listItems)
                     .OnSelectionChanged(e => { state.RosterSelectedIndex = e.SelectedIndex; })
                     .Fill()
@@ -41,35 +37,35 @@ public static class RosterScreen
             {
                 var widgets = new List<Hex1bWidget>
                 {
-                    detail.Text($"{p1}  {PanelRenderer.Bold}{acc}👤 {selected.Name}{R}"),
-                    detail.Text($"{p1}{R}"),
-                    detail.Text($"{p1}  \x1b[90mRole:\x1b[0m     \x1b[1m{selected.Role}\x1b[0m{R}"),
-                    detail.Text($"{p1}  \x1b[90mStatus:\x1b[0m   {GetStatusBadge(selected.Status)} {selected.Status}{R}"),
-                    detail.Text($"{p1}  \x1b[90mTask:\x1b[0m     {selected.CurrentTask ?? "\x1b[90mNone\x1b[0m"}{R}"),
+                    detail.Text($"  {PanelRenderer.Bold}{acc}👤 {selected.Name}{R}"),
+                    detail.Text(""),
+                    detail.Text($"  \x1b[90mRole:\x1b[0m     \x1b[1m{selected.Role}{R}"),
+                    detail.Text($"  \x1b[90mStatus:\x1b[0m   {GetStatusBadge(selected.Status)} {selected.Status}{R}"),
+                    detail.Text($"  \x1b[90mTask:\x1b[0m     {selected.CurrentTask ?? "\x1b[90mNone\x1b[0m"}{R}"),
                 };
 
                 // Charter excerpt
-                widgets.Add(detail.Text($"{p1}{R}"));
-                widgets.Add(detail.Text($"{p2}  {PanelRenderer.Bold}{acc}📜 Charter{R}"));
+                widgets.Add(detail.Text(""));
+                widgets.Add(detail.Text($"  {PanelRenderer.Bold}{acc}📜 Charter{R}"));
                 foreach (var line in charterExcerpt)
-                    widgets.Add(detail.Text($"{p2}  {line.Trim()}{R}"));
+                    widgets.Add(detail.Text($"  {line.Trim()}{R}"));
 
                 // Tasks
                 if (memberTasks.Count > 0)
                 {
-                    widgets.Add(detail.Text($"{p1}{R}"));
-                    widgets.Add(detail.Text($"{p1}  {PanelRenderer.Bold}{acc}📋 Tasks{R}"));
+                    widgets.Add(detail.Text(""));
+                    widgets.Add(detail.Text($"  {PanelRenderer.Bold}{acc}📋 Tasks{R}"));
                     foreach (var t in memberTasks)
-                        widgets.Add(detail.Text($"{p1}  {GetTaskBadge(t.Status)} {t.Title} \x1b[90m— {t.Description}\x1b[0m{R}"));
+                        widgets.Add(detail.Text($"  {GetTaskBadge(t.Status)} {t.Title} \x1b[90m— {t.Description}{R}"));
                 }
 
                 // Recent activity
                 if (recentLogs.Count > 0)
                 {
-                    widgets.Add(detail.Text($"{p1}{R}"));
-                    widgets.Add(detail.Text($"{p2}  {PanelRenderer.Bold}{acc}📊 Recent Activity{R}"));
+                    widgets.Add(detail.Text(""));
+                    widgets.Add(detail.Text($"  {PanelRenderer.Bold}{acc}📊 Recent Activity{R}"));
                     foreach (var l in recentLogs)
-                        widgets.Add(detail.Text($"{p2}  \x1b[90m📅 {l.Date}\x1b[0m  {l.Topic} — {l.Summary}{R}"));
+                        widgets.Add(detail.Text($"  \x1b[90m📅 {l.Date}\x1b[0m  {l.Topic} — {l.Summary}{R}"));
                 }
 
                 return widgets.ToArray();

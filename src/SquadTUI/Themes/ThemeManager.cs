@@ -16,15 +16,18 @@ public static class ThemeManager
         _ => CreateOceanTheme()
     };
 
-    /// <summary>Returns ANSI panel background colors for the given theme index.</summary>
-    public static PanelColors GetPanelColors(int index) => (index % ThemeNames.Length) switch
+    /// <summary>Returns the ANSI foreground accent color code for the given theme.</summary>
+    public static string GetAccentCode(int index) => (index % ThemeNames.Length) switch
     {
-        0 => new("\x1b[48;2;13;17;23m", "\x1b[48;2;22;27;34m", "\x1b[48;2;33;38;45m", "\x1b[36m"),
-        1 => new("\x1b[48;2;26;26;46m", "\x1b[48;2;22;33;62m", "\x1b[48;2;15;52;96m", "\x1b[33m"),
-        2 => new("\x1b[48;2;26;26;26m", "\x1b[48;2;45;27;46m", "\x1b[48;2;70;38;57m", "\x1b[35m"),
-        3 => new("\x1b[48;2;0;0;0m", "\x1b[48;2;26;26;26m", "\x1b[48;2;42;42;42m", "\x1b[97m"),
-        _ => new("", "", "", "\x1b[36m")
+        0 => "\x1b[36m",  // Cyan
+        1 => "\x1b[33m",  // Yellow
+        2 => "\x1b[35m",  // Magenta
+        3 => "\x1b[97m",  // BrightWhite
+        _ => "\x1b[36m"
     };
+
+    /// <summary>Returns a PanelColors record with accent code for backward compat.</summary>
+    public static PanelColors GetPanelColors(int index) => new(GetAccentCode(index));
 
     /// <summary>Modern borderless style — borders use space chars to become invisible.</summary>
     private static Hex1bTheme WithModernBorders(Hex1bTheme theme) => theme
@@ -44,7 +47,7 @@ public static class ThemeManager
             .Set(BorderTheme.TitleColor, Hex1bColor.Cyan)
             .Set(ListTheme.SelectedForegroundColor, Hex1bColor.Black)
             .Set(ListTheme.SelectedBackgroundColor, Hex1bColor.Cyan)
-            .Set(ListTheme.SelectedIndicator, "▶ ")
+            .Set(ListTheme.SelectedIndicator, "  ")
             .Set(ScrollTheme.ThumbColor, Hex1bColor.Cyan)
             .Set(ScrollTheme.TrackColor, Hex1bColor.FromRgb(33, 38, 45))
             .Set(SplitterTheme.DividerColor, Hex1bColor.FromRgb(33, 38, 45)));
@@ -58,7 +61,7 @@ public static class ThemeManager
             .Set(BorderTheme.TitleColor, Hex1bColor.Yellow)
             .Set(ListTheme.SelectedForegroundColor, Hex1bColor.Black)
             .Set(ListTheme.SelectedBackgroundColor, Hex1bColor.Yellow)
-            .Set(ListTheme.SelectedIndicator, "▸ ")
+            .Set(ListTheme.SelectedIndicator, "  ")
             .Set(ScrollTheme.ThumbColor, Hex1bColor.Yellow)
             .Set(ScrollTheme.TrackColor, Hex1bColor.FromRgb(15, 52, 96))
             .Set(SplitterTheme.DividerColor, Hex1bColor.FromRgb(15, 52, 96)));
@@ -72,7 +75,7 @@ public static class ThemeManager
             .Set(BorderTheme.TitleColor, Hex1bColor.Magenta)
             .Set(ListTheme.SelectedForegroundColor, Hex1bColor.Black)
             .Set(ListTheme.SelectedBackgroundColor, Hex1bColor.Magenta)
-            .Set(ListTheme.SelectedIndicator, "▸ ")
+            .Set(ListTheme.SelectedIndicator, "  ")
             .Set(ScrollTheme.ThumbColor, Hex1bColor.Magenta)
             .Set(ScrollTheme.TrackColor, Hex1bColor.FromRgb(70, 38, 57))
             .Set(SplitterTheme.DividerColor, Hex1bColor.FromRgb(70, 38, 57)));
@@ -86,7 +89,7 @@ public static class ThemeManager
             .Set(BorderTheme.TitleColor, Hex1bColor.White)
             .Set(ListTheme.SelectedForegroundColor, Hex1bColor.Black)
             .Set(ListTheme.SelectedBackgroundColor, Hex1bColor.White)
-            .Set(ListTheme.SelectedIndicator, "▶ ")
+            .Set(ListTheme.SelectedIndicator, "  ")
             .Set(ScrollTheme.ThumbColor, Hex1bColor.White)
             .Set(ScrollTheme.TrackColor, Hex1bColor.FromRgb(42, 42, 42))
             .Set(SplitterTheme.DividerColor, Hex1bColor.FromRgb(42, 42, 42)));

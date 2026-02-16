@@ -26,7 +26,7 @@ public class VimKeybindingTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Screen: Dashboard").Should().BeTrue();
+        snapshot.ContainsText("Members:").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -48,7 +48,7 @@ public class VimKeybindingTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Screen: Roster").Should().BeTrue();
+        snapshot.ContainsText("Team Roster").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -72,7 +72,7 @@ public class VimKeybindingTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Screen: Skills").Should().BeTrue();
+        snapshot.ContainsText("Installed Skills").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -95,7 +95,7 @@ public class VimKeybindingTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Screen: Dashboard").Should().BeTrue();
+        snapshot.ContainsText("Members:").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -118,7 +118,7 @@ public class VimKeybindingTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Screen: Dashboard").Should().BeTrue();
+        snapshot.ContainsText("Members:").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -139,7 +139,7 @@ public class VimKeybindingTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Screen: Dashboard").Should().BeTrue();
+        snapshot.ContainsText("Members:").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

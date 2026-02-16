@@ -77,7 +77,6 @@ public class ResponsiveLayoutTests
         snapshot.ContainsText("🏠 Team").Should().BeTrue();
         snapshot.ContainsText("📊 Activity").Should().BeTrue();
         snapshot.ContainsText("📈 Summary").Should().BeTrue();
-        snapshot.ContainsText("🏠 Dashboard").Should().BeFalse();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

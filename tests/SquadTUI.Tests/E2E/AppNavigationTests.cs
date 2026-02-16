@@ -60,7 +60,6 @@ public class AppNavigationTests
 
         var snapshot = terminal.CreateSnapshot();
         snapshot.ContainsText("Decisions").Should().BeTrue();
-        snapshot.ContainsText("Screen: Decisions").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -82,7 +81,6 @@ public class AppNavigationTests
 
         var snapshot = terminal.CreateSnapshot();
         snapshot.ContainsText("Skills").Should().BeTrue();
-        snapshot.ContainsText("Screen: Skills").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -124,7 +122,7 @@ public class AppNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Metrics").Should().BeTrue();
+        snapshot.ContainsText("Task Activity by Member").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -148,7 +146,7 @@ public class AppNavigationTests
 
         var snapshot = terminal.CreateSnapshot();
         snapshot.ContainsText("Dashboard").Should().BeTrue();
-        snapshot.ContainsText("Screen: Dashboard").Should().BeTrue();
+        snapshot.ContainsText("Members:").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

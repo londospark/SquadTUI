@@ -26,8 +26,6 @@ public class PanelRendererTests
     public void GetPanelColors_ReturnsValidColorsForAllThemes(int themeIndex)
     {
         var colors = ThemeManager.GetPanelColors(themeIndex);
-        colors.PanelBg.Should().NotBeNullOrEmpty();
-        colors.NestedBg.Should().NotBeNullOrEmpty();
         colors.Accent.Should().NotBeNullOrEmpty();
     }
 }

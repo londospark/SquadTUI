@@ -1,8 +1,8 @@
 namespace SquadTUI.Rendering;
 
 /// <summary>
-/// Provides ANSI escape sequences for modern opencode-inspired panel styling
-/// using background color shading instead of visible borders.
+/// Provides ANSI escape sequences for text styling.
+/// Background colors are handled by the Hex1b theme system (GlobalTheme.BackgroundColor).
 /// </summary>
 public static class PanelRenderer
 {
@@ -10,33 +10,19 @@ public static class PanelRenderer
     public const string Bold = "\x1b[1m";
     public const string Dim = "\x1b[2m";
 
-    /// <summary>Returns ANSI bg color escape for a given theme and panel depth.</summary>
-    public static string PanelBg(int themeIndex, int depth) =>
-        Themes.ThemeManager.GetPanelColors(themeIndex).GetBg(depth);
-
     /// <summary>Render a styled panel title header (bold + accent colored).</summary>
     public static string PanelTitle(int themeIndex, string emoji, string title)
     {
-        var colors = Themes.ThemeManager.GetPanelColors(themeIndex);
-        return $"{colors.PanelBg}  {Bold}{colors.Accent}{emoji} {title}{Reset}";
+        var accent = Themes.ThemeManager.GetAccentCode(themeIndex);
+        return $"  {Bold}{accent}{emoji} {title}{Reset}";
     }
 
-    /// <summary>Render a panel content line with background.</summary>
-    public static string PanelLine(int themeIndex, string content, int depth = 1)
+    /// <summary>Render a panel content line.</summary>
+    public static string PanelLine(int themeIndex, string content)
     {
-        var bg = Themes.ThemeManager.GetPanelColors(themeIndex).GetBg(depth);
-        return $"{bg}  {content}{Reset}";
+        return $"  {content}{Reset}";
     }
 }
 
-/// <summary>Holds ANSI escape sequences for panel background colors.</summary>
-public record PanelColors(string BaseBg, string PanelBg, string NestedBg, string Accent)
-{
-    public string GetBg(int depth) => depth switch
-    {
-        0 => BaseBg,
-        1 => PanelBg,
-        2 => NestedBg,
-        _ => BaseBg
-    };
-}
+/// <summary>Holds the ANSI accent foreground color code for a theme.</summary>
+public record PanelColors(string Accent);

@@ -17,25 +17,21 @@ public class ThemeSwitchingTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("🎨 Ocean").Should().BeTrue();
+        snapshot.ContainsText("Dashboard").Should().BeTrue();
 
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.T)
-            .Build();
-        await sequence.ApplyAsync(terminal);
-        await Task.Delay(200);
+        // Press T three times to cycle through themes
+        for (int i = 0; i < 3; i++)
+        {
+            var sequence = new Hex1bTerminalInputSequenceBuilder()
+                .Key(Hex1bKey.T)
+                .Build();
+            await sequence.ApplyAsync(terminal);
+            await Task.Delay(200);
+        }
 
+        // App should still render correctly after theme cycling
         var snapshot2 = terminal.CreateSnapshot();
-        snapshot2.ContainsText("🎨 Heist").Should().BeTrue();
-
-        var sequence2 = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.T)
-            .Build();
-        await sequence2.ApplyAsync(terminal);
-        await Task.Delay(200);
-
-        var snapshot3 = terminal.CreateSnapshot();
-        snapshot3.ContainsText("🎨 Sunset").Should().BeTrue();
+        snapshot2.ContainsText("Dashboard").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -50,8 +46,9 @@ public class ThemeSwitchingTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("🎨 Ocean").Should().BeTrue();
+        snapshot.ContainsText("Dashboard").Should().BeTrue();
 
+        // Press T 4 times to wrap around to initial theme
         for (int i = 0; i < 4; i++)
         {
             var sequence = new Hex1bTerminalInputSequenceBuilder()
@@ -62,14 +59,14 @@ public class ThemeSwitchingTests
         }
 
         var finalSnapshot = terminal.CreateSnapshot();
-        finalSnapshot.ContainsText("🎨 Ocean").Should().BeTrue();
+        finalSnapshot.ContainsText("Dashboard").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
     }
 
     [Fact]
-    public async Task InfoBar_AlwaysShowsCurrentTheme()
+    public async Task ThemeCycle_AppRendersCorrectlyAfterThemeChange()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -77,8 +74,7 @@ public class ThemeSwitchingTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("🎨 Ocean").Should().BeTrue();
-        snapshot.ContainsText("T:Theme").Should().BeTrue();
+        snapshot.ContainsText("Dashboard").Should().BeTrue();
 
         var sequence = new Hex1bTerminalInputSequenceBuilder()
             .Key(Hex1bKey.T)
@@ -86,9 +82,10 @@ public class ThemeSwitchingTests
         await sequence.ApplyAsync(terminal);
         await Task.Delay(200);
 
+        // After theme change, nav and content should still render
         var snapshot2 = terminal.CreateSnapshot();
-        snapshot2.ContainsText("🎨 Heist").Should().BeTrue();
-        snapshot2.ContainsText("T:Theme").Should().BeTrue();
+        snapshot2.ContainsText("Dashboard").Should().BeTrue();
+        snapshot2.ContainsText("Roster").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
