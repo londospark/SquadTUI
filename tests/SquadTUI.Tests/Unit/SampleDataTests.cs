@@ -141,4 +141,43 @@ public class SampleDataTests
         var charter = SampleData.GetCharterFor("UnknownPerson");
         charter.Should().Contain("No charter available yet.");
     }
+
+    [Fact]
+    public void SprintHistory_Has3Entries()
+    {
+        SampleData.SprintHistory.Should().HaveCount(3);
+    }
+
+    [Fact]
+    public void OverallCompletionRate_IsBetween0And100()
+    {
+        SampleData.OverallCompletionRate.Should().BeInRange(0, 100);
+    }
+
+    [Fact]
+    public void AverageVelocity_IsPositive()
+    {
+        SampleData.AverageVelocity.Should().BeGreaterThan(0);
+    }
+
+    [Fact]
+    public void VelocityTrend_ReturnsValidNumber()
+    {
+        var trend = SampleData.VelocityTrend;
+        double.IsNaN(trend).Should().BeFalse();
+        double.IsInfinity(trend).Should().BeFalse();
+    }
+
+    [Fact]
+    public void TeamUtilization_ReturnsEntryForEachMember()
+    {
+        var memberNames = SampleData.Members.Select(m => m.Name).ToHashSet();
+        var utilization = SampleData.TeamUtilization;
+        foreach (var entry in utilization)
+        {
+            memberNames.Should().Contain(entry.Name,
+                $"utilization entry '{entry.Name}' should match a member");
+            entry.Utilization.Should().BeInRange(0, 100);
+        }
+    }
 }

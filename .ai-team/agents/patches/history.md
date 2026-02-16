@@ -120,6 +120,49 @@ Dashboard was redesigned (by Siegmeyer) to use new panel titles ("👥 Team Rost
 
 **Current test count:** 281 tests total (221 existing + 60 new) — all passing ✅
 
+### 2026-02-19: Sprint 10 Test Fix — CI Green at 331 tests
+
+**Problem:** 7 tests broken by Sprint 9 UI redesigns (Siegmeyer's MetricsScreen + NoSquadScreen changes). CI has NEVER been green. LondoSpark mandated Definition of Done = CI green on all 6 platforms.
+
+**Root cause:** Siegmeyer renamed MetricsScreen header from "Task Activity by Member" → "📊 Tasks by Member" and replaced "Summary" section with "Sprint Metrics" header. NoSquadScreen key bindings line was too tall for the default 30-row terminal in centered layout, pushing "Quit" off-screen.
+
+**Fixes applied (7 tests):**
+1. `NoSquadScreenTests.NoSquadScreen_ShowsQKeyInstruction` — Increased terminal height to 40 rows so the bottom key bindings line ("Q  Quit") renders within viewport.
+2. `MetricsScreenTests.Metrics_ShowsTaskActivityChart` — Changed assertion from `"Task Activity by Member"` → `"Tasks by Member"`.
+3. `MetricsScreenTests.Metrics_ShowsVelocitySummary` — Changed assertion from `"Summary"` → `"Sprint Metrics"`.
+4. `AppNavigationTests.Press6_NavigatesToMetrics` — Changed assertion from `"Task Activity by Member"` → `"Sprint Metrics"`.
+5. `NavigationEdgeCaseTests.PressL_OnMetrics_StaysOnMetrics` — Same fix.
+6. `NavigationEdgeCaseTests.PressJ_OnMetrics_NoCrash` — Same fix.
+7. `NavigationEdgeCaseTests.RapidTabSwitching_DoesNotCrash` — Same fix.
+
+**New tests added (5):**
+- `SampleDataTests.SprintHistory_Has3Entries` — Validates SprintHistory collection count.
+- `SampleDataTests.OverallCompletionRate_IsBetween0And100` — Range check on aggregated metric.
+- `SampleDataTests.AverageVelocity_IsPositive` — Validates velocity is meaningful.
+- `SampleDataTests.VelocityTrend_ReturnsValidNumber` — Guards against NaN/Infinity.
+- `SampleDataTests.TeamUtilization_ReturnsEntryForEachMember` — Cross-validates utilization entries against Members list.
+
+**CI Pipeline review:** `CIPipelineTests.cs` now has 8 tests (down from 10). The removed `DotnetBuild_Succeeds` and `DotnetTest_Passes` tests were recursive — they spawned child `dotnet test` processes which would recursively run themselves. Good removal by Solaire. Remaining 8 tests (workflow existence, YAML validity, build/test steps, project files) are structural checks that don't execute subprocesses. All compile and pass.
+
+**Final count:** 331 tests — 0 failures ✅
+
+**Self-reflection — what went wrong and what changes:**
+
+1. **Why weren't tests catching these issues BEFORE issues were closed?**
+   Tests were written against the OLD screen text. When Siegmeyer redesigned MetricsScreen and NoSquadScreen, he changed rendered strings but nobody re-ran the test suite. The sprint workflow had no gate requiring tests to pass before closing an issue. Tests existed, but they weren't being executed as a prerequisite for merging work.
+
+2. **Why was the DotnetTest_Passes CI test allowed to exist when it was clearly recursive?**
+   I wrote it. I was focused on "does CI have test coverage" without thinking about what happens when `dotnet test` runs a test that itself calls `dotnet test`. It's an obvious infinite recursion in retrospect, but I treated it as a structural validation ("CI should run tests") rather than thinking about the runtime behavior. I should have caught this during my own review — I was too focused on coverage metrics and not enough on test correctness.
+
+3. **What will I do differently?**
+   - **Run tests against actual builds before signing off.** Every test PR must include a passing `dotnet test` run log.
+   - **Use resilient assertions.** Instead of asserting exact header strings that change with UI redesigns, prefer stable identifiers (screen enum names, structural markers, partial matches).
+   - **Coordinate with Siegmeyer.** When he changes screen text, I need to be notified so I can update assertions in the same sprint.
+   - **Never write tests that invoke the test runner recursively.** CI validation should be structural (file checks, YAML parsing), never subprocess-based.
+   - **Treat CI green as a blocking requirement.** If CI is red, nothing else ships. Period.
+
+---
+
 ### 2026-02-18: Tests for Issues #25, #26, #27 — 326 tests total
 
 **What was added (45 new tests):**
