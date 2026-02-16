@@ -58,13 +58,13 @@ await using var terminal = Hex1bTerminal.CreateBuilder()
 
                 v.InfoBar(s =>
                 [
-                    s.Section($"SquadTUI v0.2.0"),
+                    s.Section($"\x1b[1mSquadTUI\x1b[0m \x1b[90mv0.2.0\x1b[0m"),
                     s.Spacer(),
-                    s.Section($"🎨 {ThemeManager.ThemeNames[state.SelectedThemeIndex % ThemeManager.ThemeNames.Length]}"),
+                    s.Section($"\x1b[36m🎨 {ThemeManager.ThemeNames[state.SelectedThemeIndex % ThemeManager.ThemeNames.Length]}\x1b[0m"),
                     s.Spacer(),
-                    s.Section($"Screen: {state.CurrentScreen}"),
+                    s.Section($"\x1b[90mScreen:\x1b[0m \x1b[1m{state.CurrentScreen}\x1b[0m"),
                     s.Spacer(),
-                    s.Section("T:Theme  Q:Quit")
+                    s.Section("\x1b[90mT:Theme  Q:Quit\x1b[0m")
                 ])
             ]).WithInputBindings(keys =>
             {

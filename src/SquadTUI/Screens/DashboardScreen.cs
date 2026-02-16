@@ -22,37 +22,37 @@ public static class DashboardScreen
             [
                 h.Border(b =>
                 [
-                    b.Text($"  👥 Members: {members.Count}"),
-                    b.Text($"  ✅ Active: {activeCount}"),
+                    b.Text($"  \x1b[90m👥 Members:\x1b[0m \x1b[1m{members.Count}\x1b[0m"),
+                    b.Text($"  \x1b[90m✅ Active:\x1b[0m \x1b[1m{activeCount}\x1b[0m"),
                     b.Text(""),
-                    ..members.Select(m => b.Text($"  {GetStatusBadge(m.Status)} {m.Name} — {m.Role}"))
+                    ..members.Select(m => b.Text($"  {GetStatusBadge(m.Status)} \x1b[96m{m.Name}\x1b[0m \x1b[90m—\x1b[0m {m.Role}"))
                 ]).Title("🏠 Team").FillWidth(1).FillHeight(),
 
                 h.VStack(mid =>
                 [
                     mid.Border(b =>
                     [
-                        b.Text($"  📊 Total: {tasks.Count}  🔄 Active: {inProgressTasks}  ✅ Done: {completedTasks}"),
+                        b.Text($"  \x1b[90m📊 Total:\x1b[0m \x1b[1m{tasks.Count}\x1b[0m  \x1b[90m🔄 Active:\x1b[0m \x1b[1m{inProgressTasks}\x1b[0m  \x1b[90m✅ Done:\x1b[0m \x1b[1m{completedTasks}\x1b[0m"),
                         b.Text(""),
-                        ..logEntries.Take(3).Select(l => b.Text($"  📅 {l.Date}  {l.Topic}"))
+                        ..logEntries.Take(3).Select(l => b.Text($"  \x1b[90m📅 {l.Date}\x1b[0m  {l.Topic}"))
                     ]).Title("📊 Activity").FillHeight(),
 
                     mid.Border(b =>
                     [
-                        ..decisions.Take(4).Select(d => b.Text($"  📋 {d.Date}  {d.Title} ({d.Author})"))
+                        ..decisions.Take(4).Select(d => b.Text($"  \x1b[90m📋 {d.Date}\x1b[0m  {d.Title} \x1b[90m({d.Author})\x1b[0m"))
                     ]).Title("📋 Decisions").FillHeight(),
                 ]).FillWidth(2).FillHeight(),
 
                 h.Border(b =>
                 [
-                    b.Text($"  🎯 Velocity: {completedTasks} tasks/sprint"),
-                    b.Text($"  ⏳ Pending: {tasks.Count(t => t.Status == Models.SquadTaskStatus.Pending)}"),
-                    b.Text($"  🚫 Blocked: {tasks.Count(t => t.Status == Models.SquadTaskStatus.Blocked)}"),
+                    b.Text($"  \x1b[90m🎯 Velocity:\x1b[0m \x1b[1m{completedTasks}\x1b[0m \x1b[90mtasks/sprint\x1b[0m"),
+                    b.Text($"  \x1b[90m⏳ Pending:\x1b[0m \x1b[1m{tasks.Count(t => t.Status == Models.SquadTaskStatus.Pending)}\x1b[0m"),
+                    b.Text($"  \x1b[90m🚫 Blocked:\x1b[0m \x1b[1m{tasks.Count(t => t.Status == Models.SquadTaskStatus.Blocked)}\x1b[0m"),
                     b.Text(""),
-                    b.Text("  ── Quick Actions ──"),
-                    b.Text("  [1-6] Navigate screens"),
-                    b.Text("  [T]   Cycle theme"),
-                    b.Text("  [Q]   Quit"),
+                    b.Text("\x1b[1m  ── Quick Actions ──\x1b[0m"),
+                    b.Text("\x1b[90m  [1-6] Navigate screens\x1b[0m"),
+                    b.Text("\x1b[90m  [T]   Cycle theme\x1b[0m"),
+                    b.Text("\x1b[90m  [Q]   Quit\x1b[0m"),
                 ]).Title("📈 Summary").FillWidth(1).FillHeight(),
             ])),
 
@@ -61,10 +61,10 @@ public static class DashboardScreen
             [
                 h.Border(b =>
                 [
-                    b.Text($"  👥 Team Members: {members.Count} ({activeCount} active)"),
-                    b.Text($"  📊 Tasks: {tasks.Count} — {inProgressTasks} active, {completedTasks} done"),
+                    b.Text($"  \x1b[90m👥 Team Members:\x1b[0m \x1b[1m{members.Count}\x1b[0m \x1b[90m({activeCount} active)\x1b[0m"),
+                    b.Text($"  \x1b[90m📊 Tasks:\x1b[0m \x1b[1m{tasks.Count}\x1b[0m \x1b[90m— {inProgressTasks} active, {completedTasks} done\x1b[0m"),
                     b.Text(""),
-                    ..logEntries.Take(3).Select(l => b.Text($"  📅 {l.Date}  {l.Topic}"))
+                    ..logEntries.Take(3).Select(l => b.Text($"  \x1b[90m📅 {l.Date}\x1b[0m  {l.Topic}"))
                 ]).Title("🏠 Dashboard").FillWidth(2).FillHeight(),
 
                 h.Border(b =>
@@ -76,16 +76,16 @@ public static class DashboardScreen
             // Narrow layout: single column
             r.Otherwise(r => r.Border(b =>
             [
-                b.Text($"  👥 Team Members: {members.Count} ({activeCount} active)"),
-                b.Text($"  📊 Tasks: {tasks.Count} total — {inProgressTasks} in progress, {completedTasks} done"),
+                b.Text($"  \x1b[90m👥 Team Members:\x1b[0m \x1b[1m{members.Count}\x1b[0m \x1b[90m({activeCount} active)\x1b[0m"),
+                b.Text($"  \x1b[90m📊 Tasks:\x1b[0m \x1b[1m{tasks.Count}\x1b[0m \x1b[90mtotal — {inProgressTasks} in progress, {completedTasks} done\x1b[0m"),
                 b.Text(""),
-                b.Text("  ── Recent Activity ──"),
-                ..logEntries.Take(2).Select(l => b.Text($"  📅 {l.Date}  {l.Topic}")),
+                b.Text("\x1b[1m  ── Recent Activity ──\x1b[0m"),
+                ..logEntries.Take(2).Select(l => b.Text($"  \x1b[90m📅 {l.Date}\x1b[0m  {l.Topic}")),
                 b.Text(""),
-                b.Text("  ── Recent Decisions ──"),
-                ..decisions.Take(2).Select(d => b.Text($"  📋 {d.Date}  {d.Title} ({d.Author})")),
+                b.Text("\x1b[1m  ── Recent Decisions ──\x1b[0m"),
+                ..decisions.Take(2).Select(d => b.Text($"  \x1b[90m📋 {d.Date}\x1b[0m  {d.Title} \x1b[90m({d.Author})\x1b[0m")),
                 b.Text(""),
-                b.Text("  Press number keys to navigate. Q to quit."),
+                b.Text("\x1b[90m  Press number keys to navigate. Q to quit.\x1b[0m"),
             ]).Title("🏠 Dashboard")),
         ]).Fill();
     }

@@ -26,9 +26,9 @@ public static class ActivityLogScreen
             {
                 var widgets = new List<Hex1bWidget>
                 {
-                    b.Text($"  Topic: {selected.Topic}"),
-                    b.Text($"  Date:  {selected.Date}"),
-                    b.Text($"  👥 Participants: {string.Join(", ", selected.Participants)}"),
+                    b.Text($"  \x1b[90mTopic:\x1b[0m \x1b[1m{selected.Topic}\x1b[0m"),
+                    b.Text($"  \x1b[90mDate:\x1b[0m  {selected.Date}"),
+                    b.Text($"  \x1b[90m👥 Participants:\x1b[0m {string.Join(", ", selected.Participants)}"),
                     b.Text(""),
                     b.Text($"  {selected.Summary}"),
                 };
@@ -36,7 +36,7 @@ public static class ActivityLogScreen
                 if (selected.Decisions.Count > 0)
                 {
                     widgets.Add(b.Text(""));
-                    widgets.Add(b.Text("  Decisions:"));
+                    widgets.Add(b.Text("\x1b[1m  Decisions:\x1b[0m"));
                     foreach (var d in selected.Decisions)
                         widgets.Add(b.Text($"    • {d}"));
                 }
@@ -44,7 +44,7 @@ public static class ActivityLogScreen
                 if (selected.Outcomes.Count > 0)
                 {
                     widgets.Add(b.Text(""));
-                    widgets.Add(b.Text("  Outcomes:"));
+                    widgets.Add(b.Text("\x1b[1m  Outcomes:\x1b[0m"));
                     foreach (var o in selected.Outcomes)
                         widgets.Add(b.Text($"    • {o}"));
                 }

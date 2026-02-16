@@ -24,9 +24,9 @@ public static class DecisionsScreen
 
             h.Border(b =>
             [
-                b.Text($"  Title:  {selected.Title}"),
-                b.Text($"  Date:   {selected.Date}"),
-                b.Text($"  Author: 👤 {selected.Author}"),
+                b.Text($"  \x1b[90mTitle:\x1b[0m  \x1b[1m{selected.Title}\x1b[0m"),
+                b.Text($"  \x1b[90mDate:\x1b[0m   {selected.Date}"),
+                b.Text($"  \x1b[90mAuthor:\x1b[0m 👤 {selected.Author}"),
                 b.Text(""),
                 b.Text($"  {selected.Content}"),
             ]).Title("Details").Fill(),

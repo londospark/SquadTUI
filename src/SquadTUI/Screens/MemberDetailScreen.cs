@@ -23,8 +23,8 @@ public static class MemberDetailScreen
             {
                 inner.Border(b =>
                 [
-                    b.Text($"  {GetStatusBadge(member.Status)} {member.Name} — {member.Role}"),
-                    b.Text($"  Status: {member.Status}    Current Task: {member.CurrentTask ?? "None"}"),
+                    b.Text($"  {GetStatusBadge(member.Status)} \x1b[1m{member.Name}\x1b[0m \x1b[90m—\x1b[0m {member.Role}"),
+                    b.Text($"  \x1b[90mStatus:\x1b[0m {member.Status}    \x1b[90mCurrent Task:\x1b[0m {member.CurrentTask ?? "\x1b[90mNone\x1b[0m"}"),
                 ]).Title("👤 Member"),
 
                 inner.Border(b =>
@@ -47,7 +47,7 @@ public static class MemberDetailScreen
                 ).Title("📊 Recent Activity"));
             }
 
-            widgets.Add(inner.Text("  [B] Back to Roster    [E] Edit Charter"));
+            widgets.Add(inner.Text("\x1b[90m  [B] Back to Roster    [E] Edit Charter\x1b[0m"));
 
             return widgets.ToArray();
         }).Fill();

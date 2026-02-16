@@ -15,7 +15,7 @@ public static class CharterScreen
         [
             ..MarkdownRenderer.Render(b, charter),
             b.Text(""),
-            b.Text("  [B] Back to Member Detail"),
+            b.Text("\x1b[90m  [B] Back to Member Detail\x1b[0m"),
         ]).Title($"📜 Charter — {memberName}").Fill();
     }
 }

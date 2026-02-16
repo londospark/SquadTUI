@@ -27,12 +27,12 @@ public static class MetricsScreen
 
             inner.Border(b =>
             [
-                b.Text($"  📊 Total Tasks:     {tasks.Count}"),
-                b.Text($"  ✅ Completed:       {tasks.Count(t => t.Status == Models.SquadTaskStatus.Done)}"),
-                b.Text($"  🔄 In Progress:     {tasks.Count(t => t.Status == Models.SquadTaskStatus.InProgress)}"),
-                b.Text($"  ⏳ Pending:         {tasks.Count(t => t.Status == Models.SquadTaskStatus.Pending)}"),
-                b.Text($"  👥 Team Members:    {members.Count}"),
-                b.Text($"  🎯 Velocity:        {tasks.Count(t => t.Status == Models.SquadTaskStatus.Done)} tasks/sprint"),
+                b.Text($"  \x1b[90m📊 Total Tasks:\x1b[0m     \x1b[1m{tasks.Count}\x1b[0m"),
+                b.Text($"  \x1b[90m✅ Completed:\x1b[0m       \x1b[1m{tasks.Count(t => t.Status == Models.SquadTaskStatus.Done)}\x1b[0m"),
+                b.Text($"  \x1b[90m🔄 In Progress:\x1b[0m     \x1b[1m{tasks.Count(t => t.Status == Models.SquadTaskStatus.InProgress)}\x1b[0m"),
+                b.Text($"  \x1b[90m⏳ Pending:\x1b[0m         \x1b[1m{tasks.Count(t => t.Status == Models.SquadTaskStatus.Pending)}\x1b[0m"),
+                b.Text($"  \x1b[90m👥 Team Members:\x1b[0m    \x1b[1m{members.Count}\x1b[0m"),
+                b.Text($"  \x1b[90m🎯 Velocity:\x1b[0m        \x1b[1m{tasks.Count(t => t.Status == Models.SquadTaskStatus.Done)}\x1b[0m \x1b[90mtasks/sprint\x1b[0m"),
             ]).Title("Summary"),
         ]).Fill();
     }

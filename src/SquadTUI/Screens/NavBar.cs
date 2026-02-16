@@ -24,12 +24,12 @@ public static class NavBar
             {
                 var isActive = state.CurrentScreen == item.Screen;
                 var label = isActive
-                    ? $" ▶ {item.Emoji} [{item.Key}]{item.Label} "
-                    : $" {item.Emoji} [{item.Key}]{item.Label} ";
+                    ? $"\x1b[1m\x1b[36m ▶ {item.Emoji} [{item.Key}]{item.Label} \x1b[0m"
+                    : $"\x1b[90m {item.Emoji} [{item.Key}]{item.Label} \x1b[0m";
                 
                 widgets.Add(h.Text(label));
             }
-            widgets.Add(h.Text("  [Q]Quit "));
+            widgets.Add(h.Text("\x1b[90m  [Q]Quit \x1b[0m"));
             return widgets.ToArray();
         });
     }

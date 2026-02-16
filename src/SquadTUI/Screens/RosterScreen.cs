@@ -29,12 +29,12 @@ public static class RosterScreen
 
             h.Border(b =>
             [
-                b.Text($"  Name:   {selected.Name}"),
-                b.Text($"  Role:   {selected.Role}"),
-                b.Text($"  Status: {GetStatusBadge(selected.Status)} {selected.Status}"),
-                b.Text($"  Task:   {selected.CurrentTask ?? "None"}"),
+                b.Text($"  \x1b[90mName:\x1b[0m   \x1b[1m{selected.Name}\x1b[0m"),
+                b.Text($"  \x1b[90mRole:\x1b[0m   {selected.Role}"),
+                b.Text($"  \x1b[90mStatus:\x1b[0m {GetStatusBadge(selected.Status)} {selected.Status}"),
+                b.Text($"  \x1b[90mTask:\x1b[0m   {selected.CurrentTask ?? "\x1b[90mNone\x1b[0m"}"),
                 b.Text(""),
-                b.Text("  Press Enter to view details"),
+                b.Text("\x1b[90m  Press Enter to view details\x1b[0m"),
             ]).Title("Preview").Fill(),
         ]).Fill();
     }

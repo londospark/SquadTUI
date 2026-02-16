@@ -64,3 +64,31 @@
 - MarkdownRenderer.cs has 5 compilation errors (WidgetContext generic type issue, Hex1bColor not found). This blocks `dotnet build` and prevents running any tests. These errors are in Linus's implementation and need fixing before test suite can execute. Once fixed, all new tests should pass.
 
 📌 Team update (2026-02-16): Linus completed Phase 1 UI modernization adding emoji icons to all screens (🏠 🧑‍💼 📋 🔧 📊 📈), status badges, and task indicators. Full theme system, responsive layouts, TabPanel, VScroll, and markdown rendering deferred pending Hex1b API docs — decided by Linus
+
+### 2026-02-17: Responsive Layout and Theme Switching E2E Tests
+
+**What was added:**
+- `tests/SquadTUI.Tests/E2E/ResponsiveLayoutTests.cs` — 6 tests validating dashboard responsive behavior at all breakpoints (40, 60, 80, 100, 120, 160 cols)
+- `tests/SquadTUI.Tests/E2E/ThemeSwitchingTests.cs` — 3 tests validating theme cycling with T key (Ocean → Heist → Sunset → HighContrast → Ocean)
+
+**Responsive breakpoints tested:**
+- **Narrow (<80 cols)**: Single-column layout with "🏠 Dashboard" panel — tested at 40 and 60 cols
+- **Medium (≥80 cols)**: Two-column layout with "🏠 Dashboard" + "📋 Recent" — tested at 80 and 100 cols
+- **Wide (≥120 cols)**: Three-column layout with "🏠 Team" + "📊 Activity" + "📈 Summary" — tested at 120 and 160 cols
+
+**Test patterns:**
+- Each responsive test creates headless terminal at specific width using `TestAppBuilder.Build(width: X, height: 30)`
+- Tests assert correct panel titles appear for that breakpoint
+- Tests assert incorrect panel titles (from other breakpoints) are absent
+- Must check full panel titles like "🏠 Team" not just "Team" to avoid false positives from content text like "Team Members:"
+
+**Theme switching patterns:**
+- Use `Hex1bTerminalInputSequenceBuilder().Key(Hex1bKey.T).Build()` to create input sequence
+- Apply sequence with `await sequence.ApplyAsync(terminal)` followed by `await Task.Delay(200)`
+- Inspect snapshot for theme name in info bar like "🎨 Ocean", "🎨 Heist", etc.
+
+**Bug fixed:**
+- DecisionService.cs had duplicate `content` variable names in nested scopes causing CS0136 compilation errors. Renamed to `builtContent` and `finalContent` to avoid shadowing.
+
+**Current test count:** 29 tests total (26 existing + 6 responsive + 3 theme switching) — all passing ✅
+
