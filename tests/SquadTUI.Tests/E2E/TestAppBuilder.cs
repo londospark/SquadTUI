@@ -11,9 +11,14 @@ namespace SquadTUI.Tests.E2E;
 /// </summary>
 public static class TestAppBuilder
 {
-    public static Hex1bTerminal Build(int width = 120, int height = 30)
+    public static Hex1bTerminal Build(int width = 120, int height = 30, bool squadDetected = true)
     {
         var state = new AppState();
+        if (!squadDetected)
+        {
+            state.SquadDetected = false;
+            state.CurrentScreen = Screen.NoSquad;
+        }
 
         var terminal = Hex1bTerminal.CreateBuilder()
             .WithHex1bApp((app, options) =>
