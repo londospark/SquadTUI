@@ -92,7 +92,7 @@ public class HelpNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Members:").Should().BeTrue();
+        snapshot.ContainsText("Dashboard").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -116,7 +116,7 @@ public class HelpNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Members:").Should().BeTrue();
+        snapshot.ContainsText("Dashboard").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

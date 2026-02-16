@@ -10,48 +10,83 @@ public static class HelpScreen
 {
     public static Hex1bWidget Render(WidgetContext<VStackWidget> v, AppState state, Hex1bApp app)
     {
-        var colors = ThemeManager.GetPanelColors(state.SelectedThemeIndex);
-        var accent = colors.Accent;
-        var dim = "\x1b[90m";
-        var reset = PanelRenderer.Reset;
-        var bold = PanelRenderer.Bold;
+        var acc = ThemeManager.GetAccentCode(state.SelectedThemeIndex);
+        var sec = ThemeManager.GetSecondaryAccent(state.SelectedThemeIndex);
+        var D = PanelRenderer.Dim;
+        var R = PanelRenderer.Reset;
+        var B = PanelRenderer.Bold;
 
-        return v.VStack(stack =>
-        {
-            var widgets = new List<Hex1bWidget>();
+        return v.Responsive(r =>
+        [
+            // Wide: two-column help layout
+            r.WhenMinWidth(100, r => r.VStack(outer =>
+            [
+                outer.Text($"  {B}{acc}❓ Help & Keybindings{R}"),
+                outer.Text($"  {D}{sec}{new string('━', 44)}{R}"),
+                outer.Text(""),
 
-            // Title
-            widgets.Add(stack.Text($"{bold}{accent}❓ Help & Keybindings{reset}\n"));
+                outer.HStack(h =>
+                [
+                    h.VStack(left =>
+                    [
+                        left.Text($"  {B}{acc}NAVIGATION{R}"),
+                        left.Text($"  {D}1-6{R}          Jump to screen"),
+                        left.Text($"  {D}h / l{R}        Previous / next screen"),
+                        left.Text($"  {D}Escape{R}       Go back"),
+                        left.Text(""),
+                        left.Text($"  {B}{acc}LIST NAVIGATION{R}"),
+                        left.Text($"  {D}j / k{R}        Move down / up"),
+                        left.Text($"  {D}↑ / ↓{R}        Arrow keys"),
+                        left.Text(""),
+                        left.Text($"  {B}{acc}HELP{R}"),
+                        left.Text($"  {D}?{R}            Toggle this help"),
+                    ]).FillWidth(1).FillHeight(),
 
-            // Navigation section
-            widgets.Add(stack.Text($"{bold}{accent}NAVIGATION{reset}"));
-            widgets.Add(stack.Text($"{dim}[1-6]{reset}        Jump to screen (Dashboard, Roster, Decisions, Skills, Log, Metrics)"));
-            widgets.Add(stack.Text($"{dim}[h/l]{reset}        Previous/next screen"));
-            widgets.Add(stack.Text($"{dim}[Escape]{reset}     Go back to previous screen\n"));
+                    h.VStack(right =>
+                    [
+                        right.Text($"  {B}{acc}ACTIONS{R}"),
+                        right.Text($"  {D}Enter{R}        Activate / select item"),
+                        right.Text($"  {D}T{R}            Toggle theme"),
+                        right.Text($"  {D}S{R}            Settings"),
+                        right.Text($"  {D}E{R}            Edit charter"),
+                        right.Text($"  {D}C{R}            Create squad"),
+                        right.Text($"  {D}Q{R}            Quit SquadTUI"),
+                    ]).FillWidth(1).FillHeight(),
+                ]).Fill(),
 
-            // List navigation section
-            widgets.Add(stack.Text($"{bold}{accent}LIST NAVIGATION{reset}"));
-            widgets.Add(stack.Text($"{dim}[j/k]{reset}        Move selection down/up in lists"));
-            widgets.Add(stack.Text($"{dim}[↑/↓]{reset}        Arrow keys also work for up/down\n"));
+                outer.Text(""),
+                outer.Text($"  {D}Press ? or Escape to dismiss{R}"),
+            ])),
 
-            // Actions section
-            widgets.Add(stack.Text($"{bold}{accent}ACTIONS{reset}"));
-            widgets.Add(stack.Text($"{dim}[Enter]{reset}       Activate/select current item"));
-            widgets.Add(stack.Text($"{dim}[T]{reset}           Toggle theme"));
-            widgets.Add(stack.Text($"{dim}[S]{reset}           Settings"));
-            widgets.Add(stack.Text($"{dim}[E]{reset}           Edit charter (on member detail)"));
-            widgets.Add(stack.Text($"{dim}[C]{reset}           Create squad (on NoSquad screen)"));
-            widgets.Add(stack.Text($"{dim}[Q]{reset}           Quit SquadTUI\n"));
-
-            // Help section
-            widgets.Add(stack.Text($"{bold}{accent}HELP{reset}"));
-            widgets.Add(stack.Text($"{dim}[?]{reset}           Toggle this help screen\n"));
-
-            // Footer
-            widgets.Add(stack.Text($"{dim}Press ? or Escape to dismiss{reset}"));
-
-            return widgets.ToArray();
-        }).WithInputBindings(keys =>
+            // Narrow: single column
+            r.Otherwise(r => r.VStack(stack =>
+            [
+                stack.Text($"  {B}{acc}❓ Help & Keybindings{R}"),
+                stack.Text($"  {D}{sec}{new string('━', 32)}{R}"),
+                stack.Text(""),
+                stack.Text($"  {B}{acc}NAVIGATION{R}"),
+                stack.Text($"  {D}1-6{R}          Jump to screen"),
+                stack.Text($"  {D}h / l{R}        Previous / next screen"),
+                stack.Text($"  {D}Escape{R}       Go back"),
+                stack.Text(""),
+                stack.Text($"  {B}{acc}LIST NAVIGATION{R}"),
+                stack.Text($"  {D}j / k{R}        Move down / up"),
+                stack.Text($"  {D}↑ / ↓{R}        Arrow keys"),
+                stack.Text(""),
+                stack.Text($"  {B}{acc}ACTIONS{R}"),
+                stack.Text($"  {D}Enter{R}        Activate / select item"),
+                stack.Text($"  {D}T{R}            Toggle theme"),
+                stack.Text($"  {D}S{R}            Settings"),
+                stack.Text($"  {D}E{R}            Edit charter"),
+                stack.Text($"  {D}C{R}            Create squad"),
+                stack.Text($"  {D}Q{R}            Quit SquadTUI"),
+                stack.Text(""),
+                stack.Text($"  {B}{acc}HELP{R}"),
+                stack.Text($"  {D}?{R}            Toggle this help"),
+                stack.Text(""),
+                stack.Text($"  {D}Press ? or Escape to dismiss{R}"),
+            ])),
+        ]).WithInputBindings(keys =>
         {
             keys.Key(Hex1bKey.F1).Action(() =>
             {

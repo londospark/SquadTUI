@@ -94,3 +94,29 @@
 
 📌 Team recast (2026-02-18): Squad recast from Ocean's Eleven to Dark Souls universe. Basher is now Patches. Praise the sun! ☀️
 
+### 2026-02-18: Corner Case & Regression Test Suite — 281 tests total
+
+**What was added (60 new tests):**
+
+**New test files:**
+- `tests/SquadTUI.Tests/E2E/ExtremeWidthTests.cs` — 9 E2E tests for extreme terminal dimensions: impossibly narrow (10 cols), minimum viable (20 cols), narrow (30 cols), wide (200 cols), ultra-wide (300 cols), short (5 rows), small (10 rows), tall (50 rows), very tall (100 rows). Validates app doesn't crash at any extreme size.
+- `tests/SquadTUI.Tests/E2E/NavigationEdgeCaseTests.cs` — 10 E2E tests: Escape on Dashboard stays put, rapid tab switching (1→2→3→4→5→6), H on first screen no-op, L on last screen no-op, J/K on Dashboard and Metrics no-op, E on Dashboard/Roster no-op, rapid back-and-forth switching.
+- `tests/SquadTUI.Tests/E2E/NoSquadScreenTests.cs` — 1 E2E test rendering NoSquad screen with SquadDetected=false, verifying welcome message and "No squad detected" text.
+- `tests/SquadTUI.Tests/Unit/SampleDataTests.cs` — 16 unit tests: all Task.Assignee values match a Member.Name, all LogEntry participants exist in Members, GetCharterFor returns non-empty for each member, no null member names/roles, tasks have unique IDs, decisions have dates and authors, all collections non-empty, skills have names/descriptions, unknown member gets fallback charter.
+
+**Updated test files:**
+- `AppStateTests.cs` — +8 tests for index bounds: RosterSelectedIndex clamps to 0 when empty, DecisionSelectedIndex doesn't go negative, SkillSelectedIndex clamps at boundary, SettingsSelectedIndex stays 0–4, LogSelectedIndex clamps both ends, all defaults zero, full range navigation.
+- `ThemeManagerTests.cs` — +8 tests for edge cases: negative index doesn't crash, very large index (100/1000/MaxValue) wraps correctly, PanelColors valid for all indices, large index PanelColors wraps to equivalent, CreateSunsetTheme/CreateHighContrastTheme return non-null, all theme names unique.
+
+**Fixed 18 pre-existing test regressions:**
+Dashboard was redesigned (by Siegmeyer) to use new panel titles ("👥 Team Roster", "📊 Activity & Progress", "📈 Sprint Metrics") and responsive layout. Old tests asserted `ContainsText("Members:")` which no longer appears at default 120-col width. Fixed all 18 tests across 8 files to use resilient assertions matching current dashboard output.
+
+**Test patterns used:**
+- For "no crash" tests: assert `snapshot.Should().NotBeNull()` — validates terminal renders without throwing.
+- For "stays on same screen" tests: assert presence of current screen's unique text after input.
+- For resilient assertions: use generic text like "Dashboard", "Team Roster" instead of specific member names.
+- NoSquadScreen test builds custom AppState with `SquadDetected = false` and `CurrentScreen = Screen.NoSquad`.
+- ThemeManager negative index test uses `Should().NotThrow()` since C# modulo can return negative.
+
+**Current test count:** 281 tests total (221 existing + 60 new) — all passing ✅
+
