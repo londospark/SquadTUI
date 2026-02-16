@@ -57,4 +57,55 @@ public class ThemeManagerTests
         var theme = ThemeManager.CreateHeistTheme();
         theme.Should().NotBeNull();
     }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    public void GetAccentCode_ReturnsNonNullString(int index)
+    {
+        var code = ThemeManager.GetAccentCode(index);
+        code.Should().NotBeNullOrEmpty();
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    public void GetAccentCode_ReturnsAnsiEscapeCode(int index)
+    {
+        var code = ThemeManager.GetAccentCode(index);
+        code.Should().StartWith("\x1b[");
+    }
+
+    [Theory]
+    [InlineData(4, 0)]
+    [InlineData(5, 1)]
+    [InlineData(8, 0)]
+    [InlineData(7, 3)]
+    public void GetAccentCode_WrapsAroundIndex(int input, int expectedEquivalent)
+    {
+        var code = ThemeManager.GetAccentCode(input);
+        var expected = ThemeManager.GetAccentCode(expectedEquivalent);
+        code.Should().Be(expected);
+    }
+
+    [Fact]
+    public void GetPanelColors_ReturnsNonNull()
+    {
+        var colors = ThemeManager.GetPanelColors(0);
+        colors.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void GetPanelColors_AccentMatchesGetAccentCode()
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            var colors = ThemeManager.GetPanelColors(i);
+            colors.Accent.Should().Be(ThemeManager.GetAccentCode(i));
+        }
+    }
 }
