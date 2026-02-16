@@ -24,12 +24,17 @@ public static class SkillsScreen
         var relatedMembers = GetRelatedMembers(selected.Name, members);
         var confidence = GetConfidenceLevel(selected.Name);
 
+        var RV = "\x1b[7m"; // reverse video
+
         return v.HStack(h =>
         [
             h.VStack(left =>
             [
-                left.Text($"  {B}{acc}🔧 Installed Skills{R}"),
-                left.Text($"  {D}{sec}{new string('━', 30)}{R}"),
+                left.Text($"  {B}{acc}{RV} 🔧  Installed Skills {R}"),
+                left.Text($"  {D}Available capabilities for your squad{R}"),
+                left.Text(""),
+                left.Text($"  {sec}{new string('━', 30)}{R}"),
+                left.Text(""),
                 left.List(listItems)
                     .OnSelectionChanged(e => { state.SkillSelectedIndex = e.SelectedIndex; })
                     .Fill()
@@ -39,27 +44,33 @@ public static class SkillsScreen
             {
                 var widgets = new List<Hex1bWidget>
                 {
-                    detail.Text($"  {B}{acc}🔧 {selected.Name}{R}"),
-                    detail.Text($"  {D}{sec}{new string('━', 36)}{R}"),
                     detail.Text(""),
-                    detail.Text($"  {D}Description:{R}  {selected.Description}{R}"),
-                    detail.Text($"  {D}Confidence:{R}   {confidence.Bar} {B}{confidence.Level}{R}"),
+                    detail.Text($"  {B}{acc}{RV} 🔧  {selected.Name} {R}"),
                     detail.Text(""),
-                    detail.Text($"  {D}{sec}{new string('━', 36)}{R}"),
+                    detail.Text($"  {sec}{new string('━', 36)}{R}"),
+                    detail.Text(""),
+                    detail.Text($"    {D}Description:{R}  {selected.Description}{R}"),
+                    detail.Text($"    {D}Confidence:{R}   {confidence.Bar} {B}{confidence.Level}{R}"),
+                    detail.Text(""),
+                    detail.Text($"  {sec}{new string('━', 36)}{R}"),
+                    detail.Text(""),
                     detail.Text($"  {B}{acc}👥 Related Members{R}"),
+                    detail.Text(""),
                 };
 
                 if (relatedMembers.Count > 0)
                     foreach (var m in relatedMembers)
                         widgets.Add(detail.Text($"    • {m}{R}"));
                 else
-                    widgets.Add(detail.Text($"  {D}No members directly associated{R}"));
+                    widgets.Add(detail.Text($"    {D}No members directly associated{R}"));
 
                 widgets.Add(detail.Text(""));
-                widgets.Add(detail.Text($"  {D}{sec}{new string('━', 36)}{R}"));
+                widgets.Add(detail.Text($"  {sec}{new string('━', 36)}{R}"));
+                widgets.Add(detail.Text(""));
                 widgets.Add(detail.Text($"  {B}{acc}📊 Usage{R}"));
-                widgets.Add(detail.Text($"  {D}This skill is available to all squad members{R}"));
-                widgets.Add(detail.Text($"  {D}and can be invoked during task execution.{R}"));
+                widgets.Add(detail.Text(""));
+                widgets.Add(detail.Text($"    {D}This skill is available to all squad members{R}"));
+                widgets.Add(detail.Text($"    {D}and can be invoked during task execution.{R}"));
 
                 return widgets.ToArray();
             }).FillWidth(2).FillHeight(),
