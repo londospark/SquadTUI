@@ -9,7 +9,7 @@ public static class CharterScreen
 {
     public static Hex1bWidget Render(WidgetContext<VStackWidget> v, AppState state, Hex1bApp app)
     {
-        var memberName = state.SelectedMemberName ?? "Danny";
+        var memberName = state.SelectedMemberName ?? "Solaire";
         var charter = SampleData.GetCharterFor(memberName);
 
         var acc = ThemeManager.GetAccentCode(state.SelectedThemeIndex);

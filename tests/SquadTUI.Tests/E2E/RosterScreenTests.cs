@@ -23,9 +23,9 @@ public class RosterScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Danny").Should().BeTrue();
-        snapshot.ContainsText("Linus").Should().BeTrue();
-        snapshot.ContainsText("Rusty").Should().BeTrue();
+        snapshot.ContainsText("Solaire").Should().BeTrue();
+        snapshot.ContainsText("Siegmeyer").Should().BeTrue();
+        snapshot.ContainsText("Andre").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -46,7 +46,7 @@ public class RosterScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Danny").Should().BeTrue();
+        snapshot.ContainsText("Solaire").Should().BeTrue();
         snapshot.ContainsText("Role:").Should().BeTrue();
         snapshot.ContainsText("Status:").Should().BeTrue();
 

@@ -9,7 +9,7 @@ public static class MemberDetailScreen
 {
     public static Hex1bWidget Render(WidgetContext<VStackWidget> v, AppState state, Hex1bApp app)
     {
-        var memberName = state.SelectedMemberName ?? "Danny";
+        var memberName = state.SelectedMemberName ?? "Solaire";
         var members = state.Members ?? SampleData.Members;
         var member = members.FirstOrDefault(m => m.Name == memberName) ?? members[0];
 

@@ -63,7 +63,7 @@ public class ThemeIntegrationTests
         var state = new AppState();
         state.SelectedMemberName.Should().BeNull();
 
-        state.SelectedMemberName = "Danny";
-        state.SelectedMemberName.Should().Be("Danny");
+        state.SelectedMemberName = "Solaire";
+        state.SelectedMemberName.Should().Be("Solaire");
     }
 }
