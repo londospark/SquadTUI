@@ -36,3 +36,11 @@
 - **Integration:** Minimal Program.cs changes — added F1 key binding and Help case to screen switch statement only
 
 📌 Team recast (2026-02-18): Squad recast from Ocean's Eleven to Dark Souls universe. Saul is now Firekeeper. Praise the sun! ☀️
+
+### NoSquad Welcome Dialog Redesign (Issue #27)
+- **Redesigned NoSquadScreen.cs** as a centered dialog using HStack with Fill() spacers for horizontal centering and VStack with Fill() spacers for vertical centering
+- **Box-drawn border** using Unicode characters (┌─┐│└─┘) rendered as Text lines to simulate a modal dialog
+- **Rich onboarding content:** "What is SquadTUI?", "What is a Squad?", "Getting Started" sections with clear instructions
+- **NavBar hidden** on NoSquad screen via conditional ternary in Program.cs and TestAppBuilder.cs
+- **Key bindings guarded:** 1-6, H, L, S keys no-op when on NoSquad screen to prevent navigating to empty data screens
+- **TestAppBuilder.cs kept in exact sync** with Program.cs changes

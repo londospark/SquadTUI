@@ -55,7 +55,7 @@ await using var terminal = Hex1bTerminal.CreateBuilder()
         {
             return ctx.VStack(v =>
             [
-                NavBar.Render(v, state),
+                state.CurrentScreen != Screen.NoSquad ? NavBar.Render(v, state) : v.Text(""),
 
                 (state.CurrentScreen switch
                 {
@@ -74,19 +74,19 @@ await using var terminal = Hex1bTerminal.CreateBuilder()
                 })
             ]).WithInputBindings(keys =>
             {
-                keys.Key(Hex1bKey.D1).Action(() => { state.CurrentScreen = Screen.Dashboard; }, "Dashboard");
-                keys.Key(Hex1bKey.D2).Action(() => { state.CurrentScreen = Screen.Roster; }, "Roster");
-                keys.Key(Hex1bKey.D3).Action(() => { state.CurrentScreen = Screen.Decisions; }, "Decisions");
-                keys.Key(Hex1bKey.D4).Action(() => { state.CurrentScreen = Screen.Skills; }, "Skills");
-                keys.Key(Hex1bKey.D5).Action(() => { state.CurrentScreen = Screen.ActivityLog; }, "Log");
-                keys.Key(Hex1bKey.D6).Action(() => { state.CurrentScreen = Screen.Metrics; }, "Metrics");
+                keys.Key(Hex1bKey.D1).Action(() => { if (state.CurrentScreen != Screen.NoSquad) state.CurrentScreen = Screen.Dashboard; }, "Dashboard");
+                keys.Key(Hex1bKey.D2).Action(() => { if (state.CurrentScreen != Screen.NoSquad) state.CurrentScreen = Screen.Roster; }, "Roster");
+                keys.Key(Hex1bKey.D3).Action(() => { if (state.CurrentScreen != Screen.NoSquad) state.CurrentScreen = Screen.Decisions; }, "Decisions");
+                keys.Key(Hex1bKey.D4).Action(() => { if (state.CurrentScreen != Screen.NoSquad) state.CurrentScreen = Screen.Skills; }, "Skills");
+                keys.Key(Hex1bKey.D5).Action(() => { if (state.CurrentScreen != Screen.NoSquad) state.CurrentScreen = Screen.ActivityLog; }, "Log");
+                keys.Key(Hex1bKey.D6).Action(() => { if (state.CurrentScreen != Screen.NoSquad) state.CurrentScreen = Screen.Metrics; }, "Metrics");
                 keys.Key(Hex1bKey.Q).Action(() => { app.RequestStop(); }, "Quit");
                 keys.Key(Hex1bKey.T).Action(() =>
                 {
                     state.SelectedThemeIndex = (state.SelectedThemeIndex + 1) % ThemeManager.ThemeNames.Length;
                     options.Theme = ThemeManager.GetTheme(state.SelectedThemeIndex);
                 }, "Theme");
-                keys.Key(Hex1bKey.S).Action(() => { state.CurrentScreen = Screen.Settings; }, "Settings");
+                keys.Key(Hex1bKey.S).Action(() => { if (state.CurrentScreen != Screen.NoSquad) state.CurrentScreen = Screen.Settings; }, "Settings");
                 keys.Key(Hex1bKey.Escape).Action(() =>
                 {
                     if (state.CurrentScreen == Screen.MemberDetail)
@@ -129,6 +129,7 @@ await using var terminal = Hex1bTerminal.CreateBuilder()
                 }, "Up");
                 keys.Key(Hex1bKey.H).Action(() =>
                 {
+                    if (state.CurrentScreen == Screen.NoSquad) return;
                     // Previous screen
                     var screens = new[] { Screen.Dashboard, Screen.Roster, Screen.Decisions, Screen.Skills, Screen.ActivityLog, Screen.Metrics };
                     var idx = Array.IndexOf(screens, state.CurrentScreen);
@@ -136,6 +137,7 @@ await using var terminal = Hex1bTerminal.CreateBuilder()
                 }, "Prev Screen");
                 keys.Key(Hex1bKey.L).Action(() =>
                 {
+                    if (state.CurrentScreen == Screen.NoSquad) return;
                     // Next screen
                     var screens = new[] { Screen.Dashboard, Screen.Roster, Screen.Decisions, Screen.Skills, Screen.ActivityLog, Screen.Metrics };
                     var idx = Array.IndexOf(screens, state.CurrentScreen);
