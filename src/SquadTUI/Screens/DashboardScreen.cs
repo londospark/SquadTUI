@@ -14,83 +14,167 @@ public static class DashboardScreen
         var activeCount = members.Count(m => m.Status == Models.MemberStatus.Active);
         var inProgressTasks = tasks.Count(t => t.Status == Models.SquadTaskStatus.InProgress);
         var completedTasks = tasks.Count(t => t.Status == Models.SquadTaskStatus.Done);
+        var pendingTasks = tasks.Count(t => t.Status == Models.SquadTaskStatus.Pending);
+        var blockedTasks = tasks.Count(t => t.Status == Models.SquadTaskStatus.Blocked);
         var logEntries = state.LogEntries ?? SampleData.LogEntries;
         var decisions = state.Decisions ?? SampleData.Decisions;
         var acc = ThemeManager.GetAccentCode(state.SelectedThemeIndex);
+        var sec = ThemeManager.GetSecondaryAccent(state.SelectedThemeIndex);
+        var rule = ThemeManager.GetDimRule(state.SelectedThemeIndex, 36);
         var R = PanelRenderer.Reset;
+        var B = PanelRenderer.Bold;
+        var D = PanelRenderer.Dim;
 
         return v.Responsive(r =>
         [
-            // Wide layout (≥120 cols): 3-column dashboard
-            r.WhenMinWidth(120, r => r.HStack(h =>
+            // Wide layout (≥120 cols): rich 3-column dashboard
+            r.WhenMinWidth(120, r => r.VStack(outer =>
             [
-                h.VStack(left =>
-                [
-                    left.Text($"  {PanelRenderer.Bold}{acc}🏠 Team{R}"),
-                    left.Text($"  \x1b[90m👥 Members:\x1b[0m \x1b[1m{members.Count}{R}"),
-                    left.Text($"  \x1b[90m✅ Active:\x1b[0m \x1b[1m{activeCount}{R}"),
-                    left.Text(""),
-                    ..members.Select(m => left.Text($"  {GetStatusBadge(m.Status)} \x1b[96m{m.Name}\x1b[0m \x1b[90m—\x1b[0m {m.Role}{R}"))
-                ]).FillWidth(1).FillHeight(),
+                outer.Text($"  {B}{acc}☀️  SquadTUI Dashboard{R}"),
+                outer.Text($"  {D}{sec}Your AI squad at a glance{R}"),
+                outer.Text(""),
 
-                h.VStack(mid =>
+                outer.HStack(h =>
                 [
-                    mid.VStack(act =>
-                    [
-                        act.Text($"  {PanelRenderer.Bold}{acc}📊 Activity{R}"),
-                        act.Text($"  \x1b[90m📊 Total:\x1b[0m \x1b[1m{tasks.Count}\x1b[0m  \x1b[90m🔄 Active:\x1b[0m \x1b[1m{inProgressTasks}\x1b[0m  \x1b[90m✅ Done:\x1b[0m \x1b[1m{completedTasks}{R}"),
-                        act.Text(""),
-                        ..logEntries.Take(3).Select(l => act.Text($"  \x1b[90m📅 {l.Date}\x1b[0m  {l.Topic}{R}"))
-                    ]).FillHeight(),
+                    // Left: Team roster with status + task
+                    h.VStack(left =>
+                    {
+                        var w = new List<Hex1bWidget>
+                        {
+                            left.Text($"  {B}{acc}👥 Team Roster{R}"),
+                            left.Text($"  {D}{sec}{new string('━', 28)}{R}"),
+                        };
+                        foreach (var m in members)
+                        {
+                            w.Add(left.Text($"  {GetStatusBadge(m.Status)} {B}{m.Name}{R}  {D}{m.Role}{R}"));
+                            var task = m.CurrentTask ?? "No active task";
+                            w.Add(left.Text($"     {D}↳ {task}{R}"));
+                        }
+                        w.Add(left.Text(""));
+                        w.Add(left.Text($"  {D}👥 {members.Count} members  ·  ✅ {activeCount} active{R}"));
+                        return w.ToArray();
+                    }).FillWidth(1).FillHeight(),
 
-                    mid.VStack(dec =>
-                    [
-                        dec.Text($"  {PanelRenderer.Bold}{acc}📋 Decisions{R}"),
-                        ..decisions.Take(4).Select(d => dec.Text($"  \x1b[90m📋 {d.Date}\x1b[0m  {d.Title} \x1b[90m({d.Author}){R}"))
-                    ]).FillHeight(),
-                ]).FillWidth(2).FillHeight(),
+                    // Center: Activity + tasks + progress
+                    h.VStack(mid =>
+                    {
+                        var w = new List<Hex1bWidget>
+                        {
+                            mid.Text($"  {B}{acc}📊 Activity & Progress{R}"),
+                            mid.Text($"  {D}{sec}{new string('━', 36)}{R}"),
+                            mid.Text(""),
+                            mid.Text($"  {D}Tasks:{R}  {B}{tasks.Count}{R}  total"),
+                            mid.Text($"  🔄 {B}{inProgressTasks}{R} active   ✅ {B}{completedTasks}{R} done   ⏳ {B}{pendingTasks}{R} pending   🚫 {B}{blockedTasks}{R} blocked"),
+                            mid.Text(""),
+                        };
 
-                h.VStack(right =>
-                [
-                    right.Text($"  {PanelRenderer.Bold}{acc}📈 Summary{R}"),
-                    right.Text($"  \x1b[90m🎯 Velocity:\x1b[0m \x1b[1m{completedTasks}\x1b[0m \x1b[90mtasks/sprint{R}"),
-                    right.Text($"  \x1b[90m⏳ Pending:\x1b[0m \x1b[1m{tasks.Count(t => t.Status == Models.SquadTaskStatus.Pending)}{R}"),
-                    right.Text($"  \x1b[90m🚫 Blocked:\x1b[0m \x1b[1m{tasks.Count(t => t.Status == Models.SquadTaskStatus.Blocked)}{R}"),
-                ]).FillWidth(1).FillHeight(),
+                        // Progress bar
+                        var total = tasks.Count > 0 ? tasks.Count : 1;
+                        var doneWidth = (int)(completedTasks * 30.0 / total);
+                        var activeWidth = (int)(inProgressTasks * 30.0 / total);
+                        var remaining = 30 - doneWidth - activeWidth;
+                        if (remaining < 0) remaining = 0;
+                        w.Add(mid.Text($"  \x1b[32m{new string('█', doneWidth)}\x1b[33m{new string('▓', activeWidth)}{D}{new string('░', remaining)}{R}  {completedTasks * 100 / total}%"));
+                        w.Add(mid.Text(""));
+
+                        w.Add(mid.Text($"  {D}{sec}{new string('━', 36)}{R}"));
+                        w.Add(mid.Text($"  {B}{acc}📅 Recent Activity{R}"));
+                        foreach (var l in logEntries.Take(5))
+                            w.Add(mid.Text($"  {D}{l.Date}{R}  {l.Topic}  {D}({string.Join(", ", l.Participants.Take(2))}){R}"));
+
+                        return w.ToArray();
+                    }).FillWidth(2).FillHeight(),
+
+                    // Right: Decisions + velocity
+                    h.VStack(right =>
+                    {
+                        var w = new List<Hex1bWidget>
+                        {
+                            right.Text($"  {B}{acc}📋 Decisions{R}"),
+                            right.Text($"  {D}{sec}{new string('━', 28)}{R}"),
+                        };
+                        foreach (var d in decisions.Take(5))
+                            w.Add(right.Text($"  {D}{d.Date}{R}  {d.Title}  {D}({d.Author}){R}"));
+
+                        w.Add(right.Text(""));
+                        w.Add(right.Text($"  {D}{sec}{new string('━', 28)}{R}"));
+                        w.Add(right.Text($"  {B}{acc}📈 Sprint Metrics{R}"));
+                        w.Add(right.Text($"  {D}Velocity:{R}    {B}{completedTasks}{R} {D}tasks/sprint{R}"));
+                        w.Add(right.Text($"  {D}Throughput:{R}  {B}{completedTasks + inProgressTasks}{R} {D}active items{R}"));
+                        w.Add(right.Text($"  {D}Blocked:{R}    {B}{blockedTasks}{R} {D}items{R}"));
+                        w.Add(right.Text($"  {D}Backlog:{R}    {B}{pendingTasks}{R} {D}pending{R}"));
+
+                        return w.ToArray();
+                    }).FillWidth(1).FillHeight(),
+                ]).Fill()
             ])),
 
             // Medium layout (≥80 cols): 2-column
-            r.WhenMinWidth(80, r => r.HStack(h =>
+            r.WhenMinWidth(80, r => r.VStack(outer =>
             [
-                h.VStack(left =>
-                [
-                    left.Text($"  {PanelRenderer.Bold}{acc}🏠 Dashboard{R}"),
-                    left.Text($"  \x1b[90m👥 Team Members:\x1b[0m \x1b[1m{members.Count}\x1b[0m \x1b[90m({activeCount} active){R}"),
-                    left.Text($"  \x1b[90m📊 Tasks:\x1b[0m \x1b[1m{tasks.Count}\x1b[0m \x1b[90m— {inProgressTasks} active, {completedTasks} done{R}"),
-                    left.Text(""),
-                    ..logEntries.Take(3).Select(l => left.Text($"  \x1b[90m📅 {l.Date}\x1b[0m  {l.Topic}{R}"))
-                ]).FillWidth(2).FillHeight(),
+                outer.Text($"  {B}{acc}☀️  SquadTUI Dashboard{R}"),
+                outer.Text($"  {D}{sec}Your AI squad at a glance{R}"),
+                outer.Text(""),
 
-                h.VStack(right =>
+                outer.HStack(h =>
                 [
-                    right.Text($"  {PanelRenderer.Bold}{acc}📋 Recent{R}"),
-                    ..decisions.Take(4).Select(d => right.Text($"  📋 {d.Title}{R}"))
-                ]).FillWidth(1).FillHeight(),
+                    h.VStack(left =>
+                    {
+                        var w = new List<Hex1bWidget>
+                        {
+                            left.Text($"  {B}{acc}👥 Team{R}  {D}({members.Count} members, {activeCount} active){R}"),
+                            left.Text($"  {D}{sec}{new string('━', 32)}{R}"),
+                        };
+                        foreach (var m in members)
+                            w.Add(left.Text($"  {GetStatusBadge(m.Status)} {B}{m.Name}{R}  {D}{m.Role}{R}"));
+                        w.Add(left.Text(""));
+                        w.Add(left.Text($"  {D}📊 Tasks:{R} {B}{tasks.Count}{R} {D}— {inProgressTasks} active, {completedTasks} done{R}"));
+                        w.Add(left.Text(""));
+                        w.Add(left.Text($"  {D}{sec}{new string('━', 32)}{R}"));
+                        w.Add(left.Text($"  {B}{acc}📅 Recent{R}"));
+                        foreach (var l in logEntries.Take(3))
+                            w.Add(left.Text($"  {D}{l.Date}{R}  {l.Topic}"));
+                        return w.ToArray();
+                    }).FillWidth(2).FillHeight(),
+
+                    h.VStack(right =>
+                    {
+                        var w = new List<Hex1bWidget>
+                        {
+                            right.Text($"  {B}{acc}📋 Decisions{R}"),
+                            right.Text($"  {D}{sec}{new string('━', 24)}{R}"),
+                        };
+                        foreach (var d in decisions.Take(4))
+                            w.Add(right.Text($"  {D}{d.Date}{R}  {d.Title}"));
+                        w.Add(right.Text(""));
+                        w.Add(right.Text($"  {D}{sec}{new string('━', 24)}{R}"));
+                        w.Add(right.Text($"  {B}{acc}📈 Metrics{R}"));
+                        w.Add(right.Text($"  {D}Velocity:{R}  {B}{completedTasks}{R} {D}tasks/sprint{R}"));
+                        w.Add(right.Text($"  {D}Pending:{R}   {B}{pendingTasks}{R}"));
+                        return w.ToArray();
+                    }).FillWidth(1).FillHeight(),
+                ]).Fill()
             ])),
 
             // Narrow layout: single column
             r.Otherwise(r => r.VStack(col =>
-            [
-                col.Text($"  {PanelRenderer.Bold}{acc}🏠 Dashboard{R}"),
-                col.Text($"  \x1b[90m👥 Team Members:\x1b[0m \x1b[1m{members.Count}\x1b[0m \x1b[90m({activeCount} active){R}"),
-                col.Text($"  \x1b[90m📊 Tasks:\x1b[0m \x1b[1m{tasks.Count}\x1b[0m \x1b[90mtotal — {inProgressTasks} in progress, {completedTasks} done{R}"),
-                col.Text(""),
-                col.Text($"  {PanelRenderer.Bold}── Recent Activity ──{R}"),
-                ..logEntries.Take(2).Select(l => col.Text($"  \x1b[90m📅 {l.Date}\x1b[0m  {l.Topic}{R}")),
-                col.Text(""),
-                col.Text($"  {PanelRenderer.Bold}── Recent Decisions ──{R}"),
-                ..decisions.Take(2).Select(d => col.Text($"  \x1b[90m📋 {d.Date}\x1b[0m  {d.Title} \x1b[90m({d.Author}){R}")),
-            ])),
+            {
+                var w = new List<Hex1bWidget>
+                {
+                    col.Text($"  {B}{acc}☀️  SquadTUI{R}"),
+                    col.Text($"  {D}{sec}{new string('━', 24)}{R}"),
+                    col.Text($"  {D}👥 Members:{R} {B}{members.Count}{R}  {D}Tasks:{R} {B}{tasks.Count}{R}"),
+                    col.Text(""),
+                    col.Text($"  {B}{acc}📅 Recent{R}"),
+                };
+                foreach (var l in logEntries.Take(2))
+                    w.Add(col.Text($"  {D}{l.Date}{R}  {l.Topic}"));
+                w.Add(col.Text(""));
+                w.Add(col.Text($"  {B}{acc}📋 Decisions{R}"));
+                foreach (var d in decisions.Take(2))
+                    w.Add(col.Text($"  {D}{d.Date}{R}  {d.Title}  {D}({d.Author}){R}"));
+                return w.ToArray();
+            })),
         ]).Fill();
     }
 

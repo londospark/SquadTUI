@@ -98,3 +98,46 @@ When official Hex1b API documentation becomes available:
 
 **List selection indicators (Issue #14):**
 - Changed `SelectedIndicator` from `"▶ "` / `"▸ "` to `"  "` (two spaces) for all themes. `SelectedBackgroundColor` provides the highlight instead.
+
+### Sprint 7 — UI Beautification (Wide Terminal Polish)
+
+**ThemeManager overhaul:**
+- Replaced basic ANSI color codes (`\x1b[36m` etc.) with vibrant RGB accent colors via `\x1b[38;2;r;g;bm` — Ocean gets bright cyan (88,196,220), Heist gets warm gold (255,199,95), Sunset gets hot pink (255,121,198).
+- Added `GetSecondaryAccent()` for muted complementary colors used in divider rules and inactive elements.
+- Added `GetDimRule()` helper for consistent dim horizontal separator lines across all screens.
+- `SplitterTheme.DividerColor` now uses visually distinct colors per theme (not same as bg) — creates panel separation without borders.
+- All themes got richer foreground tints instead of plain white for a warmer feel.
+
+**DashboardScreen — complete rewrite for wide terminals:**
+- Welcome header: `☀️ SquadTUI Dashboard` with subtitle.
+- Wide (≥120): Full 3-column layout — Left shows team roster with status + current task per member, Center shows activity log with progress bar and task stats, Right shows decisions summary + sprint metrics.
+- Medium (≥80): 2-column with team + activity on left, decisions + metrics on right.
+- Narrow: Compact single-column with essential info.
+- Added visual progress bar using █▓░ characters with color coding.
+
+**NavBar — cleaned up:**
+- Removed square brackets from all tab labels.
+- Active tab uses `▶` prefix with bold accent color.
+- Inactive tabs use secondary accent instead of `\x1b[90m` (too dim before).
+
+**HelpScreen — modernized:**
+- Removed ALL square brackets from keybind labels (`[1-6]` → `1-6`, `[h/l]` → `h / l`, etc.).
+- Two-column layout on wide terminals (≥100 cols), single column on narrow.
+- Added dim accent divider under title.
+
+**All screens — consistent visual polish:**
+- Every screen now has `{Bold}{accent}emoji Title{Reset}` headers followed by dim accent `━━━` divider lines.
+- Detail panes use dim separators between sections (charter, tasks, activity, etc.).
+- Consistent use of `D` (dim), `B` (bold), `acc` (accent), `sec` (secondary accent), `R` (reset) variables.
+- 2-space padding before all content lines.
+- RosterScreen: list pane widened from FillWidth(1) to FillWidth(2), detail from FillWidth(2) to FillWidth(3). Tasks section always shown (even if empty). Added dim separators between profile/tasks/charter/activity.
+- SettingsScreen: Added dim divider lines between settings groups and detail sections.
+- SkillsScreen: Confidence bars now color-coded (green for High, yellow for Medium).
+- MetricsScreen: Added title header with divider, summary uses semantic colors for completion status.
+- MemberDetailScreen: Tasks shown prominently (always visible, not conditionally), dim dividers between all sections.
+- CharterScreen: Added dim divider under title.
+- NoSquadScreen: Replaced hardcoded cyan with theme accent colors, removed square brackets from key labels.
+
+**API learnings:**
+- `ThemeManager.GetSecondaryAccent(int index)` — new method for muted complementary colors.
+- `ThemeManager.GetDimRule(int index, int width)` — reusable dim horizontal separator.

@@ -21,10 +21,11 @@ public static class SettingsScreen
     {
         var settings = state.Settings;
         var ti = state.SelectedThemeIndex;
-        var c = ThemeManager.GetPanelColors(ti);
-        var acc = c.Accent;
+        var acc = ThemeManager.GetAccentCode(ti);
+        var sec = ThemeManager.GetSecondaryAccent(ti);
         var R = PanelRenderer.Reset;
         var B = PanelRenderer.Bold;
+        var D = PanelRenderer.Dim;
 
         var selectedIdx = Math.Clamp(state.SettingsSelectedIndex, 0, SettingLabels.Length - 1);
 
@@ -42,6 +43,7 @@ public static class SettingsScreen
             h.VStack(left =>
             [
                 left.Text($"  {B}{acc}⚙️  Settings{R}"),
+                left.Text($"  {D}{sec}{new string('━', 30)}{R}"),
                 left.Text(""),
                 left.List(listItems)
                     .OnSelectionChanged(e => { state.SettingsSelectedIndex = e.SelectedIndex; })
@@ -54,19 +56,20 @@ public static class SettingsScreen
 
             h.VStack(detail =>
             {
+                var (label, description, currentValue) = GetSettingDetail(selectedIdx, settings);
                 var widgets = new List<Hex1bWidget>
                 {
                     detail.Text($"  {B}{acc}📋 Setting Details{R}"),
-                    detail.Text("")
+                    detail.Text($"  {D}{sec}{new string('━', 36)}{R}"),
+                    detail.Text(""),
+                    detail.Text($"  {B}{acc}{label}{R}"),
+                    detail.Text($"  {D}{description}{R}"),
+                    detail.Text(""),
+                    detail.Text($"  {D}{sec}{new string('━', 36)}{R}"),
+                    detail.Text($"  {D}Current:{R}  {B}{currentValue}{R}"),
+                    detail.Text(""),
+                    detail.Text($"  {D}Press Enter to change{R}"),
                 };
-
-                var (label, description, currentValue) = GetSettingDetail(selectedIdx, settings);
-                widgets.Add(detail.Text($"  {B}{acc}{label}{R}"));
-                widgets.Add(detail.Text($"  \x1b[90m{description}\x1b[0m"));
-                widgets.Add(detail.Text(""));
-                widgets.Add(detail.Text($"  \x1b[90mCurrent:\x1b[0m {B}{currentValue}{R}"));
-                widgets.Add(detail.Text(""));
-                widgets.Add(detail.Text($"  \x1b[90mPress Enter to change{R}"));
 
                 return widgets.ToArray();
             }).FillWidth(1).FillHeight(),

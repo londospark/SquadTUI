@@ -19,7 +19,10 @@ public static class MemberDetailScreen
         var recentLogs = logs.Where(l => l.Participants.Contains(member.Name)).Take(3).ToList();
 
         var acc = ThemeManager.GetAccentCode(state.SelectedThemeIndex);
+        var sec = ThemeManager.GetSecondaryAccent(state.SelectedThemeIndex);
         var R = PanelRenderer.Reset;
+        var B = PanelRenderer.Bold;
+        var D = PanelRenderer.Dim;
 
         return v.VStack(inner =>
         {
@@ -27,37 +30,47 @@ public static class MemberDetailScreen
             {
                 inner.VStack(header =>
                 [
-                    header.Text($"  {PanelRenderer.Bold}{acc}👤 Member{R}"),
-                    header.Text($"  {GetStatusBadge(member.Status)} \x1b[1m{member.Name}\x1b[0m \x1b[90m—\x1b[0m {member.Role}{R}"),
-                    header.Text($"  \x1b[90mStatus:\x1b[0m {member.Status}    \x1b[90mCurrent Task:\x1b[0m {member.CurrentTask ?? "\x1b[90mNone\x1b[0m"}{R}"),
+                    header.Text($"  {B}{acc}👤 {member.Name}{R}"),
+                    header.Text($"  {D}{sec}{new string('━', 44)}{R}"),
+                    header.Text($"  {GetStatusBadge(member.Status)} {B}{member.Name}{R}  {D}—{R}  {member.Role}{R}"),
+                    header.Text($"  {D}Status:{R} {member.Status}    {D}Current Task:{R} {member.CurrentTask ?? $"{D}None{R}"}{R}"),
                 ]),
+
+                inner.VStack(taskSection =>
+                {
+                    var tw = new List<Hex1bWidget>
+                    {
+                        taskSection.Text($"  {D}{sec}{new string('━', 44)}{R}"),
+                        taskSection.Text($"  {B}{acc}📋 Tasks{R}"),
+                    };
+                    if (memberTasks.Count > 0)
+                        foreach (var t in memberTasks)
+                            tw.Add(taskSection.Text($"  {GetTaskBadge(t.Status)} {B}{t.Title}{R}  {D}{t.Description}{R}"));
+                    else
+                        tw.Add(taskSection.Text($"  {D}No tasks assigned{R}"));
+                    return tw.ToArray();
+                }),
 
                 inner.VStack(charterSection =>
                 [
-                    charterSection.Text($"  {PanelRenderer.Bold}{acc}📜 Charter{R}"),
+                    charterSection.Text($"  {D}{sec}{new string('━', 44)}{R}"),
+                    charterSection.Text($"  {B}{acc}📜 Charter{R}"),
                     ..MarkdownRenderer.Render(charterSection, charter)
                 ]),
             };
-
-            if (memberTasks.Count > 0)
-            {
-                widgets.Add(inner.VStack(taskSection =>
-                [
-                    taskSection.Text($"  {PanelRenderer.Bold}{acc}📋 Tasks{R}"),
-                    ..memberTasks.Select(t => taskSection.Text($"  {GetTaskBadge(t.Status)} {t.Title}{R}"))
-                ]));
-            }
 
             if (recentLogs.Count > 0)
             {
                 widgets.Add(inner.VStack(logSection =>
                 [
-                    logSection.Text($"  {PanelRenderer.Bold}{acc}📊 Recent Activity{R}"),
-                    ..recentLogs.Select(l => logSection.Text($"  📅 {l.Date}  {l.Topic} — {l.Summary}{R}"))
+                    logSection.Text($"  {D}{sec}{new string('━', 44)}{R}"),
+                    logSection.Text($"  {B}{acc}📊 Recent Activity{R}"),
+                    ..recentLogs.Select(l => logSection.Text($"  {D}{l.Date}{R}  {l.Topic}  {D}{l.Summary}{R}"))
                 ]));
             }
 
-            widgets.Add(inner.Text($"\x1b[90m  Esc Back to Roster    E Edit Charter\x1b[0m"));
+            widgets.Add(inner.Text(""));
+            widgets.Add(inner.Text($"  {D}Esc Back to Roster    E Edit Charter{R}"));
 
             return widgets.ToArray();
         }).Fill();

@@ -13,16 +13,20 @@ public static class CharterScreen
         var charter = SampleData.GetCharterFor(memberName);
 
         var acc = ThemeManager.GetAccentCode(state.SelectedThemeIndex);
+        var sec = ThemeManager.GetSecondaryAccent(state.SelectedThemeIndex);
         var R = PanelRenderer.Reset;
+        var B = PanelRenderer.Bold;
+        var D = PanelRenderer.Dim;
 
         return v.VStack(inner =>
         [
-            inner.Text($"  {PanelRenderer.Bold}{acc}📜 Charter — {memberName}{R}"),
+            inner.Text($"  {B}{acc}📜 Charter — {memberName}{R}"),
+            inner.Text($"  {D}{sec}{new string('━', 44)}{R}"),
             inner.VStack(scroll =>
             [
                 ..MarkdownRenderer.Render(scroll, charter),
             ]).Fill(),
-            inner.Text($"\x1b[90m  Esc Back\x1b[0m"),
+            inner.Text($"  {D}Esc Back{R}"),
         ]).Fill();
     }
 }

@@ -13,7 +13,14 @@ public static class MetricsScreen
         var tasks = SampleData.Tasks;
         var members = state.Members ?? SampleData.Members;
         var acc = ThemeManager.GetAccentCode(state.SelectedThemeIndex);
+        var sec = ThemeManager.GetSecondaryAccent(state.SelectedThemeIndex);
         var R = PanelRenderer.Reset;
+        var B = PanelRenderer.Bold;
+        var D = PanelRenderer.Dim;
+
+        var done = tasks.Count(t => t.Status == Models.SquadTaskStatus.Done);
+        var active = tasks.Count(t => t.Status == Models.SquadTaskStatus.InProgress);
+        var pending = tasks.Count(t => t.Status == Models.SquadTaskStatus.Pending);
 
         var chartData = members.Select(m =>
         {
@@ -24,21 +31,27 @@ public static class MetricsScreen
 
         return v.VStack(inner =>
         [
+            inner.Text($"  {B}{acc}📈 Sprint Metrics{R}"),
+            inner.Text($"  {D}{sec}{new string('━', 44)}{R}"),
+            inner.Text(""),
+
             inner.VStack(chartSection =>
             [
-                chartSection.Text($"  {PanelRenderer.Bold}{acc}📈 Task Activity by Member{R}"),
+                chartSection.Text($"  {B}{acc}📊 Task Activity by Member{R}"),
                 chartSection.BarChart(chartData).Fill()
             ]).Fill(),
 
+            inner.Text($"  {D}{sec}{new string('━', 44)}{R}"),
+
             inner.VStack(summarySection =>
             [
-                summarySection.Text($"  {PanelRenderer.Bold}{acc}Summary{R}"),
-                summarySection.Text($"  \x1b[90m📊 Total Tasks:\x1b[0m     \x1b[1m{tasks.Count}{R}"),
-                summarySection.Text($"  \x1b[90m✅ Completed:\x1b[0m       \x1b[1m{tasks.Count(t => t.Status == Models.SquadTaskStatus.Done)}{R}"),
-                summarySection.Text($"  \x1b[90m🔄 In Progress:\x1b[0m     \x1b[1m{tasks.Count(t => t.Status == Models.SquadTaskStatus.InProgress)}{R}"),
-                summarySection.Text($"  \x1b[90m⏳ Pending:\x1b[0m         \x1b[1m{tasks.Count(t => t.Status == Models.SquadTaskStatus.Pending)}{R}"),
-                summarySection.Text($"  \x1b[90m👥 Team Members:\x1b[0m    \x1b[1m{members.Count}{R}"),
-                summarySection.Text($"  \x1b[90m🎯 Velocity:\x1b[0m        \x1b[1m{tasks.Count(t => t.Status == Models.SquadTaskStatus.Done)}\x1b[0m \x1b[90mtasks/sprint{R}"),
+                summarySection.Text($"  {B}{acc}📋 Summary{R}"),
+                summarySection.Text($"  {D}Total Tasks:{R}     {B}{tasks.Count}{R}"),
+                summarySection.Text($"  {D}Completed:{R}       \x1b[32m{B}{done}{R}"),
+                summarySection.Text($"  {D}In Progress:{R}     \x1b[33m{B}{active}{R}"),
+                summarySection.Text($"  {D}Pending:{R}         {B}{pending}{R}"),
+                summarySection.Text($"  {D}Team Members:{R}    {B}{members.Count}{R}"),
+                summarySection.Text($"  {D}Velocity:{R}        {B}{done}{R} {D}tasks/sprint{R}"),
             ]),
         ]).Fill();
     }

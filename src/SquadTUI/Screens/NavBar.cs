@@ -10,6 +10,7 @@ public static class NavBar
     public static Hex1bWidget Render(WidgetContext<VStackWidget> v, AppState state)
     {
         var acc = ThemeManager.GetAccentCode(state.SelectedThemeIndex);
+        var sec = ThemeManager.GetSecondaryAccent(state.SelectedThemeIndex);
         var R = PanelRenderer.Reset;
 
         var items = new (string Key, string Label, string Emoji, Screen Screen)[]
@@ -29,8 +30,8 @@ public static class NavBar
             {
                 var isActive = state.CurrentScreen == item.Screen;
                 var label = isActive
-                    ? $"\x1b[1m{acc} ▶ {item.Emoji} {item.Label} {R}"
-                    : $"\x1b[90m {item.Emoji} {item.Label} {R}";
+                    ? $" \x1b[1m{acc}▶ {item.Emoji} {item.Label}{R} "
+                    : $" {sec}{item.Emoji} {item.Label}{R} ";
 
                 var screen = item.Screen;
                 widgets.Add(h.Button(label).OnClick(_ => { state.CurrentScreen = screen; }));
