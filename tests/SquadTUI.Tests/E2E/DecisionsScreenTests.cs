@@ -66,7 +66,8 @@ public class DecisionsScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Details").Should().BeTrue();
+        // Detail pane now shows selected decision title and content inline
+        snapshot.ContainsText("Date:").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

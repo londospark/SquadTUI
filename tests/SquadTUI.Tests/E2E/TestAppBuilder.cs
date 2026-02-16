@@ -37,6 +37,7 @@ public static class TestAppBuilder
                             Screen.ActivityLog => ActivityLogScreen.Render(v, state, app),
                             Screen.Metrics => MetricsScreen.Render(v, state, app),
                             Screen.Charter => CharterScreen.Render(v, state, app),
+                            Screen.NoSquad => NoSquadScreen.Render(v, state, app),
                             _ => v.Text("Unknown screen")
                         }),
 
@@ -48,7 +49,7 @@ public static class TestAppBuilder
                             s.Spacer(),
                             s.Section($"Screen: {state.CurrentScreen}"),
                             s.Spacer(),
-                            s.Section("T:Theme  Q:Quit")
+                            s.Section("Esc:Back  j/k:Nav  h/l:Screen  T:Theme  Q:Quit")
                         ])
                     ]).WithInputBindings(keys =>
                     {
@@ -64,18 +65,73 @@ public static class TestAppBuilder
                             state.SelectedThemeIndex = (state.SelectedThemeIndex + 1) % ThemeManager.ThemeNames.Length;
                             options.Theme = ThemeManager.GetTheme(state.SelectedThemeIndex);
                         }, "Theme");
-                        keys.Key(Hex1bKey.B).Action(() =>
+                        keys.Key(Hex1bKey.Escape).Action(() =>
                         {
                             if (state.CurrentScreen == Screen.MemberDetail)
                                 state.CurrentScreen = Screen.Roster;
                             else if (state.CurrentScreen == Screen.Charter)
                                 state.CurrentScreen = Screen.MemberDetail;
+                            else if (state.CurrentScreen != Screen.Dashboard)
+                                state.CurrentScreen = Screen.Dashboard;
                         }, "Back");
                         keys.Key(Hex1bKey.E).Action(() =>
                         {
                             if (state.CurrentScreen == Screen.MemberDetail)
                                 state.CurrentScreen = Screen.Charter;
                         }, "Edit Charter");
+                        keys.Key(Hex1bKey.J).Action(() =>
+                        {
+                            // Move selection down in current list
+                            if (state.CurrentScreen == Screen.Roster)
+                                state.RosterSelectedIndex = Math.Min(state.RosterSelectedIndex + 1, (state.Members?.Count ?? 6) - 1);
+                            else if (state.CurrentScreen == Screen.Decisions)
+                                state.DecisionSelectedIndex = Math.Min(state.DecisionSelectedIndex + 1, (state.Decisions?.Count ?? 4) - 1);
+                            else if (state.CurrentScreen == Screen.ActivityLog)
+                                state.LogSelectedIndex = Math.Min(state.LogSelectedIndex + 1, (state.LogEntries?.Count ?? 3) - 1);
+                            else if (state.CurrentScreen == Screen.Skills)
+                                state.SkillSelectedIndex = Math.Min(state.SkillSelectedIndex + 1, (state.Skills?.Count ?? 5) - 1);
+                        }, "Down");
+                        keys.Key(Hex1bKey.K).Action(() =>
+                        {
+                            // Move selection up in current list
+                            if (state.CurrentScreen == Screen.Roster)
+                                state.RosterSelectedIndex = Math.Max(state.RosterSelectedIndex - 1, 0);
+                            else if (state.CurrentScreen == Screen.Decisions)
+                                state.DecisionSelectedIndex = Math.Max(state.DecisionSelectedIndex - 1, 0);
+                            else if (state.CurrentScreen == Screen.ActivityLog)
+                                state.LogSelectedIndex = Math.Max(state.LogSelectedIndex - 1, 0);
+                            else if (state.CurrentScreen == Screen.Skills)
+                                state.SkillSelectedIndex = Math.Max(state.SkillSelectedIndex - 1, 0);
+                        }, "Down");
+                        keys.Key(Hex1bKey.H).Action(() =>
+                        {
+                            // Previous screen
+                            var screens = new[] { Screen.Dashboard, Screen.Roster, Screen.Decisions, Screen.Skills, Screen.ActivityLog, Screen.Metrics };
+                            var idx = Array.IndexOf(screens, state.CurrentScreen);
+                            if (idx > 0) state.CurrentScreen = screens[idx - 1];
+                        }, "Prev Screen");
+                        keys.Key(Hex1bKey.L).Action(() =>
+                        {
+                            // Next screen
+                            var screens = new[] { Screen.Dashboard, Screen.Roster, Screen.Decisions, Screen.Skills, Screen.ActivityLog, Screen.Metrics };
+                            var idx = Array.IndexOf(screens, state.CurrentScreen);
+                            if (idx >= 0 && idx < screens.Length - 1) state.CurrentScreen = screens[idx + 1];
+                        }, "Next Screen");
+                        keys.Key(Hex1bKey.C).Action(() =>
+                        {
+                            if (state.CurrentScreen == Screen.NoSquad)
+                            {
+                                var root = Directory.GetCurrentDirectory();
+                                var aiTeamDir = Path.Combine(root, ".ai-team");
+                                var agentsDir = Path.Combine(aiTeamDir, "agents");
+                                Directory.CreateDirectory(agentsDir);
+                                File.WriteAllText(Path.Combine(aiTeamDir, "team.md"), "# Team Roster\n\n*Created by SquadTUI*\n");
+                                File.WriteAllText(Path.Combine(aiTeamDir, "decisions.md"), "# Decisions\n\n*No decisions yet.*\n");
+                                state.SquadDetected = true;
+                                state.SquadRootPath = root;
+                                state.CurrentScreen = Screen.Dashboard;
+                            }
+                        }, "Create Squad");
                     });
                 };
             })

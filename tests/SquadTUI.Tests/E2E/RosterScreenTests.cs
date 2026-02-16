@@ -46,16 +46,39 @@ public class RosterScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Preview").Should().BeTrue();
-        snapshot.ContainsText("Name:").Should().BeTrue();
+        snapshot.ContainsText("Danny").Should().BeTrue();
         snapshot.ContainsText("Role:").Should().BeTrue();
+        snapshot.ContainsText("Status:").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
     }
 
     [Fact]
-    public async Task Roster_EnterNavigatesToMemberDetail()
+    public async Task Roster_ShowsInlineDetailContent()
+    {
+        await using var terminal = TestAppBuilder.Build();
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        var sequence = new Hex1bTerminalInputSequenceBuilder()
+            .Key(Hex1bKey.D2)
+            .Build();
+        await sequence.ApplyAsync(terminal);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        // Detail pane now shows charter excerpt and tasks inline
+        snapshot.ContainsText("Charter").Should().BeTrue();
+        snapshot.ContainsText("Task:").Should().BeTrue();
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
+    }
+
+    [Fact]
+    public async Task Roster_EscapeBackToDashboard()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -65,40 +88,13 @@ public class RosterScreenTests
         var sequence = new Hex1bTerminalInputSequenceBuilder()
             .Key(Hex1bKey.D2)
             .Wait(100)
-            .Enter()
+            .Key(Hex1bKey.Escape)
             .Build();
         await sequence.ApplyAsync(terminal);
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Member").Should().BeTrue();
-        snapshot.ContainsText("Screen: MemberDetail").Should().BeTrue();
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task MemberDetail_BackButtonReturnsToRoster()
-    {
-        await using var terminal = TestAppBuilder.Build();
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D2)
-            .Wait(100)
-            .Enter()
-            .Wait(100)
-            .Key(Hex1bKey.B)
-            .Build();
-        await sequence.ApplyAsync(terminal);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Team Roster").Should().BeTrue();
-        snapshot.ContainsText("Screen: Roster").Should().BeTrue();
+        snapshot.ContainsText("Screen: Dashboard").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

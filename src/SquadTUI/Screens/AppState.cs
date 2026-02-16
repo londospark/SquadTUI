@@ -11,7 +11,8 @@ public enum Screen
     Skills,
     ActivityLog,
     Metrics,
-    Charter
+    Charter,
+    NoSquad
 }
 
 public class AppState
@@ -38,4 +39,9 @@ public class AppState
     public int SelectedThemeIndex { get; set; } = 0;
     public int ActiveTab { get; set; } = 0;
     public bool ShowHelp { get; set; } = false;
+
+    // Squad detection
+    public bool SquadDetected { get; set; } = true;
+    public string? SquadRootPath { get; set; }
+    public AppSettings Settings { get; set; } = new();
 }

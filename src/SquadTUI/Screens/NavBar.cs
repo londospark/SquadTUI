@@ -1,5 +1,6 @@
 using Hex1b;
 using Hex1b.Widgets;
+using SquadTUI.Rendering;
 
 namespace SquadTUI.Screens;
 
@@ -7,6 +8,9 @@ public static class NavBar
 {
     public static Hex1bWidget Render(WidgetContext<VStackWidget> v, AppState state)
     {
+        var colors = Themes.ThemeManager.GetPanelColors(state.SelectedThemeIndex);
+        var navBg = colors.PanelBg;
+
         var items = new (string Key, string Label, string Emoji, Screen Screen)[]
         {
             ("1", "Dashboard", "🏠", Screen.Dashboard),
@@ -24,12 +28,12 @@ public static class NavBar
             {
                 var isActive = state.CurrentScreen == item.Screen;
                 var label = isActive
-                    ? $"\x1b[1m\x1b[36m ▶ {item.Emoji} [{item.Key}]{item.Label} \x1b[0m"
-                    : $"\x1b[90m {item.Emoji} [{item.Key}]{item.Label} \x1b[0m";
-                
+                    ? $"{colors.NestedBg}\x1b[1m{colors.Accent} ▶ {item.Emoji} [{item.Key}]{item.Label} {PanelRenderer.Reset}"
+                    : $"{navBg}\x1b[90m {item.Emoji} [{item.Key}]{item.Label} {PanelRenderer.Reset}";
+
                 widgets.Add(h.Text(label));
             }
-            widgets.Add(h.Text("\x1b[90m  [Q]Quit \x1b[0m"));
+            widgets.Add(h.Text($"{navBg}\x1b[90m  [Q]Quit {PanelRenderer.Reset}"));
             return widgets.ToArray();
         });
     }

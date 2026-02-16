@@ -21,39 +21,19 @@
 ## 📸 Screenshots
 
 ### Dashboard
-```
-┌─────────────────────────────────────────────────────┐
-│ 🏠 DASHBOARD — Squad Overview                       │
-│                                                     │
-│ 👥 Active Members: 11/11                           │
-│ 🔄 Tasks in Progress: 8                            │
-│ ✅ Completed Today: 12                             │
-└─────────────────────────────────────────────────────┘
-```
+![Dashboard](docs/images/screenshot-dashboard.png)
 
-### Roster
-```
-┌─────────────────────────────────────────────────────┐
-│ 👥 ROSTER — Team Members                            │
-│                                                     │
-│ 🎯 Danny — Lead (✅ Active)                         │
-│ 💻 Rusty — Backend Engineer (🔵 Working)           │
-│ 🎨 Linus — Frontend Dev (✅ Active)                 │
-└─────────────────────────────────────────────────────┘
-```
+### Roster with Inline Detail
+![Roster](docs/images/screenshot-roster.png)
 
-*More screenshots coming soon — contributions welcome!*
+### Decisions
+![Decisions](docs/images/screenshot-decisions.png)
+
+*Screenshots captured on a 120-column terminal with the Ocean theme.*
 
 ## 🚀 Installation
 
-### Option 1: Install as .NET Tool (Recommended)
-
-```bash
-dotnet tool install --global SquadTUI
-squadtui
-```
-
-### Option 2: Build from Source
+### Option 1: Build from Source (Recommended)
 
 ```bash
 git clone https://github.com/londospark/SquadTUI.git
@@ -62,7 +42,7 @@ dotnet build -c Release
 dotnet run --project src/SquadTUI
 ```
 
-### Option 3: Download Pre-built Binaries
+### Option 2: Download Pre-built Binaries
 
 Download the latest release for your platform from the [Releases](https://github.com/londospark/SquadTUI/releases) page:
 
@@ -87,11 +67,14 @@ tar xzf squadtui-X.Y.Z-osx-x64.tar.gz
 ### Starting SquadTUI
 
 ```bash
-# If installed as a tool
-squadtui
-
-# If running from source
+# From the repo root
 dotnet run --project src/SquadTUI
+```
+
+If no `.ai-team/` directory is detected, SquadTUI will offer to create one for you, or you can set one up with [Squad](https://github.com/bradygaster/squad):
+
+```bash
+npx github:bradygaster/squad
 ```
 
 ### Keyboard Shortcuts
@@ -101,16 +84,16 @@ dotnet run --project src/SquadTUI
 | `1` | Dashboard |
 | `2` | Roster |
 | `3` | Decisions |
-| `4` | Charter Viewer |
-| `5` | Skills |
-| `6` | Activity Log |
-| `7` | Metrics |
-| `T` | Cycle themes (Ocean → Heist → Daylight) |
+| `4` | Skills |
+| `5` | Activity Log |
+| `6` | Metrics |
+| `j` / `k` | Navigate list items up/down |
+| `h` / `l` | Switch to previous/next screen |
+| `Esc` | Back (return to previous screen / Dashboard) |
+| `T` | Cycle themes (Ocean → Heist → Sunset → HighContrast) |
 | `Q` | Quit |
 | `↑` `↓` | Navigate lists |
-| `←` `→` | Switch tabs (where applicable) |
 | `Enter` | Select item |
-| `Esc` | Back/Cancel |
 
 ### Navigation Flow
 
