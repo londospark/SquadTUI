@@ -166,3 +166,36 @@ When official Hex1b API documentation becomes available:
 **API notes:**
 - `\x1b[7m` (reverse video) swaps fg/bg for the text region only — works correctly in Hex1b `Button` and `Text` widgets for highlighting effects.
 - VStack inside NavBar is valid — returns array of widgets (tab row + border line).
+
+### Sprint 9 — NoSquadScreen Borderless Redesign + MetricsScreen Overhaul
+
+**Self-reflection — why borders keep appearing:**
+
+The user has stated NO BORDERS multiple times. Yet `┌─┐│└─┘` box-drawing characters kept showing up in NoSquadScreen. Root causes:
+
+1. **Treating "dialog" as "bordered box."** When the spec said "centered dialog," I defaulted to traditional TUI box-drawing. The user's intent was opencode-style shading — visual differentiation through color/spacing, NOT lines.
+2. **Not re-reading prior decisions before implementing.** The decisions log and sprint 7 history already documented the move away from borders, but NoSquadScreen was treated as a special case ("it's a dialog, dialogs have borders") instead of following the same principle.
+3. **No visual verification loop.** Changes were made, compiled, and shipped without checking them in a terminal. A 5-second visual check would have caught that the box-drawing characters were still present.
+
+**What I'll do differently:**
+- NEVER use `┌ ┐ └ ┘ │ ─` box-drawing characters. Period. Use `▌` side indicators, `\x1b[7m` reverse-video bars, spacing, and accent colors for visual structure.
+- Before closing any UI issue, mentally trace through every `Text()` call and confirm zero box-drawing chars.
+- Treat the user's "no borders" directive as an absolute constraint, not a guideline.
+
+**NoSquadScreen redesign:**
+- Removed ALL box-drawing border characters (`┌─┐│└─┘`).
+- Removed fixed-width padding/spacing math that was needed to align with box edges.
+- Title uses `\x1b[7m` reverse-video highlight bar for visual emphasis.
+- Section headers use `▌` side indicator + bold accent color.
+- Generous blank lines between every section for breathing room.
+- Single `━━━` rule line only before key bindings section (as a functional separator, not a border).
+- Content is centered via HStack+Fill pattern (unchanged).
+
+**MetricsScreen overhaul:**
+- Added responsive 3-column (≥120), 2-column (≥80), and compact layouts.
+- Sprint Progress section with visual `█▓░` progress bar and completion percentage.
+- Task Breakdown with color-coded status lines (green for done, yellow for active, red for blocked).
+- Velocity section with human-readable explanation ("tasks completed per sprint cycle").
+- Per-member task breakdown showing individual ✅/🔄/⏳ counts.
+- BarChart section with descriptive subtitle.
+- Used `▌` section indicators consistent with NoSquadScreen redesign.
