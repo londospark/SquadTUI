@@ -134,74 +134,8 @@ public class CIPipelineTests
         slnFiles.Should().NotBeEmpty("solution file should exist");
     }
 
-    [Fact]
-    public async Task DotnetBuild_Succeeds()
-    {
-        var startInfo = new System.Diagnostics.ProcessStartInfo
-        {
-            FileName = "dotnet",
-            Arguments = "build --no-incremental",
-            WorkingDirectory = _repoRoot,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
-
-        using var process = System.Diagnostics.Process.Start(startInfo);
-        process.Should().NotBeNull();
-
-        await process!.WaitForExitAsync();
-        
-        var output = await process.StandardOutput.ReadToEndAsync();
-        var error = await process.StandardError.ReadToEndAsync();
-
-        process.ExitCode.Should().Be(0, 
-            $"dotnet build should succeed.\nOutput: {output}\nError: {error}");
-    }
-
-    [Fact]
-    public async Task DotnetTest_Passes()
-    {
-        // First ensure build succeeds
-        var buildInfo = new System.Diagnostics.ProcessStartInfo
-        {
-            FileName = "dotnet",
-            Arguments = "build",
-            WorkingDirectory = _repoRoot,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
-
-        using var buildProcess = System.Diagnostics.Process.Start(buildInfo);
-        await buildProcess!.WaitForExitAsync();
-
-        if (buildProcess.ExitCode != 0)
-            return; // Skip test if build fails
-
-        // Run tests
-        var testInfo = new System.Diagnostics.ProcessStartInfo
-        {
-            FileName = "dotnet",
-            Arguments = "test --no-build",
-            WorkingDirectory = _repoRoot,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
-
-        using var testProcess = System.Diagnostics.Process.Start(testInfo);
-        testProcess.Should().NotBeNull();
-
-        await testProcess!.WaitForExitAsync();
-        
-        var output = await testProcess.StandardOutput.ReadToEndAsync();
-        var error = await testProcess.StandardError.ReadToEndAsync();
-
-        testProcess.ExitCode.Should().Be(0, 
-            $"dotnet test should pass.\nOutput: {output}\nError: {error}");
-    }
+    // DotnetBuild_Succeeds and DotnetTest_Passes were removed.
+    // They spawned child `dotnet build`/`dotnet test` processes, causing
+    // infinite recursion in CI. The CI workflow itself already validates
+    // that build and test succeed — these tests were circular.
 }
