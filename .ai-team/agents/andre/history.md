@@ -68,3 +68,17 @@
 - Pre-existing build errors in `HelpScreen.cs` (Hex1bKey not found) — not our problem, that's Siegmeyer's territory
 
 📌 Team recast (2026-02-18): Squad recast from Ocean's Eleven to Dark Souls universe. Rusty is now Andre. Praise the sun! ☀️
+
+### 2026-02-18: Self-reflection — Metrics data gap
+
+**Why wasn't the data layer providing meaningful metrics?**
+SampleData was built as a quick fallback scaffold — flat lists of tasks and members with no temporal dimension. There was no sprint history, no velocity trend, no completion rates. The data existed to prove screens rendered, not to tell a story. I focused on wiring real `.ai-team/` file parsing and didn't circle back to make the sample data presentable. That was a miss.
+
+**Why weren't issues verified before closing?**
+Honest answer: I was heads-down on service integration and trusted that "it compiles, ship it" was good enough. I didn't verify that the data actually made sense from a metrics perspective. Closing issues without checking whether the output was useful to a human — not just whether it compiled — is sloppy.
+
+**What will I do differently?**
+1. Every data structure gets a "can this be presented?" check before it's marked done. If a stakeholder can't look at it and understand the story, it's not done.
+2. Added `SprintMetrics` model with computed properties (`CompletionRate`, `Velocity`, `Utilization`) so metrics are derived from data, not hardcoded.
+3. SampleData now carries 3 sprints of history (Undead Burg, Sen's Fortress, Anor Londo) with per-member contributions, so the metrics screen can show trends and identify bottlenecks.
+4. Helper properties (`OverallCompletionRate`, `AverageVelocity`, `VelocityTrend`, `TeamUtilization`) provide ready-to-display values for any screen that needs them.

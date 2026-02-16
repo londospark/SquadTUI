@@ -21,6 +21,17 @@ public static class MetricsScreen
         var done = tasks.Count(t => t.Status == Models.SquadTaskStatus.Done);
         var active = tasks.Count(t => t.Status == Models.SquadTaskStatus.InProgress);
         var pending = tasks.Count(t => t.Status == Models.SquadTaskStatus.Pending);
+        var blocked = tasks.Count(t => t.Status == Models.SquadTaskStatus.Blocked);
+        var total = tasks.Count > 0 ? tasks.Count : 1;
+        var pct = done * 100 / total;
+
+        // Progress bar
+        var barWidth = 30;
+        var doneWidth = (int)(done * (double)barWidth / total);
+        var activeWidth = (int)(active * (double)barWidth / total);
+        var remaining = barWidth - doneWidth - activeWidth;
+        if (remaining < 0) remaining = 0;
+        var progressBar = $"\x1b[32m{new string('█', doneWidth)}\x1b[33m{new string('▓', activeWidth)}{D}{new string('░', remaining)}{R}";
 
         var chartData = members.Select(m =>
         {
@@ -29,30 +40,147 @@ public static class MetricsScreen
             return new ChartItem(m.Name, completed + inProgress);
         }).Where(c => c.Value > 0).ToArray();
 
-        return v.VStack(inner =>
+        return v.Responsive(r =>
         [
-            inner.Text($"  {B}{acc}📈 Sprint Metrics{R}"),
-            inner.Text($"  {D}{sec}{new string('━', 44)}{R}"),
-            inner.Text(""),
-
-            inner.VStack(chartSection =>
+            // Wide layout (≥120 cols): 3-column
+            r.WhenMinWidth(120, r => r.VStack(outer =>
             [
-                chartSection.Text($"  {B}{acc}📊 Task Activity by Member{R}"),
-                chartSection.BarChart(chartData).Fill()
-            ]).Fill(),
+                outer.Text($"  {B}{acc}📈 Sprint Metrics{R}"),
+                outer.Text($"  {D}{sec}Performance overview for the current sprint cycle{R}"),
+                outer.Text(""),
 
-            inner.Text($"  {D}{sec}{new string('━', 44)}{R}"),
+                outer.HStack(h =>
+                [
+                    // Left: Completion overview
+                    h.VStack(left =>
+                    [
+                        left.Text($"  {B}{acc}▌{R} {B}{acc}Sprint Progress{R}"),
+                        left.Text(""),
+                        left.Text($"  {progressBar}  {B}{pct}%{R}"),
+                        left.Text($"  {D}Completion: {done} of {tasks.Count} tasks done{R}"),
+                        left.Text(""),
+                        left.Text(""),
+                        left.Text($"  {B}{acc}▌{R} {B}{acc}Task Breakdown{R}"),
+                        left.Text(""),
+                        left.Text($"  {D}Total Tasks:{R}      {B}{tasks.Count}{R}"),
+                        left.Text($"  \x1b[32m✅ Completed:{R}     {B}{done}{R}"),
+                        left.Text($"  \x1b[33m🔄 In Progress:{R}   {B}{active}{R}"),
+                        left.Text($"  {D}⏳ Pending:{R}       {B}{pending}{R}"),
+                        left.Text($"  \x1b[31m🚫 Blocked:{R}       {B}{blocked}{R}"),
+                        left.Text(""),
+                        left.Text(""),
+                        left.Text($"  {B}{acc}▌{R} {B}{acc}Velocity{R}"),
+                        left.Text(""),
+                        left.Text($"  {B}{done}{R} {D}tasks completed per sprint cycle{R}"),
+                        left.Text($"  {D}Measures how many tasks the team finishes{R}"),
+                        left.Text($"  {D}in each sprint iteration.{R}"),
+                    ]).FillWidth(1).FillHeight(),
 
-            inner.VStack(summarySection =>
+                    // Center: Chart
+                    h.VStack(mid =>
+                    [
+                        mid.Text($"  {B}{acc}▌{R} {B}{acc}📊 Tasks by Member{R}"),
+                        mid.Text($"  {D}Completed + in-progress tasks per team member{R}"),
+                        mid.Text(""),
+                        mid.BarChart(chartData).Fill(),
+                    ]).FillWidth(2).FillHeight(),
+
+                    // Right: Per-member detail
+                    h.VStack(right =>
+                    {
+                        var w = new List<Hex1bWidget>
+                        {
+                            right.Text($"  {B}{acc}▌{R} {B}{acc}👥 Member Status{R}"),
+                            right.Text(""),
+                        };
+                        foreach (var m in members)
+                        {
+                            var mDone = tasks.Count(t => t.Assignee == m.Name && t.Status == Models.SquadTaskStatus.Done);
+                            var mActive = tasks.Count(t => t.Assignee == m.Name && t.Status == Models.SquadTaskStatus.InProgress);
+                            var mPending = tasks.Count(t => t.Assignee == m.Name && t.Status == Models.SquadTaskStatus.Pending);
+                            w.Add(right.Text($"  {B}{m.Name}{R}  {D}{m.Role}{R}"));
+                            w.Add(right.Text($"    {D}✅ {mDone}  🔄 {mActive}  ⏳ {mPending}{R}"));
+                            w.Add(right.Text(""));
+                        }
+                        w.Add(right.Text($"  {sec}{new string('━', 28)}{R}"));
+                        w.Add(right.Text($"  {D}Team size:{R}  {B}{members.Count}{R} {D}members{R}"));
+                        return w.ToArray();
+                    }).FillWidth(1).FillHeight(),
+                ]).Fill(),
+            ])),
+
+            // Medium layout (≥80 cols): 2-column
+            r.WhenMinWidth(80, r => r.VStack(outer =>
             [
-                summarySection.Text($"  {B}{acc}📋 Summary{R}"),
-                summarySection.Text($"  {D}Total Tasks:{R}     {B}{tasks.Count}{R}"),
-                summarySection.Text($"  {D}Completed:{R}       \x1b[32m{B}{done}{R}"),
-                summarySection.Text($"  {D}In Progress:{R}     \x1b[33m{B}{active}{R}"),
-                summarySection.Text($"  {D}Pending:{R}         {B}{pending}{R}"),
-                summarySection.Text($"  {D}Team Members:{R}    {B}{members.Count}{R}"),
-                summarySection.Text($"  {D}Velocity:{R}        {B}{done}{R} {D}tasks/sprint{R}"),
-            ]),
+                outer.Text($"  {B}{acc}📈 Sprint Metrics{R}"),
+                outer.Text($"  {D}{sec}Performance overview for the current sprint cycle{R}"),
+                outer.Text(""),
+
+                outer.HStack(h =>
+                [
+                    h.VStack(left =>
+                    {
+                        var w = new List<Hex1bWidget>
+                        {
+                            left.Text($"  {B}{acc}▌{R} {B}{acc}Sprint Progress{R}"),
+                            left.Text(""),
+                            left.Text($"  {progressBar}  {B}{pct}%{R}"),
+                            left.Text($"  {D}Completion: {done} of {tasks.Count} tasks done{R}"),
+                            left.Text(""),
+                            left.Text(""),
+                            left.Text($"  {B}{acc}▌{R} {B}{acc}Task Breakdown{R}"),
+                            left.Text(""),
+                            left.Text($"  \x1b[32m✅ {done} done{R}   \x1b[33m🔄 {active} active{R}   {D}⏳ {pending} pending{R}   \x1b[31m🚫 {blocked} blocked{R}"),
+                            left.Text(""),
+                            left.Text(""),
+                            left.Text($"  {B}{acc}▌{R} {B}{acc}Velocity{R}"),
+                            left.Text(""),
+                            left.Text($"  {B}{done}{R} {D}tasks completed per sprint cycle{R}"),
+                            left.Text(""),
+                        };
+                        foreach (var m in members)
+                        {
+                            var mDone = tasks.Count(t => t.Assignee == m.Name && t.Status == Models.SquadTaskStatus.Done);
+                            var mActive = tasks.Count(t => t.Assignee == m.Name && t.Status == Models.SquadTaskStatus.InProgress);
+                            w.Add(left.Text($"  {D}{m.Name}: ✅ {mDone}  🔄 {mActive}{R}"));
+                        }
+                        return w.ToArray();
+                    }).FillWidth(1).FillHeight(),
+
+                    h.VStack(right =>
+                    [
+                        right.Text($"  {B}{acc}▌{R} {B}{acc}📊 Tasks by Member{R}"),
+                        right.Text($"  {D}Completed + active tasks per member{R}"),
+                        right.Text(""),
+                        right.BarChart(chartData).Fill(),
+                    ]).FillWidth(1).FillHeight(),
+                ]).Fill(),
+            ])),
+
+            // Narrow layout: single column
+            r.Otherwise(r => r.VStack(col =>
+            {
+                var w = new List<Hex1bWidget>
+                {
+                    col.Text($"  {B}{acc}📈 Sprint Metrics{R}"),
+                    col.Text(""),
+                    col.Text($"  {progressBar}  {B}{pct}%{R}"),
+                    col.Text($"  {D}{done}/{tasks.Count} done{R}"),
+                    col.Text(""),
+                    col.Text($"  \x1b[32m✅ {done}{R}  \x1b[33m🔄 {active}{R}  {D}⏳ {pending}{R}  \x1b[31m🚫 {blocked}{R}"),
+                    col.Text(""),
+                    col.Text($"  {D}Velocity:{R} {B}{done}{R} {D}tasks/sprint{R}"),
+                    col.Text(""),
+                    col.Text($"  {B}{acc}📊 Tasks by Member{R}"),
+                };
+                foreach (var m in members)
+                {
+                    var mDone = tasks.Count(t => t.Assignee == m.Name && t.Status == Models.SquadTaskStatus.Done);
+                    var mActive = tasks.Count(t => t.Assignee == m.Name && t.Status == Models.SquadTaskStatus.InProgress);
+                    w.Add(col.Text($"  {D}{m.Name}: ✅ {mDone}  🔄 {mActive}{R}"));
+                }
+                return w.ToArray();
+            })),
         ]).Fill();
     }
 }

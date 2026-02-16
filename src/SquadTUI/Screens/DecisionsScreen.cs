@@ -19,13 +19,17 @@ public static class DecisionsScreen
         var R = PanelRenderer.Reset;
         var B = PanelRenderer.Bold;
         var D = PanelRenderer.Dim;
+        var RV = "\x1b[7m"; // reverse video
 
         return v.HStack(h =>
         [
             h.VStack(left =>
             [
-                left.Text($"  {B}{acc}📋 Decisions{R}"),
+                left.Text($"  {B}{acc}{RV} 📋  Decisions {R}"),
+                left.Text($"  {D}Team decisions and architectural choices{R}"),
+                left.Text(""),
                 left.Text($"  {sec}{new string('━', 30)}{R}"),
+                left.Text(""),
                 left.List(listItems)
                     .OnSelectionChanged(e => { state.DecisionSelectedIndex = e.SelectedIndex; })
                     .Fill()
@@ -33,14 +37,18 @@ public static class DecisionsScreen
 
             h.VStack(detail =>
             [
-                detail.Text($"  {B}{acc}📋 {selected.Title}{R}"),
-                detail.Text($"  {sec}{new string('━', 36)}{R}"),
                 detail.Text(""),
-                detail.Text($"  {D}Date:{R}    {B}{selected.Date}{R}"),
-                detail.Text($"  {D}Author:{R}  👤 {B}{selected.Author}{R}"),
+                detail.Text($"  {B}{acc}{RV} 📋  {selected.Title} {R}"),
                 detail.Text(""),
                 detail.Text($"  {sec}{new string('━', 36)}{R}"),
+                detail.Text(""),
+                detail.Text($"    {D}Date:{R}      {B}{selected.Date}{R}"),
+                detail.Text($"    {D}Author:{R}    👤 {B}{selected.Author}{R}"),
+                detail.Text(""),
+                detail.Text($"  {sec}{new string('━', 36)}{R}"),
+                detail.Text(""),
                 detail.Text($"  {B}{acc}Content{R}"),
+                detail.Text(""),
                 ..MarkdownRenderer.Render(detail, selected.Content).Select(w => w),
             ]).FillWidth(2).FillHeight(),
         ]).Fill();

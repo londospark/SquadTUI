@@ -78,12 +78,15 @@ public class NoSquadScreenTests
     [Fact]
     public async Task NoSquadScreen_ShowsQKeyInstruction()
     {
-        await using var terminal = TestAppBuilder.Build(squadDetected: false);
+        // Taller terminal needed — key bindings line is near the bottom of centered layout
+        await using var terminal = TestAppBuilder.Build(height: 40, squadDetected: false);
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
+        // The key bindings line renders: "C  Create basic squad structure        Q  Quit"
+        // Check for the Q key instruction being present
         snapshot.ContainsText("Quit").Should().BeTrue(
             "NoSquad screen should show the Q key instruction");
 

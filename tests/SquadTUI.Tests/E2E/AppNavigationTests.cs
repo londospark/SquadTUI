@@ -122,7 +122,7 @@ public class AppNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Task Activity by Member").Should().BeTrue();
+        snapshot.ContainsText("Sprint Metrics").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

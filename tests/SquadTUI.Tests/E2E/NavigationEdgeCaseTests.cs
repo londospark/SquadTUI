@@ -51,7 +51,7 @@ public class NavigationEdgeCaseTests
 
         var snapshot = terminal.CreateSnapshot();
         // Should end on Metrics (screen 6)
-        snapshot.ContainsText("Task Activity by Member").Should().BeTrue();
+        snapshot.ContainsText("Sprint Metrics").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -96,7 +96,7 @@ public class NavigationEdgeCaseTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Task Activity by Member").Should().BeTrue();
+        snapshot.ContainsText("Sprint Metrics").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -163,7 +163,7 @@ public class NavigationEdgeCaseTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Task Activity by Member").Should().BeTrue();
+        snapshot.ContainsText("Sprint Metrics").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

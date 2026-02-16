@@ -63,6 +63,85 @@ public static class SampleData
         new("task-5", "Architecture doc", "Document system architecture", SquadTaskStatus.Done, "Solaire"),
     ];
 
+    // --- Sprint velocity history (3 sprints, Dark Souls themed) ---
+
+    public static readonly IReadOnlyList<SprintMetrics> SprintHistory =
+    [
+        new(1, "Undead Burg Sprint",
+            DateTimeOffset.Parse("2026-02-03T00:00:00Z"),
+            DateTimeOffset.Parse("2026-02-09T23:59:59Z"),
+            PlannedTasks: 8, CompletedTasks: 5, CarriedOver: 3,
+            Contributions:
+            [
+                new("Solaire",   TasksCompleted: 2, TasksAssigned: 2, PointsEarned: 5),
+                new("Siegmeyer", TasksCompleted: 1, TasksAssigned: 2, PointsEarned: 3),
+                new("Andre",     TasksCompleted: 1, TasksAssigned: 2, PointsEarned: 3),
+                new("Patches",   TasksCompleted: 1, TasksAssigned: 1, PointsEarned: 2),
+                new("Firekeeper",TasksCompleted: 0, TasksAssigned: 1, PointsEarned: 0),
+            ]),
+        new(2, "Sen's Fortress Sprint",
+            DateTimeOffset.Parse("2026-02-10T00:00:00Z"),
+            DateTimeOffset.Parse("2026-02-16T23:59:59Z"),
+            PlannedTasks: 10, CompletedTasks: 7, CarriedOver: 3,
+            Contributions:
+            [
+                new("Solaire",   TasksCompleted: 2, TasksAssigned: 2, PointsEarned: 5),
+                new("Siegmeyer", TasksCompleted: 2, TasksAssigned: 3, PointsEarned: 5),
+                new("Andre",     TasksCompleted: 2, TasksAssigned: 3, PointsEarned: 5),
+                new("Patches",   TasksCompleted: 1, TasksAssigned: 1, PointsEarned: 2),
+                new("Firekeeper",TasksCompleted: 0, TasksAssigned: 1, PointsEarned: 1),
+            ]),
+        new(3, "Anor Londo Sprint",
+            DateTimeOffset.Parse("2026-02-17T00:00:00Z"),
+            DateTimeOffset.Parse("2026-02-23T23:59:59Z"),
+            PlannedTasks: 12, CompletedTasks: 4, CarriedOver: 8,
+            Contributions:
+            [
+                new("Solaire",   TasksCompleted: 1, TasksAssigned: 2, PointsEarned: 3),
+                new("Siegmeyer", TasksCompleted: 1, TasksAssigned: 3, PointsEarned: 3),
+                new("Andre",     TasksCompleted: 1, TasksAssigned: 3, PointsEarned: 3),
+                new("Patches",   TasksCompleted: 1, TasksAssigned: 2, PointsEarned: 2),
+                new("Firekeeper",TasksCompleted: 0, TasksAssigned: 2, PointsEarned: 0),
+            ]),
+    ];
+
+    // --- Metric helpers ---
+
+    /// <summary>Overall task completion rate across all sprints.</summary>
+    public static double OverallCompletionRate
+    {
+        get
+        {
+            var totalPlanned = SprintHistory.Sum(s => s.PlannedTasks);
+            var totalDone = SprintHistory.Sum(s => s.CompletedTasks);
+            return totalPlanned > 0 ? Math.Round((double)totalDone / totalPlanned * 100, 1) : 0;
+        }
+    }
+
+    /// <summary>Average velocity (completed tasks per sprint).</summary>
+    public static double AverageVelocity =>
+        SprintHistory.Count > 0 ? Math.Round(SprintHistory.Average(s => s.Velocity), 1) : 0;
+
+    /// <summary>Velocity trend: positive means accelerating, negative means slowing.</summary>
+    public static double VelocityTrend =>
+        SprintHistory.Count >= 2
+            ? SprintHistory[^1].Velocity - SprintHistory[^2].Velocity
+            : 0;
+
+    /// <summary>Per-member utilization across all sprints.</summary>
+    public static IReadOnlyList<(string Name, double Utilization)> TeamUtilization =>
+        SprintHistory
+            .SelectMany(s => s.Contributions)
+            .GroupBy(c => c.MemberName)
+            .Select(g => (
+                Name: g.Key,
+                Utilization: g.Sum(c => c.TasksAssigned) > 0
+                    ? Math.Round((double)g.Sum(c => c.TasksCompleted) / g.Sum(c => c.TasksAssigned) * 100, 1)
+                    : 0.0
+            ))
+            .OrderByDescending(x => x.Utilization)
+            .ToList();
+
     public static string GetCharterFor(string memberName) => memberName switch
     {
         "Solaire" => "# Solaire — Lead\n\nThe one who never goes hollow. Responsible for project direction, architecture decisions, and team coordination. Praise the sun!\n\nSolaire brings clarity to system design and keeps the team aligned on shared goals. He reviews all architectural decisions, removes blockers, and ensures the codebase remains clean and maintainable.\n\n## Goals\n- Keep the team aligned on architecture\n- Make sound technical decisions\n- Remove blockers and maintain momentum",

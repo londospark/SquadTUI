@@ -46,3 +46,23 @@
 - **E2E tests updated:** RosterScreenTests and DecisionsScreenTests now assert Dark Souls names.
 - **Fixture-based tests untouched:** Unit/integration tests that parse fixture files (team.md, decisions.md, log files) still use fixture data — those test the parser, not SampleData.
 - **Result:** 221 tests pass, build clean.
+
+### 2026-02-18 — CI Fix: Removed Self-Referential Tests
+
+- **Problem:** `DotnetTest_Passes` in CIPipelineTests.cs ran `dotnet test` as a subprocess, which re-invoked itself infinitely. This broke CI on all 6 platforms. `DotnetBuild_Succeeds` similarly spawned a child build process — unnecessary and slow.
+- **Fix:** Deleted both process-spawning tests. Added `--filter` to ci.yml as defense-in-depth. 326 tests run, 319 pass (7 pre-existing E2E failures unrelated to this change).
+- **Decision written to:** `.ai-team/decisions/inbox/solaire-ci-fix.md`
+
+#### Self-Reflection: Process Gaps
+
+**Why did CI break and nobody caught it?**
+The recursive tests were introduced in Sprint 5 test coverage expansion. I reviewed and approved the CIPipelineTests concept without catching that `DotnetTest_Passes` would recurse. The tests passed locally in some configurations (timeouts, process isolation) but failed consistently in CI's matrix builds. Nobody was monitoring CI results after merges — we merged and moved on.
+
+**What process gaps allowed closed issues without CI verification?**
+Our Definition of Done says "tests pass" but we weren't enforcing "tests pass *in CI*" as a gate. Issues were closed based on local test runs. The CI workflow existed but was treated as informational, not blocking. No branch protection rules required CI to pass before merge.
+
+**What will I do differently going forward?**
+1. **No test may spawn `dotnet build` or `dotnet test`.** This is now a hard rule. CI tests validate file structure and configuration only.
+2. **CI must be green before any issue is closed.** I will enforce this in reviews.
+3. **I will check CI status after every merge**, not assume it passes because local tests passed.
+4. **Branch protection:** Recommend to LondoSpark that we enable required status checks on develop/main so CI failures block merges.
