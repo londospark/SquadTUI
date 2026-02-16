@@ -37,3 +37,12 @@
 - **Pre-existing build errors:** The `SettingsScreen.cs` has a `ListItemActivatedEventArgs.SelectedIndex` error that predates this work — likely an API mismatch in the Hex1b version. Not my responsibility to fix.
 
 📌 Team recast (2026-02-18): Squad recast from Ocean's Eleven to Dark Souls universe. Danny is now Solaire. Praise the sun! ☀️
+
+### 2026-02-18 — SampleData Dark Souls Recast
+
+- **SampleData.cs:** Replaced all Ocean's Eleven names (Danny, Linus, Rusty, Basher, Saul) with Dark Souls names (Solaire, Siegmeyer, Andre, Patches, Firekeeper) across Members, Decisions, LogEntries, Tasks, and GetCharterFor().
+- **GetCharterFor():** Expanded from 3 entries to all 6 team members with Dark Souls-flavored charter descriptions.
+- **MemberDetailScreen.cs / CharterScreen.cs:** Default member fallback changed from "Danny" to "Solaire".
+- **E2E tests updated:** RosterScreenTests and DecisionsScreenTests now assert Dark Souls names.
+- **Fixture-based tests untouched:** Unit/integration tests that parse fixture files (team.md, decisions.md, log files) still use fixture data — those test the parser, not SampleData.
+- **Result:** 221 tests pass, build clean.
