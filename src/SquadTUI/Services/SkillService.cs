@@ -1,0 +1,103 @@
+using SquadTUI.Models;
+
+namespace SquadTUI.Services;
+
+public class SkillService(string teamRootPath) : ISkillService
+{
+    private readonly string _skillsPath = Path.Combine(teamRootPath, ".ai-team", "skills");
+
+    public async Task<IReadOnlyList<Skill>> GetSkillsAsync(CancellationToken ct = default)
+    {
+        var skills = new List<Skill>();
+        if (!Directory.Exists(_skillsPath))
+            return skills;
+
+        foreach (var dir in Directory.EnumerateDirectories(_skillsPath))
+        {
+            var skillFile = Path.Combine(dir, "SKILL.md");
+            if (!File.Exists(skillFile))
+                continue;
+
+            var slug = Path.GetFileName(dir);
+            var content = await File.ReadAllTextAsync(skillFile, ct);
+            var skill = ParseSkillFile(content, slug);
+            if (skill is not null)
+                skills.Add(skill);
+        }
+
+        return skills;
+    }
+
+    public async Task<Skill?> GetSkillAsync(string slug, CancellationToken ct = default)
+    {
+        var skillFile = Path.Combine(_skillsPath, slug, "SKILL.md");
+        if (!File.Exists(skillFile))
+            return null;
+
+        var content = await File.ReadAllTextAsync(skillFile, ct);
+        return ParseSkillFile(content, slug);
+    }
+
+    private static Skill? ParseSkillFile(string content, string slug)
+    {
+        var lines = content.Split('\n');
+        string? name = null;
+        string? description = null;
+        string? source = null;
+        string? confidence = null;
+
+        var inFrontmatter = false;
+        var bodyLines = new List<string>();
+
+        for (var i = 0; i < lines.Length; i++)
+        {
+            var trimmed = lines[i].Trim();
+
+            if (i == 0 && trimmed == "---")
+            {
+                inFrontmatter = true;
+                continue;
+            }
+
+            if (inFrontmatter)
+            {
+                if (trimmed == "---")
+                {
+                    inFrontmatter = false;
+                    continue;
+                }
+
+                var colonIdx = trimmed.IndexOf(':');
+                if (colonIdx > 0)
+                {
+                    var key = trimmed[..colonIdx].Trim().ToLowerInvariant();
+                    var value = trimmed[(colonIdx + 1)..].Trim().Trim('"');
+                    switch (key)
+                    {
+                        case "name": name = value; break;
+                        case "description": description = value; break;
+                        case "source": source = value; break;
+                        case "confidence": confidence = value; break;
+                    }
+                }
+                continue;
+            }
+
+            // Extract name from first heading if not in frontmatter
+            if (name is null && trimmed.StartsWith("# "))
+            {
+                name = trimmed[2..].Trim();
+                continue;
+            }
+
+            bodyLines.Add(lines[i]);
+        }
+
+        name ??= slug;
+        description ??= "";
+
+        var bodyContent = string.Join('\n', bodyLines).Trim();
+
+        return new Skill(name, description, source, confidence, bodyContent, slug);
+    }
+}

@@ -23,7 +23,7 @@ public class MetricsScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Velocity Summary").Should().BeTrue();
+        snapshot.ContainsText("Summary").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

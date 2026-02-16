@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Version>0.2.0</Version>
+    <AssemblyTitle>SquadTUI</AssemblyTitle>
+    <Description>Terminal UI for managing AI squads</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Hex1b" Version="0.87.0" />
+  </ItemGroup>
+
+</Project>

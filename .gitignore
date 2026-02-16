@@ -1,0 +1,43 @@
+## Build results
+bin/
+obj/
+dist/
+packages/
+
+## User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Visual Studio
+.vs/
+*.rsuser
+
+## Rider
+.idea/
+*.sln.iml
+
+## VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+## Test results
+TestResults/
+*.trx
+*.coverage
+
+## NuGet
+*.nupkg
+*.snupkg
+.nuget/
+
+## macOS
+.DS_Store
+
+## Temporary files
+*.tmp
+*.log
