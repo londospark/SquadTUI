@@ -25,7 +25,7 @@ public static class DecisionsScreen
             h.VStack(left =>
             [
                 left.Text($"  {B}{acc}📋 Decisions{R}"),
-                left.Text($"  {D}{sec}{new string('━', 30)}{R}"),
+                left.Text($"  {sec}{new string('━', 30)}{R}"),
                 left.List(listItems)
                     .OnSelectionChanged(e => { state.DecisionSelectedIndex = e.SelectedIndex; })
                     .Fill()
@@ -34,12 +34,12 @@ public static class DecisionsScreen
             h.VStack(detail =>
             [
                 detail.Text($"  {B}{acc}📋 {selected.Title}{R}"),
-                detail.Text($"  {D}{sec}{new string('━', 36)}{R}"),
+                detail.Text($"  {sec}{new string('━', 36)}{R}"),
                 detail.Text(""),
                 detail.Text($"  {D}Date:{R}    {B}{selected.Date}{R}"),
                 detail.Text($"  {D}Author:{R}  👤 {B}{selected.Author}{R}"),
                 detail.Text(""),
-                detail.Text($"  {D}{sec}{new string('━', 36)}{R}"),
+                detail.Text($"  {sec}{new string('━', 36)}{R}"),
                 detail.Text($"  {B}{acc}Content{R}"),
                 ..MarkdownRenderer.Render(detail, selected.Content).Select(w => w),
             ]).FillWidth(2).FillHeight(),

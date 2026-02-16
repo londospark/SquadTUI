@@ -31,7 +31,7 @@ public static class RosterScreen
             h.VStack(left =>
             [
                 left.Text($"  {B}{acc}👥 Team Roster{R}"),
-                left.Text($"  {D}{sec}{new string('━', 30)}{R}"),
+                left.Text($"  {sec}{new string('━', 30)}{R}"),
                 left.List(listItems)
                     .OnSelectionChanged(e => { state.RosterSelectedIndex = e.SelectedIndex; })
                     .Fill()
@@ -42,7 +42,7 @@ public static class RosterScreen
                 var widgets = new List<Hex1bWidget>
                 {
                     detail.Text($"  {B}{acc}👤 {selected.Name}{R}"),
-                    detail.Text($"  {D}{sec}{new string('━', 36)}{R}"),
+                    detail.Text($"  {sec}{new string('━', 36)}{R}"),
                     detail.Text(""),
                     detail.Text($"  {D}Role:{R}      {B}{selected.Role}{R}"),
                     detail.Text($"  {D}Status:{R}    {GetStatusBadge(selected.Status)} {selected.Status}{R}"),
@@ -51,7 +51,7 @@ public static class RosterScreen
 
                 // Tasks section
                 widgets.Add(detail.Text(""));
-                widgets.Add(detail.Text($"  {D}{sec}{new string('━', 36)}{R}"));
+                widgets.Add(detail.Text($"  {sec}{new string('━', 36)}{R}"));
                 widgets.Add(detail.Text($"  {B}{acc}📋 Tasks{R}"));
                 if (memberTasks.Count > 0)
                 {
@@ -65,7 +65,7 @@ public static class RosterScreen
 
                 // Charter excerpt
                 widgets.Add(detail.Text(""));
-                widgets.Add(detail.Text($"  {D}{sec}{new string('━', 36)}{R}"));
+                widgets.Add(detail.Text($"  {sec}{new string('━', 36)}{R}"));
                 widgets.Add(detail.Text($"  {B}{acc}📜 Charter{R}"));
                 foreach (var line in charterExcerpt)
                     widgets.Add(detail.Text($"  {D}{line.Trim()}{R}"));
@@ -74,7 +74,7 @@ public static class RosterScreen
                 if (recentLogs.Count > 0)
                 {
                     widgets.Add(detail.Text(""));
-                    widgets.Add(detail.Text($"  {D}{sec}{new string('━', 36)}{R}"));
+                    widgets.Add(detail.Text($"  {sec}{new string('━', 36)}{R}"));
                     widgets.Add(detail.Text($"  {B}{acc}📊 Recent Activity{R}"));
                     foreach (var l in recentLogs)
                         widgets.Add(detail.Text($"  {D}{l.Date}{R}  {l.Topic}  {D}{l.Summary}{R}"));

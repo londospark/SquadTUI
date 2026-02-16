@@ -36,11 +36,11 @@ public static class ThemeManager
         _ => "\x1b[38;2;56;132;170m"
     };
 
-    /// <summary>Returns a dim rule line in the theme's secondary accent.</summary>
+    /// <summary>Returns a rule line in the theme's secondary accent.</summary>
     public static string GetDimRule(int index, int width = 40)
     {
         var sec = GetSecondaryAccent(index);
-        return $"  \x1b[2m{sec}{new string('━', width)}\x1b[0m";
+        return $"  {sec}{new string('━', width)}\x1b[0m";
     }
 
     /// <summary>Returns a PanelColors record with accent code for backward compat.</summary>
@@ -67,7 +67,7 @@ public static class ThemeManager
             .Set(ListTheme.SelectedIndicator, "  ")
             .Set(ScrollTheme.ThumbColor, Hex1bColor.FromRgb(88, 196, 220))
             .Set(ScrollTheme.TrackColor, Hex1bColor.FromRgb(25, 32, 42))
-            .Set(SplitterTheme.DividerColor, Hex1bColor.FromRgb(40, 55, 70)));
+            .Set(SplitterTheme.DividerColor, Hex1bColor.FromRgb(70, 90, 110)));
 
     /// <summary>Heist — Rich indigo with warm gold accents.</summary>
     public static Hex1bTheme CreateHeistTheme() => WithModernBorders(
@@ -81,13 +81,13 @@ public static class ThemeManager
             .Set(ListTheme.SelectedIndicator, "  ")
             .Set(ScrollTheme.ThumbColor, Hex1bColor.FromRgb(255, 199, 95))
             .Set(ScrollTheme.TrackColor, Hex1bColor.FromRgb(30, 25, 50))
-            .Set(SplitterTheme.DividerColor, Hex1bColor.FromRgb(55, 45, 80)));
+            .Set(SplitterTheme.DividerColor, Hex1bColor.FromRgb(85, 75, 115)));
 
     /// <summary>Sunset — Charcoal with hot pink and warm accents.</summary>
     public static Hex1bTheme CreateSunsetTheme() => WithModernBorders(
         new Hex1bTheme("Sunset")
             .Set(GlobalTheme.ForegroundColor, Hex1bColor.FromRgb(215, 210, 210))
-            .Set(GlobalTheme.BackgroundColor, Hex1bColor.FromRgb(22, 20, 24))
+            .Set(GlobalTheme.BackgroundColor, Hex1bColor.FromRgb(28, 18, 22))
             .Set(BorderTheme.BorderColor, Hex1bColor.FromRgb(50, 30, 45))
             .Set(BorderTheme.TitleColor, Hex1bColor.FromRgb(255, 121, 198))
             .Set(ListTheme.SelectedForegroundColor, Hex1bColor.FromRgb(22, 20, 24))
@@ -95,7 +95,7 @@ public static class ThemeManager
             .Set(ListTheme.SelectedIndicator, "  ")
             .Set(ScrollTheme.ThumbColor, Hex1bColor.FromRgb(255, 121, 198))
             .Set(ScrollTheme.TrackColor, Hex1bColor.FromRgb(38, 30, 40))
-            .Set(SplitterTheme.DividerColor, Hex1bColor.FromRgb(70, 45, 65)));
+            .Set(SplitterTheme.DividerColor, Hex1bColor.FromRgb(100, 75, 95)));
 
     /// <summary>HighContrast — True black with crisp white accents.</summary>
     public static Hex1bTheme CreateHighContrastTheme() => WithModernBorders(
@@ -109,5 +109,5 @@ public static class ThemeManager
             .Set(ListTheme.SelectedIndicator, "  ")
             .Set(ScrollTheme.ThumbColor, Hex1bColor.White)
             .Set(ScrollTheme.TrackColor, Hex1bColor.FromRgb(35, 35, 35))
-            .Set(SplitterTheme.DividerColor, Hex1bColor.FromRgb(60, 60, 60)));
+            .Set(SplitterTheme.DividerColor, Hex1bColor.FromRgb(95, 95, 95)));
 }
