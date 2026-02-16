@@ -1,7 +1,7 @@
 # Decision: Git Flow and GitHub Repository Setup
 
 **Date:** 2026-02-17  
-**By:** Danny  
+**By:** Solaire  
 **Status:** Implemented
 
 ## What
@@ -59,7 +59,7 @@ Established Git Flow branching strategy for SquadTUI and prepared project for pu
 
 **Team Impact:**
 - **All agents:** Use `develop` as base branch for new features (not `main`)
-- **Danny:** Reviews PRs before merge; manages release branches
+- **Solaire:** Reviews PRs before merge; manages release branches
 - **Toolsmith:** May need to add branch protection automation or GitHub repo setup script
 - **Scribe:** Needs to merge this decision into main `.ai-team/decisions.md`
 

@@ -12,11 +12,11 @@
 
 | Name | Role | Charter | Status |
 |------|------|---------|--------|
-| Danny | Lead | `.ai-team/agents/danny/charter.md` | ✅ Active |
-| Linus | Frontend Dev | `.ai-team/agents/linus/charter.md` | ✅ Active |
-| Rusty | Backend Dev | `.ai-team/agents/rusty/charter.md` | ✅ Active |
-| Basher | Tester | `.ai-team/agents/basher/charter.md` | ✅ Active |
-| Saul | UX/Design | `.ai-team/agents/saul/charter.md` | ✅ Active |
+| Solaire | Lead | `.ai-team/agents/solaire/charter.md` | ✅ Active |
+| Siegmeyer | Frontend Dev | `.ai-team/agents/siegmeyer/charter.md` | ✅ Active |
+| Andre | Backend Dev | `.ai-team/agents/andre/charter.md` | ✅ Active |
+| Patches | Tester | `.ai-team/agents/patches/charter.md` | ✅ Active |
+| Firekeeper | UX/Design | `.ai-team/agents/firekeeper/charter.md` | ✅ Active |
 | Scribe | Session Logger | `.ai-team/agents/scribe/charter.md` | 📋 Silent |
 | Ralph | Work Monitor | — | 🔄 Monitor |
 

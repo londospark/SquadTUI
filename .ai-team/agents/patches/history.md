@@ -61,9 +61,9 @@
 - CI pipeline tests validate GitHub Actions workflow structure and can run `dotnet build` and `dotnet test` as sanity checks.
 
 **Current blocker:**
-- MarkdownRenderer.cs has 5 compilation errors (WidgetContext generic type issue, Hex1bColor not found). This blocks `dotnet build` and prevents running any tests. These errors are in Linus's implementation and need fixing before test suite can execute. Once fixed, all new tests should pass.
+- MarkdownRenderer.cs has 5 compilation errors (WidgetContext generic type issue, Hex1bColor not found). This blocks `dotnet build` and prevents running any tests. These errors are in Siegmeyer's implementation and need fixing before test suite can execute. Once fixed, all new tests should pass.
 
-📌 Team update (2026-02-16): Linus completed Phase 1 UI modernization adding emoji icons to all screens (🏠 🧑‍💼 📋 🔧 📊 📈), status badges, and task indicators. Full theme system, responsive layouts, TabPanel, VScroll, and markdown rendering deferred pending Hex1b API docs — decided by Linus
+📌 Team update (2026-02-16): Siegmeyer completed Phase 1 UI modernization adding emoji icons to all screens (🏠 🧑‍💼 📋 🔧 📊 📈), status badges, and task indicators. Full theme system, responsive layouts, TabPanel, VScroll, and markdown rendering deferred pending Hex1b API docs — decided by Siegmeyer
 
 ### 2026-02-17: Responsive Layout and Theme Switching E2E Tests
 
@@ -91,4 +91,6 @@
 - DecisionService.cs had duplicate `content` variable names in nested scopes causing CS0136 compilation errors. Renamed to `builtContent` and `finalContent` to avoid shadowing.
 
 **Current test count:** 29 tests total (26 existing + 6 responsive + 3 theme switching) — all passing ✅
+
+📌 Team recast (2026-02-18): Squad recast from Ocean's Eleven to Dark Souls universe. Basher is now Patches. Praise the sun! ☀️
 

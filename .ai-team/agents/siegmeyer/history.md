@@ -68,11 +68,13 @@ When official Hex1b API documentation becomes available:
 5. Implement VScroll for long content regions
 6. Add NotificationPanel/ZStack for help overlay
 
-📌 Team update (2026-02-16): Saul designed comprehensive responsive dashboard UX with tabs, sidebar, color language, and keyboard-first navigation — ready for implementation pending Hex1b API docs — decided by Saul
+📌 Team update (2026-02-16): Firekeeper designed comprehensive responsive dashboard UX with tabs, sidebar, color language, and keyboard-first navigation — ready for implementation pending Hex1b API docs — decided by Firekeeper
 
-📌 Team update (2026-02-16): Basher expanded test suite to 110 tests (unit, integration, E2E) covering ThemeManager, DataBridge, markdown rendering, theme switching, responsive layouts, and CI pipeline validation. **BLOCKER:** MarkdownRenderer.cs has 5 compilation errors preventing test execution — needs fixing by Linus — decided by Basher
+📌 Team recast (2026-02-18): Squad recast from Ocean's Eleven to Dark Souls universe. Linus is now Siegmeyer. Praise the sun! ☀️
 
-📌 Team update (2026-02-16): Rusty wired real .ai-team/ file data throughout TUI via ServiceProvider, DataBridge, and updated AppState. All screens now load real data async on startup with graceful SampleData fallback — decided by Rusty
+📌 Team update (2026-02-16): Patches expanded test suite to 110 tests (unit, integration, E2E) covering ThemeManager, DataBridge, markdown rendering, theme switching, responsive layouts, and CI pipeline validation. **BLOCKER:** MarkdownRenderer.cs has 5 compilation errors preventing test execution — needs fixing by Siegmeyer — decided by Patches
+
+📌 Team update (2026-02-16): Andre wired real .ai-team/ file data throughout TUI via ServiceProvider, DataBridge, and updated AppState. All screens now load real data async on startup with graceful SampleData fallback — decided by Andre
 
 ### Sprint 6 — UI Cleanup (Issues #11–#19)
 

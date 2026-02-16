@@ -1,6 +1,6 @@
 # Sprint 6 UI Cleanup — Decision Record
 
-**Author:** Linus (Frontend Dev)
+**Author:** Siegmeyer (Frontend Dev)
 **Date:** 2026-02-17
 **Issues:** #11, #12, #13, #14, #15, #17, #19
 

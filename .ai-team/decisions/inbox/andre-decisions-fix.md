@@ -1,7 +1,7 @@
 # Fix Decisions Screen Parser
 
 **Date:** 2026-02-17
-**By:** Rusty
+**By:** Andre
 **Status:** Completed
 
 ## What I Did
