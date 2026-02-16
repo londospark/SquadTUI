@@ -89,3 +89,173 @@
 
 **Why:** User request — captured for team memory.
 
+---
+
+### 2026-02-17: Fix Decisions Screen Parser
+
+**By:** Andre
+
+**What:** Fixed the `DecisionService.ParseDecisionsMarkdown()` method to correctly parse the real `.ai-team/decisions.md` file format. The parser was expecting an old format but the actual file uses `### {date}: {title}` headings, `**By:**` fields, `**What:**`/`**Why:**` fields, and `---` separators. Rewrote the parser and added `BuildDecisionContent()` helper. The TUI now correctly displays all decisions from `.ai-team/decisions.md`.
+
+**Why:** The Decisions screen was failing because the parser couldn't understand the real decision file format, returning empty or malformed data. Now all screens display real decisions with proper date, title, author, and structured content.
+
+---
+
+### 2026-02-17: SettingsScreen — dynamic options parameter
+
+**By:** Andre
+
+**What:** `SettingsScreen.Render()` accepts `dynamic options` as its 4th parameter to enable runtime theme switching. This mirrors how `Program.cs` already mutates `options.Theme` in the T-key handler. Using `dynamic` avoids needing to know the exact Hex1b options type at compile time. Also confirmed `ListItemActivatedEventArgs.ActivatedIndex` is the correct property for item activation callbacks.
+
+**Why:** The settings screen needs to change the active theme immediately when the user selects a new one. The `options` object from `WithHex1bApp` is the only way to do this, and `dynamic` keeps the screen decoupled from Hex1b internals.
+
+---
+
+### 2026-02-16: User directive — Attach asciinema recording when closing issues
+
+**By:** LondoSpark (via Copilot)
+
+**What:** From now on, when closing any issue, attach an asciinema recording demonstrating the fix/feature. Use https://docs.asciinema.org/getting-started/ for setup. Use GitHub auth flow for account if needed.
+
+**Why:** User request — visual proof of work on every issue closure.
+
+---
+
+### 2026-02-16: User directive — Recast team to Dark Souls universe
+
+**By:** LondoSpark (via Copilot)
+
+**What:** Rename the entire squad to use Dark Souls as the casting universe. Also ensure everything is well documented.
+
+**Why:** User request — Praise the sun!
+
+---
+
+### 2026-02-16: Definition of Done — CI green + releasable + recordings attached
+
+**By:** LondoSpark (via Copilot)
+
+**What:** A task is NOT done unless: (1) all tests pass on CI, (2) we could cut a release, (3) everything testable is tested including corner cases, (4) when closing an issue, attach an asciinema recording as evidence.
+
+**Why:** User request — captured for team memory.
+
+---
+
+### 2026-02-16: User directive — Git flow enforcement
+
+**By:** LondoSpark (via Copilot)
+
+**What:** The project must use git flow workflow (develop, feature branches, release branches, hotfix branches). Currently only has a `main` branch — needs proper git flow setup.
+
+**Why:** User request — captured for team memory.
+
+---
+
+### 2026-02-16: User directive — Public GitHub repo with README and screenshots
+
+**By:** LondoSpark (via Copilot)
+
+**What:** The project needs to be published as a public GitHub repository under the londospark account. Must include a comprehensive README.md with screenshots, feature descriptions, installation instructions, and usage guide.
+
+**Why:** User request — captured for team memory.
+
+---
+
+### 2026-02-16: User directive — Modern UI with proper border styling
+
+**By:** LondoSpark (via Copilot)
+
+**What:** The current UI border characters aren't modern enough. Need to look at opencode (https://github.com/opencode-ai/opencode) for inspiration on a more modern, polished terminal UI style. The UI should be interactive, with docks, panels, and a full dashboard experience for larger terminals.
+
+**Why:** User request — captured for team memory.
+
+---
+
+### 2026-02-16: User directive — Screenshots and demos
+
+**By:** LondoSpark (via Copilot)
+
+**What:** Install hex1b CLI (https://hex1b.dev/guide/cli) and use asciinema (https://asciinema.org/) for demos/screenshots in the README. The README references screenshots that don't exist yet.
+
+**Why:** User request — captured for team memory.
+
+---
+
+### 2026-02-16: User directive — Test all console widths
+
+**By:** LondoSpark (via Copilot)
+
+**What:** E2E tests must cover all console width breakpoints. Currently only testing at 120 cols default — need tests at narrow (60), medium (80), wide (120), and extra-wide (160+) terminal sizes to validate responsive layout behavior.
+
+**Why:** User request — captured for team memory.
+
+---
+
+### 2026-02-17: Help Screen Keybinding Implementation
+
+**By:** Firekeeper
+
+**What:** Implemented Help screen triggered by F1 key instead of `?`. The Hex1b framework's `Hex1bKey` enum does not expose a direct key code for `?`. F1 is the universal help key across terminal UIs and desktop apps. Behavior: toggle — first press opens Help, subsequent F1 or Escape closes and returns to previous screen. Added `Screen.Help` and `PreviousScreen` property to AppState.
+
+**Why:** F1 convention is more recognizable and aligns with terminal UI patterns. Avoids waiting for Hex1b update or using raw input handling beyond API scope.
+
+---
+
+### 2026-02-18: UX Improvement Specification — Screen Audit
+
+**By:** Firekeeper
+
+**What:** Comprehensive UX audit of all screens. Identified 11 unused Hex1b widgets (Table, TabPanel, Progress, InfoBar, BreakdownChart, ColumnChart, TimeSeriesChart, Spinner, Tree, ToggleSwitch, Notifications). Applied reverse-video headers, subtitles, breathing room, and 4-space indent to Decisions, Skills, ActivityLog, and Help screens. Established design language consistency rules: reverse-video main headers, dim subtitles, section separators with empty lines, no box-drawing borders (use shading instead). Recommended Siegmeyer apply same patterns to Metrics and NoSquad screens.
+
+**Why:** LondoSpark flagged cramped layouts, missing explanations, unwanted borders, and overall visual quality issues. Many available Hex1b widgets were unused.
+
+---
+
+### 2026-02-17: Responsive Layout and Theme Switching E2E Tests
+
+**By:** Patches
+
+**What:** Created E2E test coverage for responsive layout breakpoints (60/80/100/120/160/40 cols) and theme switching (T key cycles Ocean → Heist → Sunset with wrapping). Fixed `DecisionService.cs` compilation errors (duplicate variable name `content` causing CS0136). All 29 tests pass (26 existing + 3 new theme + 6 new responsive). Discovered Hex1b testing patterns: `.Key(Hex1bKey.X)` for input, `await sequence.ApplyAsync(terminal)` for rendering, `snapshot.ContainsText()` with emoji for assertions.
+
+**Why:** Previously only tested at default 120-col width. Dashboard has 3 responsive breakpoints that were untested. Theme cycling had no automated validation. User explicitly requested E2E tests at all breakpoints.
+
+---
+
+### 2026-02-17: Sprint 6 UI Cleanup
+
+**By:** Siegmeyer
+
+**What:** Cohesive UI polish sprint covering 7 issues (#11–#15, #17, #19). Removed all ANSI background escape codes (Hex1b's GlobalTheme handles backgrounds). Kept J/K as state-updating bindings (ListNode.MoveDown/Up are internal). Used Button widgets for clickable NavBar. Removed InfoBar entirely. Changed selection highlighting to background-color-only (removed arrow indicators). Removed bracket notation from NavBar labels in favor of emoji labels.
+
+**Why:** Multiple UI polish issues filed to improve visual consistency, remove clutter, and add modern interaction patterns. ANSI bg codes created jarring rectangles against theme backgrounds. InfoBar consumed vertical space with redundant info.
+
+---
+
+### 2026-02-18: Remove Self-Referential CI Tests
+
+**By:** Solaire
+
+**What:** Removed `DotnetBuild_Succeeds` and `DotnetTest_Passes` from `CIPipelineTests.cs` — both spawned child `dotnet` processes causing infinite recursion on CI. Added `--filter` defense to `ci.yml` to exclude future process-spawning tests. 8 CIPipelineTests remain, validating workflow structure. **Rule going forward:** No test may spawn `dotnet build`, `dotnet test`, or any process that re-invokes the test runner.
+
+**Why:** Both tests broke CI on all 6 platforms. The tests were logically circular — CI already runs `dotnet test`, so asserting it passes adds zero signal.
+
+---
+
+### 2026-02-17: Git Flow and GitHub Repository Setup
+
+**By:** Solaire
+
+**What:** Established Git Flow branching strategy with `develop` as integration branch. Updated CI workflow to trigger on `develop`. Branch structure: `main` (production), `develop` (integration), `feature/*`, `release/*`, `hotfix/*`. Created comprehensive README.md, CONTRIBUTING.md, and MIT LICENSE. Configured git remote for `londospark/SquadTUI`.
+
+**Why:** Need stability on `main`, parallel development isolation, controlled releases, and hotfix capability. Public repo enables collaboration with csharpfritz/SquadUI.
+
+---
+
+### 2026-02-17: Screenshot & Demo Infrastructure
+
+**By:** Solaire
+
+**What:** Established screenshot/demo infrastructure using hex1b CLI tool (`dotnet tool install -g Hex1b.Tool` v0.87.0). Added `.WithDiagnostics()` to Program.cs for hex1b CLI discovery. Created `scripts/capture-screenshots.ps1` for automated SVG screenshot capture across all screens with optional asciinema recording. Created `docs/SCREENSHOTS.md` guide. Updated README.md to reference SVG screenshots and asciinema demo.
+
+**Why:** README referenced `.png` screenshots that didn't exist. SVG is hex1b CLI's native high-quality format — scalable, crisp, version-control friendly. Automated script ensures screenshots can be regenerated after UI changes.
+
