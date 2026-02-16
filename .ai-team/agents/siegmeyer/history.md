@@ -141,3 +141,28 @@ When official Hex1b API documentation becomes available:
 **API learnings:**
 - `ThemeManager.GetSecondaryAccent(int index)` — new method for muted complementary colors.
 - `ThemeManager.GetDimRule(int index, int width)` — reusable dim horizontal separator.
+
+### Sprint 8 — Issues #25 & #26: Tab Redesign + Theme Background Polish
+
+**NavBar tab redesign (Issue #25):**
+- Tabs now use `\x1b[7m` (reverse video) combined with the theme accent color for the active tab — creates a filled/highlighted tab effect that visually pops.
+- Active tab wraps with `█` block characters for visual weight: ` █ 🏠 Dashboard █ `.
+- Inactive tabs use `\x1b[2m` (dim) with secondary accent — visible but clearly subordinate.
+- Added spacing padding between tabs (double space before/after each label).
+- Tab row is now wrapped in a VStack with a `━━━` bottom border line in secondary accent color underneath, visually anchoring the tab bar.
+- NavBar returns `VStack(tabRow, borderLine)` instead of a flat HStack.
+
+**Theme background/divider tuning (Issue #26):**
+- Sunset theme `BackgroundColor` changed from `FromRgb(22,20,24)` to `FromRgb(28,18,22)` — warmer red/brown tint, clearly distinct from Ocean's navy and Heist's indigo.
+- Ocean/Heist/HighContrast backgrounds left as-is (already distinct).
+- `SplitterTheme.DividerColor` bumped +30-35 brightness across all themes:
+  - Ocean: `(40,55,70)` → `(70,90,110)`
+  - Heist: `(55,45,80)` → `(85,75,115)`
+  - Sunset: `(70,45,65)` → `(100,75,95)`
+  - HighContrast: `(60,60,60)` → `(95,95,95)`
+- `GetDimRule()` no longer applies `\x1b[2m` dim modifier — rule lines now render at full secondary accent brightness.
+- All screen rule separator lines (`━━━`) in DashboardScreen, RosterScreen, DecisionsScreen, SettingsScreen: removed `{D}` (dim) prefix so they use secondary accent at full brightness, making them more visible.
+
+**API notes:**
+- `\x1b[7m` (reverse video) swaps fg/bg for the text region only — works correctly in Hex1b `Button` and `Text` widgets for highlighting effects.
+- VStack inside NavBar is valid — returns array of widgets (tab row + border line).

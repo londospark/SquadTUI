@@ -120,3 +120,28 @@ Dashboard was redesigned (by Siegmeyer) to use new panel titles ("👥 Team Rost
 
 **Current test count:** 281 tests total (221 existing + 60 new) — all passing ✅
 
+### 2026-02-18: Tests for Issues #25, #26, #27 — 326 tests total
+
+**What was added (45 new tests):**
+
+**New test files:**
+- `tests/SquadTUI.Tests/E2E/TabStyleTests.cs` — 12 E2E tests: tab bar renders with labels at 200 cols, active tab has indicator, pressing D1-D6 switches screens (5 parametrized), tab bar renders at various widths (4 parametrized: 40/80/120/200), tab labels include text, switching back updates indicator.
+- `tests/SquadTUI.Tests/Unit/ThemeBackgroundTests.cs` — 18 unit tests: each theme has background color (4), all themes have distinct backgrounds, each theme's divider differs from background (4), each theme's divider is not pure black (4), all themes have distinct dividers, theme names match expected (4).
+- `tests/SquadTUI.Tests/E2E/NoSquadGuardTests.cs` — 10 E2E tests: pressing D1-D6 on NoSquad screen doesn't navigate away (6 parametrized), pressing S doesn't go to Settings, pressing C navigates to Dashboard, pressing C creates .ai-team directory structure. Uses temp directories for file creation tests.
+
+**Updated test files:**
+- `tests/SquadTUI.Tests/E2E/NoSquadScreenTests.cs` — Rewritten from 1 test to 6 tests: shows welcome message, shows "No squad detected" text, contains setup instructions (npx/squad/.ai-team), shows C key instruction, shows Q key instruction, NavBar not visible on NoSquad (verified by pressing D1).
+- `tests/SquadTUI.Tests/E2E/TestAppBuilder.cs` — Added `bool squadDetected = true` parameter to `Build()`. When `false`, sets `state.SquadDetected = false` and `state.CurrentScreen = Screen.NoSquad`. Default `true` preserves backward compat with all existing tests.
+
+**Source file fixes (needed for compilation):**
+- `src/SquadTUI/Screens/NavBar.cs` — Fixed CS0826 by explicit `Hex1bWidget[]` array type (Firekeeper's in-progress change had implicit array).
+- `src/SquadTUI/Program.cs` — Fixed `...` (triple-dot) to `..` (double-dot spread operator) for C# collection expression syntax.
+
+**Testing patterns:**
+- Tab tests use wider terminals (200 cols) when asserting all tab labels, since styled tabs with padding may truncate at 120 cols.
+- NoSquad guard tests use `TestAppBuilder.Build(squadDetected: false)` to start on NoSquad screen.
+- File creation tests (C key) use temp directories with `Guid.NewGuid()` and restore `Directory.GetCurrentDirectory()` in finally blocks.
+- Theme background tests use `Hex1bTheme.Get(GlobalTheme.BackgroundColor)` and `Hex1bColor.ToBackgroundAnsi()` to compare theme colors as ANSI strings.
+
+**Current test count:** 326 tests total (281 existing + 45 new) — all passing ✅
+

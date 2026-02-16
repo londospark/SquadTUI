@@ -43,7 +43,7 @@ public static class SettingsScreen
             h.VStack(left =>
             [
                 left.Text($"  {B}{acc}⚙️  Settings{R}"),
-                left.Text($"  {D}{sec}{new string('━', 30)}{R}"),
+                left.Text($"  {sec}{new string('━', 30)}{R}"),
                 left.Text(""),
                 left.List(listItems)
                     .OnSelectionChanged(e => { state.SettingsSelectedIndex = e.SelectedIndex; })
@@ -60,12 +60,12 @@ public static class SettingsScreen
                 var widgets = new List<Hex1bWidget>
                 {
                     detail.Text($"  {B}{acc}📋 Setting Details{R}"),
-                    detail.Text($"  {D}{sec}{new string('━', 36)}{R}"),
+                    detail.Text($"  {sec}{new string('━', 36)}{R}"),
                     detail.Text(""),
                     detail.Text($"  {B}{acc}{label}{R}"),
                     detail.Text($"  {D}{description}{R}"),
                     detail.Text(""),
-                    detail.Text($"  {D}{sec}{new string('━', 36)}{R}"),
+                    detail.Text($"  {sec}{new string('━', 36)}{R}"),
                     detail.Text($"  {D}Current:{R}  {B}{currentValue}{R}"),
                     detail.Text(""),
                     detail.Text($"  {D}Press Enter to change{R}"),
