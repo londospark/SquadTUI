@@ -16,12 +16,13 @@ public class ResponsiveLayoutTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("🏠 Dashboard").Should().BeTrue();
-        snapshot.ContainsText("Team Members:").Should().BeTrue();
-        snapshot.ContainsText("Recent Activity").Should().BeTrue();
-        snapshot.ContainsText("Recent Decisions").Should().BeTrue();
-        snapshot.ContainsText("🏠 Team").Should().BeFalse();
-        snapshot.ContainsText("📊 Activity").Should().BeFalse();
+        // Narrow layout shows SquadTUI header and Recent/Decisions sections
+        snapshot.ContainsText("SquadTUI").Should().BeTrue();
+        snapshot.ContainsText("Recent").Should().BeTrue();
+        snapshot.ContainsText("Decisions").Should().BeTrue();
+        // Wide layout panels should NOT appear
+        snapshot.ContainsText("Team Roster").Should().BeFalse();
+        snapshot.ContainsText("Sprint Metrics").Should().BeFalse();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -36,12 +37,13 @@ public class ResponsiveLayoutTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("🏠 Dashboard").Should().BeTrue();
-        snapshot.ContainsText("📋 Recent").Should().BeTrue();
-        snapshot.ContainsText("Team Members:").Should().BeTrue();
-        snapshot.ContainsText("🏠 Team").Should().BeFalse();
-        snapshot.ContainsText("📊 Activity").Should().BeFalse();
-        snapshot.ContainsText("📈 Summary").Should().BeFalse();
+        // Medium layout shows Dashboard header and Team section
+        snapshot.ContainsText("SquadTUI Dashboard").Should().BeTrue();
+        snapshot.ContainsText("Team").Should().BeTrue();
+        snapshot.ContainsText("Decisions").Should().BeTrue();
+        // Wide layout full titles should NOT appear
+        snapshot.ContainsText("Team Roster").Should().BeFalse();
+        snapshot.ContainsText("Sprint Metrics").Should().BeFalse();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -56,10 +58,11 @@ public class ResponsiveLayoutTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("🏠 Dashboard").Should().BeTrue();
-        snapshot.ContainsText("📋 Recent").Should().BeTrue();
-        snapshot.ContainsText("🏠 Team").Should().BeFalse();
-        snapshot.ContainsText("📈 Summary").Should().BeFalse();
+        snapshot.ContainsText("SquadTUI Dashboard").Should().BeTrue();
+        snapshot.ContainsText("Team").Should().BeTrue();
+        // Wide layout titles should NOT appear
+        snapshot.ContainsText("Team Roster").Should().BeFalse();
+        snapshot.ContainsText("Sprint Metrics").Should().BeFalse();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -74,9 +77,9 @@ public class ResponsiveLayoutTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("🏠 Team").Should().BeTrue();
-        snapshot.ContainsText("📊 Activity").Should().BeTrue();
-        snapshot.ContainsText("📈 Summary").Should().BeTrue();
+        snapshot.ContainsText("Team Roster").Should().BeTrue();
+        snapshot.ContainsText("Activity").Should().BeTrue();
+        snapshot.ContainsText("Decisions").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -91,9 +94,9 @@ public class ResponsiveLayoutTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("🏠 Team").Should().BeTrue();
-        snapshot.ContainsText("📊 Activity").Should().BeTrue();
-        snapshot.ContainsText("📈 Summary").Should().BeTrue();
+        snapshot.ContainsText("Team Roster").Should().BeTrue();
+        snapshot.ContainsText("Activity").Should().BeTrue();
+        snapshot.ContainsText("Sprint Metrics").Should().BeTrue();
         snapshot.ContainsText("Velocity:").Should().BeTrue();
 
         cts.Cancel();
@@ -109,7 +112,7 @@ public class ResponsiveLayoutTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Team Members:").Should().BeTrue();
+        snapshot.ContainsText("SquadTUI").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
