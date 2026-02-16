@@ -115,19 +115,35 @@ git push origin hotfix/critical-bug-fix
    - `refactor:` for code refactoring
    - `test:` for test additions/changes
 3. **Description:** Clearly explain what and why
-4. **Tests:** Ensure all tests pass (`dotnet test`)
-5. **CI:** All CI checks must pass before merge
+4. **Tests:** Ensure all tests pass:
+   ```bash
+   # Run all tests (excluding CI-only meta tests)
+   dotnet test --filter "FullyQualifiedName!~DotnetBuild&FullyQualifiedName!~DotnetTest"
+   ```
+5. **CI:** All CI checks must pass before merge (6-platform matrix: Windows/macOS/Linux × x64/ARM64)
 
 ## CI/CD Pipeline
 
 - **CI (`ci.yml`):** Runs on every push to `develop`/`main` and all PRs
-  - Matrix builds: Windows/macOS/Linux × x64/ARM64
+  - Matrix builds: Windows/macOS/Linux × x64/ARM64 (6 platforms)
   - Runs: restore, build, test
   
 - **Release (`release.yml`):** Runs on push to `release/*` branches
   - Builds cross-platform binaries (6 platforms)
   - Creates git tags (extracted from csproj version)
   - Publishes GitHub release with binary artifacts
+
+## The Dark Souls Squad
+
+| Role | Name | Specialty |
+|------|------|-----------|
+| 🎯 Lead | **Solaire** | Architecture, code review, big picture |
+| 💻 Backend Dev | **Andre** | Services, data layer, integrations |
+| 🎨 Frontend Dev | **Siegmeyer** | UI/UX, screens, theming |
+| 🧪 QA Engineer | **Patches** | Testing, quality assurance |
+| 📣 UX Designer | **Firekeeper** | User experience, design systems |
+| 📝 Docs | **Scribe** | Documentation, knowledge management |
+| 🔧 DevOps | **Ralph** | CI/CD, tooling, automation |
 
 ## Code Style
 
@@ -143,4 +159,4 @@ Open an issue or reach out to the team. We're here to help!
 
 ---
 
-**Remember:** Ocean's Eleven themed — we plan the heist together. 🎰
+**Remember:** Dark Souls themed — we link the flame together. ☀️ \\[T]/
