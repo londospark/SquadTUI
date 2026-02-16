@@ -94,7 +94,7 @@ public class RosterScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Screen: Dashboard").Should().BeTrue();
+        snapshot.ContainsText("Members:").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

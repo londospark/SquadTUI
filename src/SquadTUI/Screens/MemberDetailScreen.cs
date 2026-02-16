@@ -18,11 +18,7 @@ public static class MemberDetailScreen
         var logs = state.LogEntries ?? SampleData.LogEntries;
         var recentLogs = logs.Where(l => l.Participants.Contains(member.Name)).Take(3).ToList();
 
-        var ti = state.SelectedThemeIndex;
-        var c = ThemeManager.GetPanelColors(ti);
-        var p1 = c.PanelBg;
-        var p2 = c.NestedBg;
-        var acc = c.Accent;
+        var acc = ThemeManager.GetAccentCode(state.SelectedThemeIndex);
         var R = PanelRenderer.Reset;
 
         return v.VStack(inner =>
@@ -31,14 +27,14 @@ public static class MemberDetailScreen
             {
                 inner.VStack(header =>
                 [
-                    header.Text($"{p1}  {PanelRenderer.Bold}{acc}👤 Member{R}"),
-                    header.Text($"{p1}  {GetStatusBadge(member.Status)} \x1b[1m{member.Name}\x1b[0m \x1b[90m—\x1b[0m {member.Role}{R}"),
-                    header.Text($"{p1}  \x1b[90mStatus:\x1b[0m {member.Status}    \x1b[90mCurrent Task:\x1b[0m {member.CurrentTask ?? "\x1b[90mNone\x1b[0m"}{R}"),
+                    header.Text($"  {PanelRenderer.Bold}{acc}👤 Member{R}"),
+                    header.Text($"  {GetStatusBadge(member.Status)} \x1b[1m{member.Name}\x1b[0m \x1b[90m—\x1b[0m {member.Role}{R}"),
+                    header.Text($"  \x1b[90mStatus:\x1b[0m {member.Status}    \x1b[90mCurrent Task:\x1b[0m {member.CurrentTask ?? "\x1b[90mNone\x1b[0m"}{R}"),
                 ]),
 
                 inner.VStack(charterSection =>
                 [
-                    charterSection.Text($"{p2}  {PanelRenderer.Bold}{acc}📜 Charter{R}"),
+                    charterSection.Text($"  {PanelRenderer.Bold}{acc}📜 Charter{R}"),
                     ..MarkdownRenderer.Render(charterSection, charter)
                 ]),
             };
@@ -47,8 +43,8 @@ public static class MemberDetailScreen
             {
                 widgets.Add(inner.VStack(taskSection =>
                 [
-                    taskSection.Text($"{p1}  {PanelRenderer.Bold}{acc}📋 Tasks{R}"),
-                    ..memberTasks.Select(t => taskSection.Text($"{p1}  {GetTaskBadge(t.Status)} {t.Title}{R}"))
+                    taskSection.Text($"  {PanelRenderer.Bold}{acc}📋 Tasks{R}"),
+                    ..memberTasks.Select(t => taskSection.Text($"  {GetTaskBadge(t.Status)} {t.Title}{R}"))
                 ]));
             }
 
@@ -56,12 +52,12 @@ public static class MemberDetailScreen
             {
                 widgets.Add(inner.VStack(logSection =>
                 [
-                    logSection.Text($"{p2}  {PanelRenderer.Bold}{acc}📊 Recent Activity{R}"),
-                    ..recentLogs.Select(l => logSection.Text($"{p2}  📅 {l.Date}  {l.Topic} — {l.Summary}{R}"))
+                    logSection.Text($"  {PanelRenderer.Bold}{acc}📊 Recent Activity{R}"),
+                    ..recentLogs.Select(l => logSection.Text($"  📅 {l.Date}  {l.Topic} — {l.Summary}{R}"))
                 ]));
             }
 
-            widgets.Add(inner.Text($"\x1b[90m  [Esc] Back to Roster    [E] Edit Charter\x1b[0m"));
+            widgets.Add(inner.Text($"\x1b[90m  Esc Back to Roster    E Edit Charter\x1b[0m"));
 
             return widgets.ToArray();
         }).Fill();

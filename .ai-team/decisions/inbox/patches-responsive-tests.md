@@ -1,6 +1,6 @@
 # Responsive Layout and Theme Switching E2E Tests
 
-**By:** Basher  
+**By:** Patches  
 **Date:** 2026-02-17  
 **Status:** ✅ Implemented
 

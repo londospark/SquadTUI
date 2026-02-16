@@ -6,80 +6,31 @@ using Hex1b.Input;
 namespace SquadTUI.Tests.E2E;
 
 [Collection("E2E")]
-public class VimKeybindingTests
+public class SettingsNavigationTests
 {
     [Fact]
-    public async Task VimH_SwitchesToPreviousScreen()
+    public async Task PressS_NavigatesToSettings()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
-        // Go to Roster first, then H should go back to Dashboard
         var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D2)
-            .Wait(100)
-            .Key(Hex1bKey.H)
+            .Key(Hex1bKey.S)
             .Build();
         await sequence.ApplyAsync(terminal);
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Members:").Should().BeTrue();
+        snapshot.ContainsText("Settings").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
     }
 
     [Fact]
-    public async Task VimL_SwitchesToNextScreen()
-    {
-        await using var terminal = TestAppBuilder.Build();
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        // From Dashboard, L should go to Roster
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.L)
-            .Build();
-        await sequence.ApplyAsync(terminal);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Team Roster").Should().BeTrue();
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task VimHL_NavigatesAcrossMultipleScreens()
-    {
-        await using var terminal = TestAppBuilder.Build();
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        // L three times: Dashboard → Roster → Decisions → Skills
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.L).Wait(50)
-            .Key(Hex1bKey.L).Wait(50)
-            .Key(Hex1bKey.L)
-            .Build();
-        await sequence.ApplyAsync(terminal);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Installed Skills").Should().BeTrue();
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task EscapeFromDecisions_ReturnsToDashboard()
+    public async Task EscapeFromSettings_ReturnsToDashboard()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -87,7 +38,7 @@ public class VimKeybindingTests
         await Task.Delay(200);
 
         var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D3)
+            .Key(Hex1bKey.S)
             .Wait(100)
             .Key(Hex1bKey.Escape)
             .Build();
@@ -102,7 +53,7 @@ public class VimKeybindingTests
     }
 
     [Fact]
-    public async Task EscapeFromMetrics_ReturnsToDashboard()
+    public async Task Settings_ShowsThemeOption()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -110,22 +61,20 @@ public class VimKeybindingTests
         await Task.Delay(200);
 
         var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D6)
-            .Wait(100)
-            .Key(Hex1bKey.Escape)
+            .Key(Hex1bKey.S)
             .Build();
         await sequence.ApplyAsync(terminal);
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Members:").Should().BeTrue();
+        snapshot.ContainsText("Theme").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
     }
 
     [Fact]
-    public async Task EscapeOnDashboard_DoesNothing()
+    public async Task Settings_ShowsVimKeybindingsToggle()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -133,13 +82,98 @@ public class VimKeybindingTests
         await Task.Delay(200);
 
         var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.Escape)
+            .Key(Hex1bKey.S)
             .Build();
         await sequence.ApplyAsync(terminal);
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Members:").Should().BeTrue();
+        snapshot.ContainsText("Vim Keybindings").Should().BeTrue();
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
+    }
+
+    [Fact]
+    public async Task Settings_ShowsMouseSupportToggle()
+    {
+        await using var terminal = TestAppBuilder.Build();
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        var sequence = new Hex1bTerminalInputSequenceBuilder()
+            .Key(Hex1bKey.S)
+            .Build();
+        await sequence.ApplyAsync(terminal);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        snapshot.ContainsText("Mouse Support").Should().BeTrue();
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
+    }
+
+    [Fact]
+    public async Task Settings_ShowsSettingDetails()
+    {
+        await using var terminal = TestAppBuilder.Build();
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        var sequence = new Hex1bTerminalInputSequenceBuilder()
+            .Key(Hex1bKey.S)
+            .Build();
+        await sequence.ApplyAsync(terminal);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        snapshot.ContainsText("Setting Details").Should().BeTrue();
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
+    }
+
+    [Fact]
+    public async Task Settings_At80Cols_ShowsSettingsContent()
+    {
+        await using var terminal = TestAppBuilder.Build(width: 80, height: 30);
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        var sequence = new Hex1bTerminalInputSequenceBuilder()
+            .Key(Hex1bKey.S)
+            .Build();
+        await sequence.ApplyAsync(terminal);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        snapshot.ContainsText("Settings").Should().BeTrue();
+        snapshot.ContainsText("Theme").Should().BeTrue();
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
+    }
+
+    [Fact]
+    public async Task Settings_At60Cols_ShowsSettingsContent()
+    {
+        await using var terminal = TestAppBuilder.Build(width: 60, height: 30);
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        var sequence = new Hex1bTerminalInputSequenceBuilder()
+            .Key(Hex1bKey.S)
+            .Build();
+        await sequence.ApplyAsync(terminal);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        snapshot.ContainsText("Settings").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

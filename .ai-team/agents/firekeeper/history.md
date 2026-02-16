@@ -15,7 +15,7 @@
 - **Progressive disclosure:** Summary cards in Overview, full lists in detail tabs. Activity feed shows 5 entries wide, 2–3 narrow.
 - **Keyboard-first UX:** Global hotkeys (1–6 for screens, ? for help, Q to quit), arrow keys for nav, Enter to activate, Tab for focus.
 - **Interactive patterns:** Mouse click/drag on splitter; keyboard nav without mouse. Vim-style j/k optional, not default.
-- **File location:** Design doc is `src/SquadTUI/Screens/UX_DESIGN.md` (ready for Linus to implement).
+- **File location:** Design doc is `src/SquadTUI/Screens/UX_DESIGN.md` (ready for Siegmeyer to implement).
 
 ### Current Screen Implementations (2026-02-16)
 - **DashboardScreen:** Currently shows static summary + activity text. Will be replaced with TabPanel + responsive layout.
@@ -23,6 +23,16 @@
 - **NavBar:** Top bar with number hotkeys (1–6) and [Q]uit. Works globally across all screens.
 - **AppState:** Tracks CurrentScreen and selection indices. Will need SidebarWidth and NotificationQueue fields.
 
-📌 Team update (2026-02-16): Danny established CI/CD pipelines with matrix builds (Windows/macOS/Linux × x64/ARM64), automated release workflows, and version management from csproj — decided by Danny
+📌 Team update (2026-02-16): Solaire established CI/CD pipelines with matrix builds (Windows/macOS/Linux × x64/ARM64), automated release workflows, and version management from csproj — decided by Solaire
 
-📌 Team update (2026-02-16): Rusty wired real .ai-team/ file data throughout TUI via ServiceProvider, DataBridge, and updated AppState. All screens now load real data async on startup with graceful SampleData fallback — decided by Rusty
+📌 Team update (2026-02-16): Andre wired real .ai-team/ file data throughout TUI via ServiceProvider, DataBridge, and updated AppState. All screens now load real data async on startup with graceful SampleData fallback — decided by Andre
+
+### Help Screen Implementation (2026-02-17)
+- **Created HelpScreen.cs** with organized keybinding reference grouped by category (Navigation, List Navigation, Actions, Help)
+- **ANSI styling:** Used foreground colors only (accent cyan for headers, dim gray for key labels, white for descriptions) per Hex1b restrictions
+- **Screen management:** Added `Screen.Help` enum value and `PreviousScreen` property to AppState to track navigation state for proper back-navigation
+- **Keybinding:** Mapped to F1 key (Hex1bKey.F1) as ? (question mark) is not directly available in Hex1bKey enum. Requirements noted F1 as valid fallback.
+- **Toggle behavior:** F1 or Escape dismisses help screen and returns to previous context, with fallback to Dashboard if no previous screen stored
+- **Integration:** Minimal Program.cs changes — added F1 key binding and Help case to screen switch statement only
+
+📌 Team recast (2026-02-18): Squad recast from Ocean's Eleven to Dark Souls universe. Saul is now Firekeeper. Praise the sun! ☀️

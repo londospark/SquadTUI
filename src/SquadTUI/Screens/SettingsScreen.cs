@@ -1,0 +1,130 @@
+using Hex1b;
+using Hex1b.Widgets;
+using SquadTUI.Rendering;
+using SquadTUI.Services;
+using SquadTUI.Themes;
+
+namespace SquadTUI.Screens;
+
+public static class SettingsScreen
+{
+    private static readonly string[] SettingLabels =
+    [
+        "Theme",
+        "Vim Keybindings",
+        "Mouse Support",
+        "Emoji Display",
+        "Markdown Rendering"
+    ];
+
+    public static Hex1bWidget Render(WidgetContext<VStackWidget> v, AppState state, Hex1bApp app, dynamic options)
+    {
+        var settings = state.Settings;
+        var ti = state.SelectedThemeIndex;
+        var c = ThemeManager.GetPanelColors(ti);
+        var acc = c.Accent;
+        var R = PanelRenderer.Reset;
+        var B = PanelRenderer.Bold;
+
+        var selectedIdx = Math.Clamp(state.SettingsSelectedIndex, 0, SettingLabels.Length - 1);
+
+        var listItems = new List<string>
+        {
+            $"  🎨 Theme            {FormatThemeValue(settings.ThemeName)}",
+            $"  ⌨️  Vim Keybindings  {FormatToggle(settings.VimBindings)}",
+            $"  🖱️  Mouse Support    {FormatToggle(settings.MouseEnabled)}",
+            $"  😀 Emoji Display    {FormatToggle(settings.ShowEmoji)}",
+            $"  📝 Markdown Render  {FormatToggle(settings.MarkdownRendering)}"
+        } as IReadOnlyList<string>;
+
+        return v.HStack(h =>
+        [
+            h.VStack(left =>
+            [
+                left.Text($"  {B}{acc}⚙️  Settings{R}"),
+                left.Text(""),
+                left.List(listItems)
+                    .OnSelectionChanged(e => { state.SettingsSelectedIndex = e.SelectedIndex; })
+                    .OnItemActivated(e =>
+                    {
+                        ToggleSetting(state, e.ActivatedIndex, options);
+                    })
+                    .Fill()
+            ]).FillWidth(1).FillHeight(),
+
+            h.VStack(detail =>
+            {
+                var widgets = new List<Hex1bWidget>
+                {
+                    detail.Text($"  {B}{acc}📋 Setting Details{R}"),
+                    detail.Text("")
+                };
+
+                var (label, description, currentValue) = GetSettingDetail(selectedIdx, settings);
+                widgets.Add(detail.Text($"  {B}{acc}{label}{R}"));
+                widgets.Add(detail.Text($"  \x1b[90m{description}\x1b[0m"));
+                widgets.Add(detail.Text(""));
+                widgets.Add(detail.Text($"  \x1b[90mCurrent:\x1b[0m {B}{currentValue}{R}"));
+                widgets.Add(detail.Text(""));
+                widgets.Add(detail.Text($"  \x1b[90mPress Enter to change{R}"));
+
+                return widgets.ToArray();
+            }).FillWidth(1).FillHeight(),
+        ]).Fill();
+    }
+
+    private static string FormatToggle(bool value) =>
+        value ? "\x1b[32m● ON\x1b[0m" : "\x1b[90m○ OFF\x1b[0m";
+
+    private static string FormatThemeValue(string themeName) =>
+        $"\x1b[1m{themeName}\x1b[0m";
+
+    private static (string Label, string Description, string Value) GetSettingDetail(int index, Models.AppSettings settings) => index switch
+    {
+        0 => ("🎨 Theme",
+              "Visual theme for the application. Cycles through Ocean, Heist, Sunset, and HighContrast.",
+              settings.ThemeName),
+        1 => ("⌨️  Vim Keybindings",
+              "Enable j/k navigation and other vim-style keys.",
+              settings.VimBindings ? "Enabled" : "Disabled"),
+        2 => ("🖱️  Mouse Support",
+              "Enable mouse click and scroll interactions.",
+              settings.MouseEnabled ? "Enabled" : "Disabled"),
+        3 => ("😀 Emoji Display",
+              "Show emoji icons throughout the interface.",
+              settings.ShowEmoji ? "Enabled" : "Disabled"),
+        4 => ("📝 Markdown Rendering",
+              "Render markdown formatting in charter and log views.",
+              settings.MarkdownRendering ? "Enabled" : "Disabled"),
+        _ => ("", "", "")
+    };
+
+    private static void ToggleSetting(AppState state, int index, dynamic options)
+    {
+        var settings = state.Settings;
+        switch (index)
+        {
+            case 0: // Theme — cycle through available themes
+                var currentThemeIdx = Array.IndexOf(ThemeManager.ThemeNames, settings.ThemeName);
+                if (currentThemeIdx < 0) currentThemeIdx = 0;
+                var nextIdx = (currentThemeIdx + 1) % ThemeManager.ThemeNames.Length;
+                settings.ThemeName = ThemeManager.ThemeNames[nextIdx];
+                state.SelectedThemeIndex = nextIdx;
+                options.Theme = ThemeManager.GetTheme(nextIdx);
+                break;
+            case 1:
+                settings.VimBindings = !settings.VimBindings;
+                break;
+            case 2:
+                settings.MouseEnabled = !settings.MouseEnabled;
+                break;
+            case 3:
+                settings.ShowEmoji = !settings.ShowEmoji;
+                break;
+            case 4:
+                settings.MarkdownRendering = !settings.MarkdownRendering;
+                break;
+        }
+        SettingsService.Save(settings);
+    }
+}

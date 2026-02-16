@@ -34,7 +34,7 @@ public class CharterNavigationTests
         await Task.Delay(200);
 
         snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Screen: Dashboard").Should().BeTrue();
+        snapshot.ContainsText("Members:").Should().BeTrue();
 
         // Navigate to Decisions
         var toDecisions = new Hex1bTerminalInputSequenceBuilder()
@@ -54,7 +54,7 @@ public class CharterNavigationTests
         await Task.Delay(200);
 
         snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Screen: Dashboard").Should().BeTrue();
+        snapshot.ContainsText("Members:").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

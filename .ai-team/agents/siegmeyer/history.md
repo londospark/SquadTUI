@@ -68,8 +68,33 @@ When official Hex1b API documentation becomes available:
 5. Implement VScroll for long content regions
 6. Add NotificationPanel/ZStack for help overlay
 
-📌 Team update (2026-02-16): Saul designed comprehensive responsive dashboard UX with tabs, sidebar, color language, and keyboard-first navigation — ready for implementation pending Hex1b API docs — decided by Saul
+📌 Team update (2026-02-16): Firekeeper designed comprehensive responsive dashboard UX with tabs, sidebar, color language, and keyboard-first navigation — ready for implementation pending Hex1b API docs — decided by Firekeeper
 
-📌 Team update (2026-02-16): Basher expanded test suite to 110 tests (unit, integration, E2E) covering ThemeManager, DataBridge, markdown rendering, theme switching, responsive layouts, and CI pipeline validation. **BLOCKER:** MarkdownRenderer.cs has 5 compilation errors preventing test execution — needs fixing by Linus — decided by Basher
+📌 Team recast (2026-02-18): Squad recast from Ocean's Eleven to Dark Souls universe. Linus is now Siegmeyer. Praise the sun! ☀️
 
-📌 Team update (2026-02-16): Rusty wired real .ai-team/ file data throughout TUI via ServiceProvider, DataBridge, and updated AppState. All screens now load real data async on startup with graceful SampleData fallback — decided by Rusty
+📌 Team update (2026-02-16): Patches expanded test suite to 110 tests (unit, integration, E2E) covering ThemeManager, DataBridge, markdown rendering, theme switching, responsive layouts, and CI pipeline validation. **BLOCKER:** MarkdownRenderer.cs has 5 compilation errors preventing test execution — needs fixing by Siegmeyer — decided by Patches
+
+📌 Team update (2026-02-16): Andre wired real .ai-team/ file data throughout TUI via ServiceProvider, DataBridge, and updated AppState. All screens now load real data async on startup with graceful SampleData fallback — decided by Andre
+
+### Sprint 6 — UI Cleanup (Issues #11–#19)
+
+**ANSI background codes removed (Issues #11, #12):**
+- Hex1b's `GlobalTheme.BackgroundColor` fills the entire terminal background uniformly. Embedding `\x1b[48;2;...m` bg codes in `Text()` content only colors the text portion, creating jarring mismatched rectangles against the theme bg. Solution: removed ALL ANSI bg codes from all screens, kept only foreground codes (bold, dim, italic, fg colors) which work correctly.
+- `PanelRenderer.PanelBg`, `PanelRenderer.NestedBg`, `PanelRenderer.GetBg()` all removed. `PanelColors` record simplified to `(string Accent)` only. `GetPanelColors()` kept as backward-compat wrapper.
+- `ThemeManager.GetAccentCode(int index)` added — returns ANSI foreground code for the accent color.
+
+**Vim keybindings J/K (Issue #13):**
+- `ListNode.MoveDown()` and `ListNode.MoveUp()` exist in Hex1b XML docs but are **internal/inaccessible** at runtime. Cannot use them from external code.
+- Kept J/K as state-updating bindings (incrementing/decrementing `state.RosterSelectedIndex` etc.) — functional but visual list highlight is independently driven by arrow keys via `ListWidget`.
+- The `InputBindingActionContext.FocusedNode` property and `Action(InputBindingActionContext ctx)` overload both exist, but `ListNode` methods are not public.
+
+**NavBar Buttons (Issue #15):**
+- Hex1b `Button` widget: `h.Button(label).OnClick(_ => { ... })` — works for clickable nav items on HStack context.
+- `ContainsText()` on test snapshots does NOT reliably find text inside Button widgets at all terminal widths. Use screen body text for assertions.
+
+**InfoBar removal (Issue #17):**
+- Many E2E tests relied on InfoBar text like `"Screen: Dashboard"` or `"🎨 Ocean"` for screen identity assertions. After removing InfoBar, must use screen-specific body text instead.
+- At 120 cols (default test width), Dashboard uses wide layout showing `"Members:"` not `"Team Members:"` — use `"Members:"` as universal Dashboard identifier.
+
+**List selection indicators (Issue #14):**
+- Changed `SelectedIndicator` from `"▶ "` / `"▸ "` to `"  "` (two spaces) for all themes. `SelectedBackgroundColor` provides the highlight instead.

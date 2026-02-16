@@ -12,17 +12,21 @@ public enum Screen
     ActivityLog,
     Metrics,
     Charter,
-    NoSquad
+    NoSquad,
+    Settings,
+    Help
 }
 
 public class AppState
 {
     public Screen CurrentScreen { get; set; } = Screen.Dashboard;
+    public Screen? PreviousScreen { get; set; }
     public string? SelectedMemberName { get; set; }
     public int RosterSelectedIndex { get; set; }
     public int DecisionSelectedIndex { get; set; }
     public int LogSelectedIndex { get; set; }
     public int SkillSelectedIndex { get; set; }
+    public int SettingsSelectedIndex { get; set; }
 
     // Loaded data from services
     public IReadOnlyList<SquadMember>? Members { get; set; }

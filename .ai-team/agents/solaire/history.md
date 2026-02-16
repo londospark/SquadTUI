@@ -17,7 +17,7 @@
 - **Models:** All C# records with nullable reference types. Key files: `SquadMember.cs`, `SquadTask.cs`, `OrchestrationLogEntry.cs`, `DecisionEntry.cs`, `Skill.cs`, `TeamRoster.cs`, `DashboardData.cs`, `GitHubModels.cs`.
 - **Services:** Interface + stub pattern. `ITeamService`, `IOrchestrationLogService`, `IDecisionService`, `ISkillService`, `ISquadDataProvider`. Implementations take `teamRootPath` string in constructor.
 - **No DI container yet** — services wired manually. Add when complexity warrants it.
-- **Architecture decision written to:** `.ai-team/decisions/inbox/danny-project-architecture.md`
+- **Architecture decision written to:** `.ai-team/decisions/inbox/solaire-project-architecture.md`
 
 ### 2026-02-16 — CI/CD Infrastructure
 
@@ -26,3 +26,14 @@
 - **Version source:** `src/SquadTUI/SquadTUI.csproj` `<Version>` property (currently 0.2.0). Release workflow extracts this with `grep -oP`.
 - **Binary packaging:** Windows gets `.zip`, macOS/Linux get `.tar.gz`. All archives include self-contained .NET runtime.
 - **Standard .gitignore added:** Covers `bin/`, `obj/`, `dist/`, `packages/`, IDE folders (`.vs/`, `.idea/`, `.vscode/`), test results, NuGet artifacts.
+
+### 2026-02-17 — Screenshot & Demo Infrastructure
+
+- **hex1b CLI:** Installed globally via `dotnet tool install -g Hex1b.Tool` (v0.87.0). Provides `hex1b terminal`, `hex1b capture screenshot`, `hex1b capture recording`, `hex1b keys` commands.
+- **Diagnostics:** Added `.WithDiagnostics()` to the terminal builder chain in `Program.cs`. This is a one-line change that enables the hex1b CLI to discover and interact with the running app via diagnostics socket.
+- **Capture script:** `scripts/capture-screenshots.ps1` — automated PowerShell script that builds the app, starts it in a hex1b-hosted terminal, navigates screens via keystroke injection, captures SVG screenshots, and optionally records asciinema demos. Supports `-Record` and `-RecordDuration` parameters.
+- **Documentation:** `docs/SCREENSHOTS.md` — comprehensive guide covering hex1b CLI installation, manual and automated screenshot capture, asciinema recording/upload, output formats, and troubleshooting.
+- **README updated:** Screenshots section now references `.svg` format (hex1b native), added 🎬 Demo section with asciinema embed placeholder, added link to SCREENSHOTS.md for contribution workflow.
+- **Pre-existing build errors:** The `SettingsScreen.cs` has a `ListItemActivatedEventArgs.SelectedIndex` error that predates this work — likely an API mismatch in the Hex1b version. Not my responsibility to fix.
+
+📌 Team recast (2026-02-18): Squad recast from Ocean's Eleven to Dark Souls universe. Danny is now Solaire. Praise the sun! ☀️

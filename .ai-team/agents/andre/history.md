@@ -50,4 +50,21 @@
 - SampleData preserved as fallback — screens work even if `.ai-team/` files missing
 - Error handling: catch exceptions during load, set `ErrorMessage` in state, set `IsLoading = false`
 
-📌 Team update (2026-02-16): Basher created 110-test suite covering ThemeManager, DataBridge, MarkdownRenderer with E2E scenarios. Tests ready to run once MarkdownRenderer.cs compilation errors are fixed by Linus — decided by Basher
+📌 Team update (2026-02-16): Patches created 110-test suite covering ThemeManager, DataBridge, MarkdownRenderer with E2E scenarios. Tests ready to run once MarkdownRenderer.cs compilation errors are fixed by Siegmeyer — decided by Patches
+
+### 2026-02-17: SettingsScreen implementation — Issue #16
+
+**What was built:**
+- Created `SettingsScreen.cs` — a new screen for viewing and changing app settings
+- Settings exposed: Theme (cycles through 4 themes), Vim Keybindings, Mouse Support, Emoji Display, Markdown Rendering
+- Two-panel layout: left panel has a selectable list of settings with current values, right panel shows detail/description for the highlighted setting
+- Changes are saved immediately via `SettingsService.Save()` and theme changes apply in real-time via `options.Theme`
+- Added `Screen.Settings` enum value and `SettingsSelectedIndex` property to `AppState.cs`
+- Added minimal wiring in `Program.cs`: screen switch case, S key binding, J/K navigation for settings list
+
+**API learnings:**
+- `ListItemActivatedEventArgs` uses `ActivatedIndex` property (not `SelectedIndex`) — discovered via binary inspection of Hex1b 0.87.0 DLL
+- `SettingsScreen.Render()` takes a `dynamic options` parameter to allow runtime theme switching (same pattern used by the T key in Program.cs)
+- Pre-existing build errors in `HelpScreen.cs` (Hex1bKey not found) — not our problem, that's Siegmeyer's territory
+
+📌 Team recast (2026-02-18): Squad recast from Ocean's Eleven to Dark Souls universe. Rusty is now Andre. Praise the sun! ☀️

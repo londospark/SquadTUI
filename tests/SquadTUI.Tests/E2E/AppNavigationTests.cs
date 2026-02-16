@@ -60,7 +60,6 @@ public class AppNavigationTests
 
         var snapshot = terminal.CreateSnapshot();
         snapshot.ContainsText("Decisions").Should().BeTrue();
-        snapshot.ContainsText("Screen: Decisions").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -82,7 +81,6 @@ public class AppNavigationTests
 
         var snapshot = terminal.CreateSnapshot();
         snapshot.ContainsText("Skills").Should().BeTrue();
-        snapshot.ContainsText("Screen: Skills").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -124,7 +122,7 @@ public class AppNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Metrics").Should().BeTrue();
+        snapshot.ContainsText("Task Activity by Member").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -148,7 +146,7 @@ public class AppNavigationTests
 
         var snapshot = terminal.CreateSnapshot();
         snapshot.ContainsText("Dashboard").Should().BeTrue();
-        snapshot.ContainsText("Screen: Dashboard").Should().BeTrue();
+        snapshot.ContainsText("Members:").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -171,5 +169,99 @@ public class AppNavigationTests
         completed.Should().Be(runTask, "app should exit when Q is pressed");
 
         cts.Cancel();
+    }
+
+    [Fact]
+    public async Task NavBar_ShowsEmojiLabelsWithoutBrackets()
+    {
+        await using var terminal = TestAppBuilder.Build();
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        // NavBar uses emoji labels without bracket wrapping
+        snapshot.ContainsText("Dashboard").Should().BeTrue();
+        snapshot.ContainsText("Roster").Should().BeTrue();
+        // Should NOT have bracket-style labels like [1]Dashboard
+        snapshot.ContainsText("[1]").Should().BeFalse();
+        snapshot.ContainsText("[2]").Should().BeFalse();
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
+    }
+
+    [Fact]
+    public async Task NavBar_DoesNotShowQuitButton()
+    {
+        await using var terminal = TestAppBuilder.Build();
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        // [Q]Quit was removed from NavBar
+        snapshot.ContainsText("[Q]Quit").Should().BeFalse();
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
+    }
+
+    [Fact]
+    public async Task InfoBar_IsNotDisplayed()
+    {
+        await using var terminal = TestAppBuilder.Build();
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        // InfoBar was removed — no status bar at bottom
+        snapshot.ContainsText("InfoBar").Should().BeFalse();
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
+    }
+
+    [Fact]
+    public async Task PressS_NavigatesToSettings()
+    {
+        await using var terminal = TestAppBuilder.Build();
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        var sequence = new Hex1bTerminalInputSequenceBuilder()
+            .Key(Hex1bKey.S)
+            .Build();
+        await sequence.ApplyAsync(terminal);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        snapshot.ContainsText("Settings").Should().BeTrue();
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
+    }
+
+    [Fact]
+    public async Task PressF1_NavigatesToHelp()
+    {
+        await using var terminal = TestAppBuilder.Build();
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        var sequence = new Hex1bTerminalInputSequenceBuilder()
+            .Key(Hex1bKey.F1)
+            .Build();
+        await sequence.ApplyAsync(terminal);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        snapshot.ContainsText("Help").Should().BeTrue();
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
     }
 }

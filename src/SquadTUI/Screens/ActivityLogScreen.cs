@@ -14,18 +14,14 @@ public static class ActivityLogScreen
 
         var selectedIdx = Math.Clamp(state.LogSelectedIndex, 0, logs.Count - 1);
         var selected = logs[selectedIdx];
-        var ti = state.SelectedThemeIndex;
-        var c = ThemeManager.GetPanelColors(ti);
-        var p1 = c.PanelBg;
-        var p2 = c.NestedBg;
-        var acc = c.Accent;
+        var acc = ThemeManager.GetAccentCode(state.SelectedThemeIndex);
         var R = PanelRenderer.Reset;
 
         return v.HStack(h =>
         [
             h.VStack(left =>
             [
-                left.Text($"{p1}  {PanelRenderer.Bold}{acc}📊 Activity Log{R}"),
+                left.Text($"  {PanelRenderer.Bold}{acc}📊 Activity Log{R}"),
                 left.List(listItems)
                     .OnSelectionChanged(e => { state.LogSelectedIndex = e.SelectedIndex; })
                     .Fill()
@@ -35,29 +31,29 @@ public static class ActivityLogScreen
             {
                 var widgets = new List<Hex1bWidget>
                 {
-                    detail.Text($"{p1}  {PanelRenderer.Bold}{acc}📅 {selected.Topic}{R}"),
-                    detail.Text($"{p1}{R}"),
-                    detail.Text($"{p1}  \x1b[90mDate:\x1b[0m  {selected.Date}{R}"),
-                    detail.Text($"{p1}  \x1b[90m👥 Participants:\x1b[0m {string.Join(", ", selected.Participants)}{R}"),
-                    detail.Text($"{p1}{R}"),
-                    detail.Text($"{p2}  {PanelRenderer.Bold}{acc}Summary{R}"),
-                    detail.Text($"{p2}  {selected.Summary}{R}"),
+                    detail.Text($"  {PanelRenderer.Bold}{acc}📅 {selected.Topic}{R}"),
+                    detail.Text(""),
+                    detail.Text($"  \x1b[90mDate:\x1b[0m  {selected.Date}{R}"),
+                    detail.Text($"  \x1b[90m👥 Participants:\x1b[0m {string.Join(", ", selected.Participants)}{R}"),
+                    detail.Text(""),
+                    detail.Text($"  {PanelRenderer.Bold}{acc}Summary{R}"),
+                    detail.Text($"  {selected.Summary}{R}"),
                 };
 
                 if (selected.Decisions.Count > 0)
                 {
-                    widgets.Add(detail.Text($"{p1}{R}"));
-                    widgets.Add(detail.Text($"{p1}  {PanelRenderer.Bold}{acc}Decisions{R}"));
+                    widgets.Add(detail.Text(""));
+                    widgets.Add(detail.Text($"  {PanelRenderer.Bold}{acc}Decisions{R}"));
                     foreach (var d in selected.Decisions)
-                        widgets.Add(detail.Text($"{p1}    • {d}{R}"));
+                        widgets.Add(detail.Text($"    • {d}{R}"));
                 }
 
                 if (selected.Outcomes.Count > 0)
                 {
-                    widgets.Add(detail.Text($"{p1}{R}"));
-                    widgets.Add(detail.Text($"{p2}  {PanelRenderer.Bold}{acc}Outcomes{R}"));
+                    widgets.Add(detail.Text(""));
+                    widgets.Add(detail.Text($"  {PanelRenderer.Bold}{acc}Outcomes{R}"));
                     foreach (var o in selected.Outcomes)
-                        widgets.Add(detail.Text($"{p2}    • {o}{R}"));
+                        widgets.Add(detail.Text($"    • {o}{R}"));
                 }
 
                 return widgets.ToArray();
