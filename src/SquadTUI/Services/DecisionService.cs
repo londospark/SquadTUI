@@ -39,64 +39,138 @@ public class DecisionService(string teamRootPath) : IDecisionService
         string? currentTitle = null;
         string? currentDate = null;
         string? currentAuthor = null;
+        string? currentWhat = null;
+        string? currentWhy = null;
+        var currentSection = "";
         var contentLines = new List<string>();
         int? titleLineNumber = null;
+
+        void FlushDecision()
+        {
+            if (currentTitle is null) return;
+
+            // Flush remaining section
+            if (currentSection == "what" && contentLines.Count > 0 && currentWhat is null)
+                currentWhat = string.Join('\n', contentLines).Trim();
+            else if (currentSection == "why" && contentLines.Count > 0 && currentWhy is null)
+                currentWhy = string.Join('\n', contentLines).Trim();
+            else if (currentSection == "body" && contentLines.Count > 0)
+                currentWhat = string.Join('\n', contentLines).Trim();
+
+            var parts = new List<string>();
+            if (!string.IsNullOrWhiteSpace(currentWhat))
+                parts.Add(currentSection == "body" ? currentWhat : $"What: {currentWhat}");
+            if (!string.IsNullOrWhiteSpace(currentWhy))
+                parts.Add($"Why: {currentWhy}");
+
+            decisions.Add(new DecisionEntry(
+                currentTitle,
+                currentDate ?? "",
+                currentAuthor ?? "",
+                string.Join("\n\n", parts),
+                filePath,
+                titleLineNumber));
+        }
 
         for (var i = 0; i < lines.Length; i++)
         {
             var trimmed = lines[i].Trim();
 
-            if (trimmed.StartsWith("## "))
+            // Handle ## or ### headings as decision titles (skip # top-level headings)
+            if ((trimmed.StartsWith("## ") && !trimmed.StartsWith("## #")) || trimmed.StartsWith("### "))
             {
-                // Flush previous decision
-                if (currentTitle is not null)
+                FlushDecision();
+
+                var heading = trimmed.StartsWith("### ") ? trimmed[4..].Trim() : trimmed[3..].Trim();
+
+                // Try "### date: title" format
+                var colonIdx = heading.IndexOf(':');
+                if (colonIdx > 0 && colonIdx <= 10)
                 {
-                    decisions.Add(new DecisionEntry(
-                        currentTitle,
-                        currentDate ?? "",
-                        currentAuthor ?? "",
-                        string.Join('\n', contentLines).Trim(),
-                        filePath,
-                        titleLineNumber));
+                    var possibleDate = heading[..colonIdx].Trim();
+                    if (possibleDate.Contains('-') && possibleDate.Length >= 8)
+                    {
+                        currentDate = possibleDate;
+                        currentTitle = heading[(colonIdx + 1)..].Trim();
+                    }
+                    else
+                    {
+                        currentDate = null;
+                        currentTitle = heading;
+                    }
+                }
+                else
+                {
+                    currentDate = null;
+                    currentTitle = heading;
                 }
 
-                currentTitle = trimmed[3..].Trim();
-                currentDate = null;
                 currentAuthor = null;
+                currentWhat = null;
+                currentWhy = null;
+                currentSection = "body";
                 contentLines.Clear();
                 titleLineNumber = i + 1;
                 continue;
             }
 
-            if (currentTitle is null)
-                continue;
+            if (trimmed == "---") continue;
+            if (currentTitle is null) continue;
 
-            if (trimmed.StartsWith("**Date:**") || trimmed.StartsWith("- **Date:**"))
+            // Handle metadata fields (supports both "**Key:**" and "- **Key:**" prefixes)
+            if (trimmed.StartsWith("**By:**") || trimmed.Contains("**By:**"))
             {
-                currentDate = ExtractBoldValue(trimmed, "Date");
+                currentAuthor = ExtractBoldValue(trimmed, "By");
+                continue;
             }
-            else if (trimmed.StartsWith("**Author:**") || trimmed.StartsWith("- **Author:**"))
+            if (trimmed.StartsWith("**Author:**") || trimmed.Contains("**Author:**"))
             {
                 currentAuthor = ExtractBoldValue(trimmed, "Author");
+                continue;
             }
-            else
+            if (trimmed.StartsWith("**Date:**") || trimmed.Contains("**Date:**"))
             {
-                contentLines.Add(lines[i]);
+                currentDate = ExtractBoldValue(trimmed, "Date");
+                continue;
             }
+
+            // Handle **What:** section
+            if (trimmed.StartsWith("**What:**") || trimmed.Contains("**What:**"))
+            {
+                if (currentSection == "body" && contentLines.Count > 0)
+                    contentLines.Clear(); // switch from body to structured
+                if (currentSection == "what" && contentLines.Count > 0)
+                {
+                    currentWhat = string.Join('\n', contentLines).Trim();
+                    contentLines.Clear();
+                }
+                currentSection = "what";
+                var inline = ExtractBoldValue(trimmed, "What");
+                if (!string.IsNullOrWhiteSpace(inline)) contentLines.Add(inline);
+                continue;
+            }
+
+            // Handle **Why:** section
+            if (trimmed.StartsWith("**Why:**") || trimmed.Contains("**Why:**"))
+            {
+                if (currentSection == "what" && contentLines.Count > 0)
+                {
+                    currentWhat = string.Join('\n', contentLines).Trim();
+                    contentLines.Clear();
+                }
+                currentSection = "why";
+                var inline = ExtractBoldValue(trimmed, "Why");
+                if (!string.IsNullOrWhiteSpace(inline)) contentLines.Add(inline);
+                continue;
+            }
+
+            // Skip empty lines before content starts
+            if (string.IsNullOrWhiteSpace(trimmed) && contentLines.Count == 0) continue;
+
+            contentLines.Add(lines[i]);
         }
 
-        // Flush last decision
-        if (currentTitle is not null)
-        {
-            decisions.Add(new DecisionEntry(
-                currentTitle,
-                currentDate ?? "",
-                currentAuthor ?? "",
-                string.Join('\n', contentLines).Trim(),
-                filePath,
-                titleLineNumber));
-        }
-
+        FlushDecision();
         return decisions;
     }
 

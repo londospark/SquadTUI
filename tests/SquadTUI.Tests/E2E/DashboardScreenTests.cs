@@ -16,7 +16,7 @@ public class DashboardScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Members:").Should().BeTrue();
+        snapshot.ContainsText("Team Roster").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -31,8 +31,8 @@ public class DashboardScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Total:").Should().BeTrue();
-        snapshot.ContainsText("Active:").Should().BeTrue();
+        snapshot.ContainsText("Tasks:").Should().BeTrue();
+        snapshot.ContainsText("active").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

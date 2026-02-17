@@ -23,7 +23,7 @@ public class MetricsScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Summary").Should().BeTrue();
+        snapshot.ContainsText("Sprint Metrics").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -67,7 +67,7 @@ public class MetricsScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Task Activity by Member").Should().BeTrue();
+        snapshot.ContainsText("Tasks by Member").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

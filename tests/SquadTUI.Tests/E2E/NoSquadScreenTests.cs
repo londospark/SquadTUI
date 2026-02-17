@@ -1,0 +1,127 @@
+using FluentAssertions;
+using Hex1b;
+using Hex1b.Automation;
+using Hex1b.Input;
+using SquadTUI.Screens;
+
+namespace SquadTUI.Tests.E2E;
+
+[Collection("E2E")]
+public class NoSquadScreenTests
+{
+    [Fact]
+    public async Task NoSquadDetected_ShowsWelcomeMessage()
+    {
+        await using var terminal = TestAppBuilder.Build(squadDetected: false);
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        snapshot.ContainsText("Welcome to SquadTUI").Should().BeTrue();
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
+    }
+
+    [Fact]
+    public async Task NoSquadDetected_ShowsNoSquadDetectedText()
+    {
+        await using var terminal = TestAppBuilder.Build(squadDetected: false);
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        snapshot.ContainsText("No squad detected").Should().BeTrue();
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
+    }
+
+    [Fact]
+    public async Task NoSquadScreen_ContainsSetupInstructions()
+    {
+        await using var terminal = TestAppBuilder.Build(squadDetected: false);
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        // Should mention npx or squad or .ai-team for setup instructions
+        var hasNpx = snapshot.ContainsText("npx");
+        var hasSquad = snapshot.ContainsText("squad");
+        var hasAiTeam = snapshot.ContainsText(".ai-team");
+        (hasNpx || hasSquad || hasAiTeam).Should().BeTrue(
+            "NoSquad screen should contain setup instructions mentioning npx, squad, or .ai-team");
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
+    }
+
+    [Fact]
+    public async Task NoSquadScreen_ShowsCKeyInstruction()
+    {
+        await using var terminal = TestAppBuilder.Build(squadDetected: false);
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        snapshot.ContainsText("Create").Should().BeTrue(
+            "NoSquad screen should show the C key instruction for creating squad structure");
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
+    }
+
+    [Fact]
+    public async Task NoSquadScreen_ShowsQKeyInstruction()
+    {
+        // Taller terminal needed — key bindings line is near the bottom of centered layout
+        await using var terminal = TestAppBuilder.Build(height: 40, squadDetected: false);
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        // The key bindings line renders: "C  Create basic squad structure        Q  Quit"
+        // Check for the Q key instruction being present
+        snapshot.ContainsText("Quit").Should().BeTrue(
+            "NoSquad screen should show the Q key instruction");
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
+    }
+
+    [Fact]
+    public async Task NoSquadScreen_NavBarNotVisible()
+    {
+        await using var terminal = TestAppBuilder.Build(squadDetected: false);
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        // When on NoSquad, the NavBar should not be visible.
+        // "Dashboard" in the tab bar would indicate NavBar is showing.
+        // However, "Welcome to SquadTUI" confirms we're on NoSquad.
+        // We check that pressing 1-6 doesn't navigate away as a resilient assertion.
+        snapshot.ContainsText("Welcome to SquadTUI").Should().BeTrue();
+
+        // Press D1 — should NOT show Dashboard content (should stay on NoSquad)
+        var sequence = new Hex1bTerminalInputSequenceBuilder()
+            .Key(Hex1bKey.D1)
+            .Build();
+        await sequence.ApplyAsync(terminal);
+        await Task.Delay(200);
+
+        var snapshot2 = terminal.CreateSnapshot();
+        snapshot2.ContainsText("Welcome to SquadTUI").Should().BeTrue(
+            "NavBar navigation should not work on NoSquad screen");
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
+    }
+}
+

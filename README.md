@@ -1,8 +1,12 @@
-# 🎰 SquadTUI
+# 🔥 SquadTUI
 
-> Ocean's Eleven meets .NET — A terminal UI for managing AI squad teams with style.
+> *Praise the Sun!* — A Dark Souls–themed terminal UI for managing AI squad teams, forged in .NET.
 
-**SquadTUI** is a powerful, elegant terminal user interface built with [Hex1b](https://hex1b.dev/) for managing AI development teams. Inspired by Ocean's Eleven, each team member has specialized skills and roles. Track your squad's activity, monitor progress, review decisions, and manage tasks — all from your terminal.
+**SquadTUI** is a powerful, elegant terminal user interface built with [Hex1b](https://hex1b.dev/) for managing AI development teams. Inspired by the cooperative spirits of Dark Souls, each team member is a seasoned warrior with specialized skills and roles. Track your squad's activity, monitor progress, review decisions, and manage tasks — all from your terminal.
+
+[![Project Board](https://img.shields.io/badge/Project%20Board-GitHub-blue)](https://github.com/users/londospark/projects/5)
+[![GitHub](https://img.shields.io/badge/Repo-GitHub-black)](https://github.com/londospark/SquadTUI)
+[![.NET 10](https://img.shields.io/badge/.NET-10-purple)](https://dotnet.microsoft.com/)
 
 ## ✨ Features
 
@@ -13,47 +17,35 @@
 - **🔧 Skills** — Catalog of team capabilities and specializations
 - **📈 Activity Log** — Chronological orchestration log with task assignments and completions
 - **📉 Metrics** — Sprint velocity, task completion rates, and team performance insights
-- **🎨 Theming** — Three beautiful themes (Ocean, Heist, Daylight) — switch with `T` key
+- **⚙️ Settings** — Configure theme, vim bindings, mouse, emoji display, and markdown rendering (`S` key)
+- **❓ Help Screen** — In-app keybinding reference accessible with `F1`
+- **🎨 Theming** — Four beautiful themes (Ocean, Heist, Sunset, HighContrast) — cycle with `T` key
 - **📱 Responsive Layout** — Adapts to wide (≥120 cols), medium (80-119), and narrow (<80) terminals
-- **⌨️ Keyboard Navigation** — Vim-friendly shortcuts with arrow key support
-- **🖱️ Mouse Support** — Click, scroll, and select with your mouse (where terminal supports it)
+- **⌨️ Keyboard Navigation** — Vim-friendly shortcuts (`j`/`k`/`h`/`l`) with arrow key support
+- **🖱️ Mouse Support** — Clickable nav tabs, scroll, and select with your mouse
+
+## 🎬 Demo
+
+[![SquadTUI Demo](https://asciinema.org/a/placeholder.svg)](https://asciinema.org/a/placeholder)
+
+*Click above to watch a live demo of SquadTUI in action.*
 
 ## 📸 Screenshots
 
 ### Dashboard
-```
-┌─────────────────────────────────────────────────────┐
-│ 🏠 DASHBOARD — Squad Overview                       │
-│                                                     │
-│ 👥 Active Members: 11/11                           │
-│ 🔄 Tasks in Progress: 8                            │
-│ ✅ Completed Today: 12                             │
-└─────────────────────────────────────────────────────┘
-```
+![Dashboard](docs/images/screenshot-dashboard.svg)
 
-### Roster
-```
-┌─────────────────────────────────────────────────────┐
-│ 👥 ROSTER — Team Members                            │
-│                                                     │
-│ 🎯 Danny — Lead (✅ Active)                         │
-│ 💻 Rusty — Backend Engineer (🔵 Working)           │
-│ 🎨 Linus — Frontend Dev (✅ Active)                 │
-└─────────────────────────────────────────────────────┘
-```
+### Roster with Inline Detail
+![Roster](docs/images/screenshot-roster.svg)
 
-*More screenshots coming soon — contributions welcome!*
+### Decisions
+![Decisions](docs/images/screenshot-decisions.svg)
+
+*Screenshots captured on a 120-column terminal with the Ocean theme using [hex1b CLI](https://hex1b.dev/). See [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md) for how to capture fresh screenshots. Currently placeholder SVGs.*
 
 ## 🚀 Installation
 
-### Option 1: Install as .NET Tool (Recommended)
-
-```bash
-dotnet tool install --global SquadTUI
-squadtui
-```
-
-### Option 2: Build from Source
+### Build from Source
 
 ```bash
 git clone https://github.com/londospark/SquadTUI.git
@@ -62,7 +54,7 @@ dotnet build -c Release
 dotnet run --project src/SquadTUI
 ```
 
-### Option 3: Download Pre-built Binaries
+### Download Pre-built Binaries
 
 Download the latest release for your platform from the [Releases](https://github.com/londospark/SquadTUI/releases) page:
 
@@ -87,55 +79,58 @@ tar xzf squadtui-X.Y.Z-osx-x64.tar.gz
 ### Starting SquadTUI
 
 ```bash
-# If installed as a tool
-squadtui
-
-# If running from source
+# From the repo root
 dotnet run --project src/SquadTUI
+```
+
+If no `.ai-team/` directory is detected, SquadTUI will offer to create one for you, or you can set one up with [Squad](https://github.com/bradygaster/squad):
+
+```bash
+npx github:bradygaster/squad
 ```
 
 ### Keyboard Shortcuts
 
 | Key | Action |
 |-----|--------|
-| `1` | Dashboard |
-| `2` | Roster |
-| `3` | Decisions |
-| `4` | Charter Viewer |
-| `5` | Skills |
-| `6` | Activity Log |
-| `7` | Metrics |
-| `T` | Cycle themes (Ocean → Heist → Daylight) |
+| `1`–`6` | Jump to screen (Dashboard, Roster, Decisions, Skills, Log, Metrics) |
+| `j` / `k` | Move selection down/up in lists |
+| `h` / `l` | Switch to previous/next screen |
+| `↑` / `↓` | Arrow keys for list navigation |
+| `←` / `→` | Arrow keys for screen switching |
+| `Enter` | Select / activate current item |
+| `T` | Cycle theme (Ocean → Heist → Sunset → HighContrast) |
+| `S` | Open Settings screen |
+| `F1` | Toggle Help screen |
+| `E` | Edit charter (from Member Detail) |
+| `C` | Create squad scaffold (from NoSquad screen) |
+| `Escape` | Go back (Detail → Roster → Dashboard) |
 | `Q` | Quit |
-| `↑` `↓` | Navigate lists |
-| `←` `→` | Switch tabs (where applicable) |
-| `Enter` | Select item |
-| `Esc` | Back/Cancel |
+| 🖱️ Click | Click nav bar tabs to switch screens |
 
 ### Navigation Flow
 
 1. **Dashboard** — Start here for an overview
-2. **Roster** — Select a member to view their charter
+2. **Roster** — Select a member → **Member Detail** → press `E` for **Charter**
 3. **Decisions** — Browse architectural decisions by date
-4. **Activity Log** — Track recent orchestration events
-5. **Metrics** — Analyze sprint velocity and completion rates
+4. **Skills** — View team capabilities and specializations
+5. **Activity Log** — Track recent orchestration events
+6. **Metrics** — Analyze sprint velocity and completion rates
+7. **Settings** (`S`) — Configure app preferences
+8. **Help** (`F1`) — Quick keybinding reference
 
 ## 🛠️ Tech Stack
 
 - **Framework:** [.NET 10](https://dotnet.microsoft.com/)
-- **TUI Library:** [Hex1b](https://hex1b.dev/) — Modern, declarative terminal UI framework
+- **TUI Library:** [Hex1b 0.87.0](https://hex1b.dev/) — Modern, declarative terminal UI framework
 - **Language:** C# 13
+- **Testing:** xUnit + Hex1b headless testing (`TestAppBuilder`)
 - **Platform Support:** Windows, macOS, Linux (x64 and ARM64)
-- **Architecture:** Clean separation: Models, Services, Screens, Rendering
+- **Architecture:** Clean separation — Models, Services, Screens, Rendering, Themes
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
-
-- Git Flow branching strategy
-- PR guidelines and commit conventions
-- CI/CD pipeline details
-- Code style guidelines
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for our Git Flow workflow, CI pipeline details, and code style guidelines. See also [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for a technical overview.
 
 ### Quick Start for Contributors
 
@@ -144,11 +139,37 @@ git checkout develop
 git pull origin develop
 git checkout -b feature/my-feature
 # Make changes
+dotnet test --filter "FullyQualifiedName!~DotnetBuild&FullyQualifiedName!~DotnetTest"
 git add .
 git commit -m "feat: add my feature"
 git push origin feature/my-feature
 # Create PR to develop
 ```
+
+## 🔗 Links
+
+- **[Project Board](https://github.com/users/londospark/projects/5)** — Track progress and upcoming work
+- **[GitHub Repository](https://github.com/londospark/SquadTUI)** — Source code and issues
+- **[Hex1b](https://hex1b.dev/)** — The terminal UI framework powering SquadTUI
+- **[SquadUI](https://github.com/csharpfritz/SquadUI)** — Inspiration for squad-based AI workflows
+
+## 🎬 Credits
+
+**SquadTUI** is forged in the fires of Lordran — where every team member, like an undead warrior, plays a critical role in linking the flame. Our AI squad follows the same cooperative philosophy found in Dark Souls.
+
+### ☀️ The Dark Souls Squad
+
+| Role | Name | Specialty |
+|------|------|-----------|
+| 🎯 Lead | **Solaire** | Architecture, code review, big picture |
+| 💻 Backend Dev | **Andre** | Services, data layer, integrations |
+| 🎨 Frontend Dev | **Siegmeyer** | UI/UX, screens, theming |
+| 🧪 QA Engineer | **Patches** | Testing, quality assurance |
+| 📣 UX Designer | **Firekeeper** | User experience, design systems |
+| 📝 Docs | **Scribe** | Documentation, knowledge management |
+| 🔧 DevOps | **Ralph** | CI/CD, tooling, automation |
+
+*Special thanks to [csharpfritz/SquadUI](https://github.com/csharpfritz/SquadUI) for inspiration.*
 
 ## 📄 License
 
@@ -156,33 +177,8 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 Copyright © 2026 LondoSpark
 
-## 🎬 Credits
-
-**SquadTUI** is built with inspiration from Ocean's Eleven — where every team member plays a critical role in pulling off the perfect heist. Our AI squad follows the same philosophy.
-
-### The Squad
-
-- **🎯 Danny** — Lead (Architecture, code review, big picture)
-- **💻 Rusty** — Backend Engineer (Services, data layer, integrations)
-- **🎨 Linus** — Frontend Dev (UI/UX, screens, theming)
-- **🧪 Basher** — QA Engineer (Testing, quality assurance)
-- **📣 Saul** — UX Designer (User experience, design systems)
-- **📝 Scribe** — Documentation (Docs, knowledge management)
-- **🔮 Oracle** — Research (Tech exploration, prototyping)
-- **🛠️ Toolsmith** — DevOps (CI/CD, tooling, automation)
-- **🔍 Detective** — Debugger (Issue investigation, root cause analysis)
-- **🚀 Turk** — Performance (Optimization, profiling)
-- **🎭 Livingston** — Integration (Cross-system communication)
-
-*Special thanks to [csharpfritz/SquadUI](https://github.com/csharpfritz/SquadUI) for inspiration.*
-
-## 🔗 Related Projects
-
-- [Hex1b](https://hex1b.dev/) — The terminal UI framework powering SquadTUI
-- [SquadUI](https://github.com/csharpfritz/SquadUI) — Inspiration for squad-based AI workflows
-
 ---
 
-**Built with ❤️ by the SquadTUI team**
+**Built with ☀️ by the SquadTUI team**
 
-*"You don't plan a heist without the right crew."* 🎰
+*"Praise the Sun!"* \\[T]/

@@ -6,56 +6,10 @@ using Hex1b.Input;
 namespace SquadTUI.Tests.E2E;
 
 [Collection("E2E")]
-public class RosterScreenTests
+public class HelpNavigationTests
 {
     [Fact]
-    public async Task Roster_ShowsMemberNames()
-    {
-        await using var terminal = TestAppBuilder.Build();
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        var navSequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D2)
-            .Build();
-        await navSequence.ApplyAsync(terminal);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Solaire").Should().BeTrue();
-        snapshot.ContainsText("Siegmeyer").Should().BeTrue();
-        snapshot.ContainsText("Andre").Should().BeTrue();
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task Roster_ShowsPreviewPanel()
-    {
-        await using var terminal = TestAppBuilder.Build();
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        var navSequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D2)
-            .Build();
-        await navSequence.ApplyAsync(terminal);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Solaire").Should().BeTrue();
-        snapshot.ContainsText("Role:").Should().BeTrue();
-        snapshot.ContainsText("Status:").Should().BeTrue();
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task Roster_ShowsInlineDetailContent()
+    public async Task PressF1_ShowsHelpScreen()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -63,22 +17,20 @@ public class RosterScreenTests
         await Task.Delay(200);
 
         var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D2)
+            .Key(Hex1bKey.F1)
             .Build();
         await sequence.ApplyAsync(terminal);
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        // Detail pane now shows charter excerpt and tasks inline
-        snapshot.ContainsText("Charter").Should().BeTrue();
-        snapshot.ContainsText("Task:").Should().BeTrue();
+        snapshot.ContainsText("Help").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
     }
 
     [Fact]
-    public async Task Roster_EscapeBackToDashboard()
+    public async Task Help_ShowsKeybindingHeaders()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -86,9 +38,79 @@ public class RosterScreenTests
         await Task.Delay(200);
 
         var sequence = new Hex1bTerminalInputSequenceBuilder()
+            .Key(Hex1bKey.F1)
+            .Build();
+        await sequence.ApplyAsync(terminal);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        snapshot.ContainsText("NAVIGATION").Should().BeTrue();
+        snapshot.ContainsText("ACTIONS").Should().BeTrue();
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
+    }
+
+    [Fact]
+    public async Task Help_ShowsListNavigationSection()
+    {
+        await using var terminal = TestAppBuilder.Build();
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        var sequence = new Hex1bTerminalInputSequenceBuilder()
+            .Key(Hex1bKey.F1)
+            .Build();
+        await sequence.ApplyAsync(terminal);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        snapshot.ContainsText("LIST NAVIGATION").Should().BeTrue();
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
+    }
+
+    [Fact]
+    public async Task EscapeFromHelp_ReturnsToDashboard()
+    {
+        await using var terminal = TestAppBuilder.Build();
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        // Go to Roster, then open help, then escape — global Escape returns to Dashboard
+        var sequence = new Hex1bTerminalInputSequenceBuilder()
             .Key(Hex1bKey.D2)
             .Wait(100)
+            .Key(Hex1bKey.F1)
+            .Wait(100)
             .Key(Hex1bKey.Escape)
+            .Build();
+        await sequence.ApplyAsync(terminal);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        snapshot.ContainsText("Dashboard").Should().BeTrue();
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
+    }
+
+    [Fact]
+    public async Task F1FromHelp_ReturnsToPreviousScreen()
+    {
+        await using var terminal = TestAppBuilder.Build();
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        // Open help from Dashboard, then F1 again should return to Dashboard
+        var sequence = new Hex1bTerminalInputSequenceBuilder()
+            .Key(Hex1bKey.F1)
+            .Wait(100)
+            .Key(Hex1bKey.F1)
             .Build();
         await sequence.ApplyAsync(terminal);
         await Task.Delay(200);

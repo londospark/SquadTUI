@@ -1,5 +1,7 @@
 using Hex1b;
 using Hex1b.Widgets;
+using SquadTUI.Rendering;
+using SquadTUI.Themes;
 
 namespace SquadTUI.Screens;
 
@@ -8,28 +10,47 @@ public static class DecisionsScreen
     public static Hex1bWidget Render(WidgetContext<VStackWidget> v, AppState state, Hex1bApp app)
     {
         var decisions = state.Decisions ?? SampleData.Decisions;
-        var listItems = decisions.Select(d => $"📋 {d.Date}  {d.Title}").ToList() as IReadOnlyList<string>;
+        var listItems = decisions.Select(d => $"  📋 {d.Date}  {d.Title}").ToList() as IReadOnlyList<string>;
 
         var selectedIdx = Math.Clamp(state.DecisionSelectedIndex, 0, decisions.Count - 1);
         var selected = decisions[selectedIdx];
+        var acc = ThemeManager.GetAccentCode(state.SelectedThemeIndex);
+        var sec = ThemeManager.GetSecondaryAccent(state.SelectedThemeIndex);
+        var R = PanelRenderer.Reset;
+        var B = PanelRenderer.Bold;
+        var D = PanelRenderer.Dim;
+        var hBg = ThemeManager.GetPanelHeaderBg(state.SelectedThemeIndex);
 
         return v.HStack(h =>
         [
-            h.Border(b =>
+            h.VStack(left =>
             [
-                b.List(listItems)
+                left.Text($"  {hBg}{B}{acc} 📋  Decisions {R}"),
+                left.Text($"  {D}Team decisions and architectural choices{R}"),
+                left.Text(""),
+                left.Text($"  {sec}{new string('━', 30)}{R}"),
+                left.Text(""),
+                left.List(listItems)
                     .OnSelectionChanged(e => { state.DecisionSelectedIndex = e.SelectedIndex; })
                     .Fill()
-            ]).Title("📋 Decisions").FillWidth(2).FillHeight(),
+            ]).FillWidth(1).FillHeight(),
 
-            h.Border(b =>
+            h.VStack(detail =>
             [
-                b.Text($"  Title:  {selected.Title}"),
-                b.Text($"  Date:   {selected.Date}"),
-                b.Text($"  Author: 👤 {selected.Author}"),
-                b.Text(""),
-                b.Text($"  {selected.Content}"),
-            ]).Title("Details").Fill(),
+                detail.Text(""),
+                detail.Text($"  {hBg}{B}{acc} 📋  {selected.Title} {R}"),
+                detail.Text(""),
+                detail.Text($"  {sec}{new string('━', 36)}{R}"),
+                detail.Text(""),
+                detail.Text($"    {D}Date:{R}      {B}{selected.Date}{R}"),
+                detail.Text($"    {D}Author:{R}    👤 {B}{selected.Author}{R}"),
+                detail.Text(""),
+                detail.Text($"  {sec}{new string('━', 36)}{R}"),
+                detail.Text(""),
+                detail.Text($"  {hBg}{B}{acc}Content{R}"),
+                detail.Text(""),
+                ..MarkdownRenderer.Render(detail, selected.Content).Select(w => w),
+            ]).FillWidth(2).FillHeight(),
         ]).Fill();
     }
 }

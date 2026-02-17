@@ -9,7 +9,7 @@ namespace SquadTUI.Tests.E2E;
 public class CharterNavigationTests
 {
     [Fact]
-    public async Task FullNavigation_Roster_MemberDetail_Charter_Back()
+    public async Task EscapeNavigation_BackFromScreensToDashboard()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
@@ -26,47 +26,35 @@ public class CharterNavigationTests
         var snapshot = terminal.CreateSnapshot();
         snapshot.ContainsText("Team Roster").Should().BeTrue();
 
-        // Enter to go to Member Detail
-        var toDetail = new Hex1bTerminalInputSequenceBuilder()
-            .Enter()
+        // Escape from Roster should go to Dashboard
+        var backToDashboard = new Hex1bTerminalInputSequenceBuilder()
+            .Key(Hex1bKey.Escape)
             .Build();
-        await toDetail.ApplyAsync(terminal);
-        await Task.Delay(200);
-
-        snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Screen: MemberDetail").Should().BeTrue();
-
-        // E to go to Charter
-        var toCharter = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.E)
-            .Build();
-        await toCharter.ApplyAsync(terminal);
-        await Task.Delay(200);
-
-        snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Charter").Should().BeTrue();
-        snapshot.ContainsText("Screen: Charter").Should().BeTrue();
-
-        // B to go back to Member Detail
-        var backToDetail = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.B)
-            .Build();
-        await backToDetail.ApplyAsync(terminal);
-        await Task.Delay(200);
-
-        snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Screen: MemberDetail").Should().BeTrue();
-
-        // B to go back to Roster
-        var backToRoster = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.B)
-            .Build();
-        await backToRoster.ApplyAsync(terminal);
+        await backToDashboard.ApplyAsync(terminal);
         await Task.Delay(200);
 
         snapshot = terminal.CreateSnapshot();
         snapshot.ContainsText("Team Roster").Should().BeTrue();
-        snapshot.ContainsText("Screen: Roster").Should().BeTrue();
+
+        // Navigate to Decisions
+        var toDecisions = new Hex1bTerminalInputSequenceBuilder()
+            .Key(Hex1bKey.D3)
+            .Build();
+        await toDecisions.ApplyAsync(terminal);
+        await Task.Delay(200);
+
+        snapshot = terminal.CreateSnapshot();
+        snapshot.ContainsText("Decisions").Should().BeTrue();
+
+        // Escape from Decisions should go to Dashboard
+        var backAgain = new Hex1bTerminalInputSequenceBuilder()
+            .Key(Hex1bKey.Escape)
+            .Build();
+        await backAgain.ApplyAsync(terminal);
+        await Task.Delay(200);
+
+        snapshot = terminal.CreateSnapshot();
+        snapshot.ContainsText("Team Roster").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

@@ -44,7 +44,7 @@ public class DecisionsScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Danny").Should().BeTrue();
+        snapshot.ContainsText("Solaire").Should().BeTrue();
         snapshot.ContainsText("2026-02-16").Should().BeTrue();
 
         cts.Cancel();
@@ -66,7 +66,8 @@ public class DecisionsScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Details").Should().BeTrue();
+        // Detail pane now shows selected decision title and content inline
+        snapshot.ContainsText("Date:").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

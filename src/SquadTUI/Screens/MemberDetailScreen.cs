@@ -1,6 +1,7 @@
 using Hex1b;
 using Hex1b.Widgets;
 using SquadTUI.Rendering;
+using SquadTUI.Themes;
 
 namespace SquadTUI.Screens;
 
@@ -8,7 +9,7 @@ public static class MemberDetailScreen
 {
     public static Hex1bWidget Render(WidgetContext<VStackWidget> v, AppState state, Hex1bApp app)
     {
-        var memberName = state.SelectedMemberName ?? "Danny";
+        var memberName = state.SelectedMemberName ?? "Solaire";
         var members = state.Members ?? SampleData.Members;
         var member = members.FirstOrDefault(m => m.Name == memberName) ?? members[0];
 
@@ -17,37 +18,59 @@ public static class MemberDetailScreen
         var logs = state.LogEntries ?? SampleData.LogEntries;
         var recentLogs = logs.Where(l => l.Participants.Contains(member.Name)).Take(3).ToList();
 
+        var acc = ThemeManager.GetAccentCode(state.SelectedThemeIndex);
+        var sec = ThemeManager.GetSecondaryAccent(state.SelectedThemeIndex);
+        var R = PanelRenderer.Reset;
+        var B = PanelRenderer.Bold;
+        var D = PanelRenderer.Dim;
+
         return v.VStack(inner =>
         {
             var widgets = new List<Hex1bWidget>
             {
-                inner.Border(b =>
+                inner.VStack(header =>
                 [
-                    b.Text($"  {GetStatusBadge(member.Status)} {member.Name} — {member.Role}"),
-                    b.Text($"  Status: {member.Status}    Current Task: {member.CurrentTask ?? "None"}"),
-                ]).Title("👤 Member"),
+                    header.Text($"  {B}{acc}👤 {member.Name}{R}"),
+                    header.Text($"  {D}{sec}{new string('━', 44)}{R}"),
+                    header.Text($"  {GetStatusBadge(member.Status)} {B}{member.Name}{R}  {D}—{R}  {member.Role}{R}"),
+                    header.Text($"  {D}Status:{R} {member.Status}    {D}Current Task:{R} {member.CurrentTask ?? $"{D}None{R}"}{R}"),
+                ]),
 
-                inner.Border(b =>
+                inner.VStack(taskSection =>
+                {
+                    var tw = new List<Hex1bWidget>
+                    {
+                        taskSection.Text($"  {D}{sec}{new string('━', 44)}{R}"),
+                        taskSection.Text($"  {B}{acc}📋 Tasks{R}"),
+                    };
+                    if (memberTasks.Count > 0)
+                        foreach (var t in memberTasks)
+                            tw.Add(taskSection.Text($"  {GetTaskBadge(t.Status)} {B}{t.Title}{R}  {D}{t.Description}{R}"));
+                    else
+                        tw.Add(taskSection.Text($"  {D}No tasks assigned{R}"));
+                    return tw.ToArray();
+                }),
+
+                inner.VStack(charterSection =>
                 [
-                    ..MarkdownRenderer.Render(b, charter)
-                ]).Title("📜 Charter"),
+                    charterSection.Text($"  {D}{sec}{new string('━', 44)}{R}"),
+                    charterSection.Text($"  {B}{acc}📜 Charter{R}"),
+                    ..MarkdownRenderer.Render(charterSection, charter)
+                ]),
             };
-
-            if (memberTasks.Count > 0)
-            {
-                widgets.Add(inner.Border(b =>
-                    memberTasks.Select(t => b.Text($"  {GetTaskBadge(t.Status)} {t.Title}")).ToArray()
-                ).Title("📋 Tasks"));
-            }
 
             if (recentLogs.Count > 0)
             {
-                widgets.Add(inner.Border(b =>
-                    recentLogs.Select(l => b.Text($"  📅 {l.Date}  {l.Topic} — {l.Summary}")).ToArray()
-                ).Title("📊 Recent Activity"));
+                widgets.Add(inner.VStack(logSection =>
+                [
+                    logSection.Text($"  {D}{sec}{new string('━', 44)}{R}"),
+                    logSection.Text($"  {B}{acc}📊 Recent Activity{R}"),
+                    ..recentLogs.Select(l => logSection.Text($"  {D}{l.Date}{R}  {l.Topic}  {D}{l.Summary}{R}"))
+                ]));
             }
 
-            widgets.Add(inner.Text("  [B] Back to Roster    [E] Edit Charter"));
+            widgets.Add(inner.Text(""));
+            widgets.Add(inner.Text($"  {D}Esc Back to Roster    E Edit Charter{R}"));
 
             return widgets.ToArray();
         }).Fill();

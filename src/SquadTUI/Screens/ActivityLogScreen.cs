@@ -1,5 +1,7 @@
 using Hex1b;
 using Hex1b.Widgets;
+using SquadTUI.Rendering;
+using SquadTUI.Themes;
 
 namespace SquadTUI.Screens;
 
@@ -8,49 +10,75 @@ public static class ActivityLogScreen
     public static Hex1bWidget Render(WidgetContext<VStackWidget> v, AppState state, Hex1bApp app)
     {
         var logs = state.LogEntries ?? SampleData.LogEntries;
-        var listItems = logs.Select(l => $"📅 {l.Date}  {l.Topic}").ToList() as IReadOnlyList<string>;
+        var listItems = logs.Select(l => $"  📅 {l.Date}  {l.Topic}").ToList() as IReadOnlyList<string>;
 
         var selectedIdx = Math.Clamp(state.LogSelectedIndex, 0, logs.Count - 1);
         var selected = logs[selectedIdx];
+        var acc = ThemeManager.GetAccentCode(state.SelectedThemeIndex);
+        var sec = ThemeManager.GetSecondaryAccent(state.SelectedThemeIndex);
+        var R = PanelRenderer.Reset;
+        var B = PanelRenderer.Bold;
+        var D = PanelRenderer.Dim;
+
+        var hBg = ThemeManager.GetPanelHeaderBg(state.SelectedThemeIndex);
 
         return v.HStack(h =>
         [
-            h.Border(b =>
+            h.VStack(left =>
             [
-                b.List(listItems)
+                left.Text($"  {hBg}{B}{acc} 📊  Activity Log {R}"),
+                left.Text($"  {D}Chronological record of squad interactions{R}"),
+                left.Text(""),
+                left.Text($"  {sec}{new string('━', 30)}{R}"),
+                left.Text(""),
+                left.List(listItems)
                     .OnSelectionChanged(e => { state.LogSelectedIndex = e.SelectedIndex; })
                     .Fill()
-            ]).Title("📊 Activity Log").FillWidth(2).FillHeight(),
+            ]).FillWidth(1).FillHeight(),
 
-            h.Border(b =>
+            h.VStack(detail =>
             {
                 var widgets = new List<Hex1bWidget>
                 {
-                    b.Text($"  Topic: {selected.Topic}"),
-                    b.Text($"  Date:  {selected.Date}"),
-                    b.Text($"  👥 Participants: {string.Join(", ", selected.Participants)}"),
-                    b.Text(""),
-                    b.Text($"  {selected.Summary}"),
+                    detail.Text(""),
+                    detail.Text($"  {hBg}{B}{acc} 📅  {selected.Topic} {R}"),
+                    detail.Text(""),
+                    detail.Text($"  {sec}{new string('━', 36)}{R}"),
+                    detail.Text(""),
+                    detail.Text($"    {D}Date:{R}          {B}{selected.Date}{R}"),
+                    detail.Text($"    {D}Participants:{R}  {string.Join(", ", selected.Participants)}{R}"),
+                    detail.Text(""),
+                    detail.Text($"  {sec}{new string('━', 36)}{R}"),
+                    detail.Text(""),
+                    detail.Text($"  {hBg}{B}{acc}Summary{R}"),
+                    detail.Text(""),
+                    detail.Text($"    {selected.Summary}{R}"),
                 };
 
                 if (selected.Decisions.Count > 0)
                 {
-                    widgets.Add(b.Text(""));
-                    widgets.Add(b.Text("  Decisions:"));
+                    widgets.Add(detail.Text(""));
+                    widgets.Add(detail.Text($"  {sec}{new string('━', 36)}{R}"));
+                    widgets.Add(detail.Text(""));
+                    widgets.Add(detail.Text($"  {hBg}{B}{acc}Decisions{R}"));
+                    widgets.Add(detail.Text(""));
                     foreach (var d in selected.Decisions)
-                        widgets.Add(b.Text($"    • {d}"));
+                        widgets.Add(detail.Text($"    • {d}{R}"));
                 }
 
                 if (selected.Outcomes.Count > 0)
                 {
-                    widgets.Add(b.Text(""));
-                    widgets.Add(b.Text("  Outcomes:"));
+                    widgets.Add(detail.Text(""));
+                    widgets.Add(detail.Text($"  {sec}{new string('━', 36)}{R}"));
+                    widgets.Add(detail.Text(""));
+                    widgets.Add(detail.Text($"  {hBg}{B}{acc}Outcomes{R}"));
+                    widgets.Add(detail.Text(""));
                     foreach (var o in selected.Outcomes)
-                        widgets.Add(b.Text($"    • {o}"));
+                        widgets.Add(detail.Text($"    • {o}{R}"));
                 }
 
                 return widgets.ToArray();
-            }).Title("Details").Fill(),
+            }).FillWidth(2).FillHeight(),
         ]).Fill();
     }
 }

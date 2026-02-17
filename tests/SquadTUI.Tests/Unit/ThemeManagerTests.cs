@@ -57,4 +57,120 @@ public class ThemeManagerTests
         var theme = ThemeManager.CreateHeistTheme();
         theme.Should().NotBeNull();
     }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    public void GetAccentCode_ReturnsNonNullString(int index)
+    {
+        var code = ThemeManager.GetAccentCode(index);
+        code.Should().NotBeNullOrEmpty();
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    public void GetAccentCode_ReturnsAnsiEscapeCode(int index)
+    {
+        var code = ThemeManager.GetAccentCode(index);
+        code.Should().StartWith("\x1b[");
+    }
+
+    [Theory]
+    [InlineData(4, 0)]
+    [InlineData(5, 1)]
+    [InlineData(8, 0)]
+    [InlineData(7, 3)]
+    public void GetAccentCode_WrapsAroundIndex(int input, int expectedEquivalent)
+    {
+        var code = ThemeManager.GetAccentCode(input);
+        var expected = ThemeManager.GetAccentCode(expectedEquivalent);
+        code.Should().Be(expected);
+    }
+
+    [Fact]
+    public void GetPanelColors_ReturnsNonNull()
+    {
+        var colors = ThemeManager.GetPanelColors(0);
+        colors.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void GetPanelColors_AccentMatchesGetAccentCode()
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            var colors = ThemeManager.GetPanelColors(i);
+            colors.Accent.Should().Be(ThemeManager.GetAccentCode(i));
+        }
+    }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(-5)]
+    [InlineData(-100)]
+    public void GetTheme_NegativeIndex_DoesNotCrash(int index)
+    {
+        // C# modulo with negative numbers may return negative, but GetTheme should handle it
+        var act = () => ThemeManager.GetTheme(index);
+        act.Should().NotThrow();
+    }
+
+    [Theory]
+    [InlineData(100)]
+    [InlineData(1000)]
+    [InlineData(int.MaxValue)]
+    public void GetAccentCode_VeryLargeIndex_WrapsCorrectly(int index)
+    {
+        var code = ThemeManager.GetAccentCode(index);
+        code.Should().NotBeNullOrEmpty();
+        code.Should().StartWith("\x1b[");
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(7)]
+    [InlineData(99)]
+    public void GetPanelColors_ReturnsValidForAllIndices(int index)
+    {
+        var colors = ThemeManager.GetPanelColors(index);
+        colors.Should().NotBeNull();
+        colors.Accent.Should().NotBeNullOrEmpty();
+    }
+
+    [Fact]
+    public void GetPanelColors_LargeIndex_WrapsToValidAccent()
+    {
+        var colors100 = ThemeManager.GetPanelColors(100);
+        var colors0 = ThemeManager.GetPanelColors(0);
+        // 100 % 4 == 0, so they should match
+        colors100.Accent.Should().Be(colors0.Accent);
+    }
+
+    [Fact]
+    public void CreateSunsetTheme_ReturnsTheme()
+    {
+        var theme = ThemeManager.CreateSunsetTheme();
+        theme.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void CreateHighContrastTheme_ReturnsTheme()
+    {
+        var theme = ThemeManager.CreateHighContrastTheme();
+        theme.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void AllThemes_HaveDistinctNames()
+    {
+        ThemeManager.ThemeNames.Should().OnlyHaveUniqueItems();
+    }
 }
