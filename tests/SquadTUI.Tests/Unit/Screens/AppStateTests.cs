@@ -1,6 +1,9 @@
 using FluentAssertions;
+using LanguageExt;
+using static LanguageExt.Prelude;
 using SquadTUI.Screens;
 using SquadTUI.Models;
+using SquadTUI.Tests.Fixtures;
 
 namespace SquadTUI.Tests.Unit.Screens;
 
@@ -44,7 +47,7 @@ public class AppStateTests
     public void RosterSelectedIndex_ClampedToZero_WhenMembersEmpty()
     {
         var state = new AppState();
-        state.Members = new List<SquadMember>();
+        state.Members = Right<AppError, IReadOnlyList<SquadMember>>(new List<SquadMember>());
         // Simulate K press logic: Math.Max(index - 1, 0)
         state.RosterSelectedIndex = Math.Max(state.RosterSelectedIndex - 1, 0);
         state.RosterSelectedIndex.Should().Be(0);
@@ -64,8 +67,8 @@ public class AppStateTests
     public void SkillSelectedIndex_ClampedAtBoundary()
     {
         var state = new AppState();
-        state.Skills = SampleData.Skills;
-        int maxIndex = state.Skills.Count - 1;
+        state.Skills = Right<AppError, IReadOnlyList<Skill>>(SampleData.Skills);
+        int maxIndex = state.Skills.GetOrEmpty().Count - 1;
         // Simulate J press: Math.Min(index + 1, count - 1)
         state.SkillSelectedIndex = maxIndex;
         state.SkillSelectedIndex = Math.Min(state.SkillSelectedIndex + 1, maxIndex);
@@ -91,8 +94,8 @@ public class AppStateTests
     public void LogSelectedIndex_ClampedCorrectly()
     {
         var state = new AppState();
-        state.LogEntries = SampleData.LogEntries;
-        int maxIndex = state.LogEntries.Count - 1;
+        state.LogEntries = Right<AppError, IReadOnlyList<OrchestrationLogEntry>>(SampleData.LogEntries);
+        int maxIndex = state.LogEntries.GetOrEmpty().Count - 1;
 
         // Try to go past the end
         state.LogSelectedIndex = maxIndex;
@@ -128,6 +131,27 @@ public class AppStateTests
     }
 
     [Fact]
+    public void ShowSettingsOverlay_DefaultsToFalse()
+    {
+        var state = new AppState();
+        state.ShowSettingsOverlay.Should().BeFalse();
+    }
+
+    [Fact]
+    public void PreviewThemeIndex_DefaultsToNegativeOne()
+    {
+        var state = new AppState();
+        state.PreviewThemeIndex.Should().Be(-1);
+    }
+
+    [Fact]
+    public void OriginalThemeIndex_DefaultsToZero()
+    {
+        var state = new AppState();
+        state.OriginalThemeIndex.Should().Be(0);
+    }
+
+    [Fact]
     public void AllSelectedIndices_DefaultToZero()
     {
         var state = new AppState();
@@ -142,8 +166,8 @@ public class AppStateTests
     public void RosterSelectedIndex_CanNavigateFullRange()
     {
         var state = new AppState();
-        state.Members = SampleData.Members;
-        int count = state.Members.Count;
+        state.Members = Right<AppError, IReadOnlyList<SquadMember>>(SampleData.Members);
+        int count = state.Members.GetOrEmpty().Count;
 
         // Navigate all the way down
         for (int i = 0; i < count + 5; i++)

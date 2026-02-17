@@ -1,3 +1,5 @@
+using LanguageExt;
+using static LanguageExt.Prelude;
 using SquadTUI.Models;
 
 namespace SquadTUI.Screens;
@@ -27,13 +29,16 @@ public class AppState
     public int LogSelectedIndex { get; set; }
     public int SkillSelectedIndex { get; set; }
     public int SettingsSelectedIndex { get; set; }
+    public int DashboardFocusedPanel { get; set; } = 0;
 
-    // Loaded data from services
-    public IReadOnlyList<SquadMember>? Members { get; set; }
-    public IReadOnlyList<DecisionEntry>? Decisions { get; set; }
-    public IReadOnlyList<Skill>? Skills { get; set; }
-    public IReadOnlyList<OrchestrationLogEntry>? LogEntries { get; set; }
-    public IReadOnlyList<SquadTask>? Tasks { get; set; }
+    // Loaded data from services — monadic Either for error visibility
+    public Either<AppError, IReadOnlyList<SquadMember>> Members { get; set; } = Right<AppError, IReadOnlyList<SquadMember>>([]);
+    public Either<AppError, IReadOnlyList<DecisionEntry>> Decisions { get; set; } = Right<AppError, IReadOnlyList<DecisionEntry>>([]);
+    public Either<AppError, IReadOnlyList<Skill>> Skills { get; set; } = Right<AppError, IReadOnlyList<Skill>>([]);
+    public Either<AppError, IReadOnlyList<OrchestrationLogEntry>> LogEntries { get; set; } = Right<AppError, IReadOnlyList<OrchestrationLogEntry>>([]);
+    public Either<AppError, IReadOnlyList<SquadTask>> Tasks { get; set; } = Right<AppError, IReadOnlyList<SquadTask>>([]);
+    public Either<AppError, IReadOnlyList<SprintMetrics>> SprintHistory { get; set; } = Right<AppError, IReadOnlyList<SprintMetrics>>([]);
+    public Option<string> CharterContent { get; set; } = None;
     public DashboardData? Dashboard { get; set; }
 
     // Loading state
@@ -45,6 +50,11 @@ public class AppState
     public int ActiveTab { get; set; } = 0;
     public bool ShowHelp { get; set; } = false;
     public bool ShowBurndown { get; set; } = false;
+
+    // Theme modal overlay
+    public bool ShowSettingsOverlay { get; set; } = false;
+    public int PreviewThemeIndex { get; set; } = -1; // -1 means "use SelectedThemeIndex"
+    public int OriginalThemeIndex { get; set; } = 0;
 
     // Live dashboard
     public bool IsLiveEnabled { get; set; } = true;

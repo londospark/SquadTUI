@@ -1,5 +1,6 @@
 using Hex1b;
 using Hex1b.Widgets;
+using SquadTUI.Models;
 using SquadTUI.Rendering;
 using SquadTUI.Themes;
 
@@ -9,14 +10,23 @@ public static class MemberDetailScreen
 {
     public static Hex1bWidget Render(WidgetContext<VStackWidget> v, AppState state, Hex1bApp app)
     {
-        var memberName = state.SelectedMemberName ?? "Sonic";
-        var members = state.Members ?? SampleData.Members;
+        var members = state.Members.GetOrEmpty();
+        if (members.Count == 0)
+        {
+            var D0 = PanelRenderer.Dim;
+            var R0 = PanelRenderer.Reset;
+            return v.VStack(empty => [
+                empty.Text(""),
+                empty.Text($"  {D0}No member selected. Ensure your .squad/ directory contains a roster.{R0}"),
+            ]).Fill();
+        }
+        var memberName = state.SelectedMemberName ?? members[0].Name;
         var member = members.FirstOrDefault(m => m.Name == memberName) ?? members[0];
 
-        var charter = SampleData.GetCharterFor(member.Name);
-        var allTasks = state.Tasks ?? SampleData.Tasks;
+        var charter = state.CharterContent.Match(Some: s => s, None: () => "No charter loaded");
+        var allTasks = state.Tasks.GetOrEmpty();
         var memberTasks = allTasks.Where(t => t.Assignee == member.Name).ToList();
-        var logs = state.LogEntries ?? SampleData.LogEntries;
+        var logs = state.LogEntries.GetOrEmpty();
         var recentLogs = logs.Where(l => l.Participants.Contains(member.Name)).Take(3).ToList();
 
         var acc = ThemeManager.GetAccentCode(state.SelectedThemeIndex);

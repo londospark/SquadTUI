@@ -1,5 +1,6 @@
 using Hex1b;
 using Hex1b.Widgets;
+using SquadTUI.Models;
 using SquadTUI.Rendering;
 using SquadTUI.Themes;
 
@@ -9,8 +10,9 @@ public static class CharterScreen
 {
     public static Hex1bWidget Render(WidgetContext<VStackWidget> v, AppState state, Hex1bApp app)
     {
-        var memberName = state.SelectedMemberName ?? "Sonic";
-        var charter = SampleData.GetCharterFor(memberName);
+        var members = state.Members.GetOrEmpty();
+        var memberName = state.SelectedMemberName ?? (members.Count > 0 ? members[0].Name : "Unknown");
+        var charter = state.CharterContent.Match(Some: s => s, None: () => "No charter loaded");
 
         var acc = ThemeManager.GetAccentCode(state.SelectedThemeIndex);
         var sec = ThemeManager.GetSecondaryAccent(state.SelectedThemeIndex);

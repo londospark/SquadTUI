@@ -1,6 +1,7 @@
 using Hex1b;
 using Hex1b.Charts;
 using Hex1b.Widgets;
+using SquadTUI.Models;
 using SquadTUI.Rendering;
 using SquadTUI.Themes;
 
@@ -17,9 +18,18 @@ public static class MetricsScreen
             state.LastRefreshTime = DateTime.Now;
         }
 
-        var sprints = SampleData.SprintHistory;
-        var tasks = state.Tasks ?? SampleData.Tasks;
-        var members = state.Members ?? SampleData.Members;
+        var sprints = state.SprintHistory.GetOrEmpty();
+        var tasks = state.Tasks.GetOrEmpty();
+        var members = state.Members.GetOrEmpty();
+        if (sprints.Count == 0 && tasks.Count == 0)
+        {
+            var D0 = PanelRenderer.Dim;
+            var R0 = PanelRenderer.Reset;
+            return v.VStack(empty => [
+                empty.Text(""),
+                empty.Text($"  {D0}No sprint data available. Ensure your .squad/ directory contains task and log data.{R0}"),
+            ]).Fill();
+        }
         var acc = ThemeManager.GetAccentCode(state.SelectedThemeIndex);
         var sec = ThemeManager.GetSecondaryAccent(state.SelectedThemeIndex);
         var R = PanelRenderer.Reset;
@@ -41,6 +51,13 @@ public static class MetricsScreen
         var burndownData = sprints.Select(s => new ChartItem(s.SprintName.Split(' ')[0], s.CarriedOver)).ToArray();
         var chartData = state.ShowBurndown ? burndownData : velocityData;
 
+        // Compute metrics from state data
+        var totalPlanned = sprints.Sum(s => s.PlannedTasks);
+        var totalDone = sprints.Sum(s => s.CompletedTasks);
+        var overallCompletionRate = totalPlanned > 0 ? Math.Round((double)totalDone / totalPlanned * 100, 1) : 0;
+        var averageVelocity = sprints.Count > 0 ? Math.Round(sprints.Average(s => (double)s.Velocity), 1) : 0;
+        var velocityTrend = sprints.Count >= 2 ? sprints[^1].Velocity - sprints[^2].Velocity : 0;
+
         // Task status breakdown
         var statusData = new ChartItem[]
         {
@@ -51,7 +68,7 @@ public static class MetricsScreen
         var modeLabel = state.ShowBurndown ? "Burndown View" : "Velocity View";
         var chartTitle = state.ShowBurndown ? "Remaining Work Trend" : "Tasks Completed per Sprint";
         var chartSubtitle = state.ShowBurndown ? "Remaining tasks carried over per sprint" : "Completed tasks per sprint cycle";
-        var trendArrow = SampleData.VelocityTrend > 0 ? "\x1b[32m▲" : SampleData.VelocityTrend < 0 ? "\x1b[31m▼" : "\x1b[33m─";
+        var trendArrow = velocityTrend > 0 ? "\x1b[32m▲" : velocityTrend < 0 ? "\x1b[31m▼" : "\x1b[33m─";
 
         return v.Responsive(r =>
         [
@@ -69,9 +86,9 @@ public static class MetricsScreen
                     [
                         left.Text($"  {B}{acc}▌{R} {B}{acc}Sprint Overview{R}"),
                         left.Text(""),
-                        left.Text($"  {D}Completion Rate:{R}  {B}{SampleData.OverallCompletionRate}%{R}"),
-                        left.Text($"  {D}Avg Velocity:{R}    {B}{SampleData.AverageVelocity}{R} {D}tasks/sprint{R}"),
-                        left.Text($"  {D}Trend:{R}           {trendArrow} {B}{Math.Abs(SampleData.VelocityTrend)}{R}{D} tasks{R}"),
+                        left.Text($"  {D}Completion Rate:{R}  {B}{overallCompletionRate}%{R}"),
+                        left.Text($"  {D}Avg Velocity:{R}    {B}{averageVelocity}{R} {D}tasks/sprint{R}"),
+                        left.Text($"  {D}Trend:{R}           {trendArrow} {B}{Math.Abs(velocityTrend)}{R}{D} tasks{R}"),
                         left.Text(""),
                         left.Text($"  {B}{acc}▌{R} {B}{acc}Task Status{R}"),
                         left.Text(""),
@@ -127,9 +144,9 @@ public static class MetricsScreen
                     [
                         left.Text($"  {B}{acc}▌{R} {B}{acc}Sprint Overview{R}"),
                         left.Text(""),
-                        left.Text($"  {D}Completion Rate:{R}  {B}{SampleData.OverallCompletionRate}%{R}"),
-                        left.Text($"  {D}Avg Velocity:{R}    {B}{SampleData.AverageVelocity}{R} {D}tasks/sprint{R}"),
-                        left.Text($"  {D}Trend:{R}           {trendArrow} {B}{Math.Abs(SampleData.VelocityTrend)}{R}{D} tasks{R}"),
+                        left.Text($"  {D}Completion Rate:{R}  {B}{overallCompletionRate}%{R}"),
+                        left.Text($"  {D}Avg Velocity:{R}    {B}{averageVelocity}{R} {D}tasks/sprint{R}"),
+                        left.Text($"  {D}Trend:{R}           {trendArrow} {B}{Math.Abs(velocityTrend)}{R}{D} tasks{R}"),
                         left.Text(""),
                         left.Text($"  {B}{acc}▌{R} {B}{acc}Task Status{R}"),
                         left.Text(""),
@@ -157,8 +174,8 @@ public static class MetricsScreen
                     col.Text($"  {hBg}{B}{acc}📈 Sprint Metrics{R}"),
                     col.Text($"  {D}{modeLabel} (V to toggle){R}"),
                     col.Text(""),
-                    col.Text($"  {D}Completion:{R} {B}{SampleData.OverallCompletionRate}%{R}  {D}Velocity:{R} {B}{SampleData.AverageVelocity}{R}"),
-                    col.Text($"  {D}Trend:{R} {trendArrow} {B}{Math.Abs(SampleData.VelocityTrend)}{R}{D} tasks{R}"),
+                    col.Text($"  {D}Completion:{R} {B}{overallCompletionRate}%{R}  {D}Velocity:{R} {B}{averageVelocity}{R}"),
+                    col.Text($"  {D}Trend:{R} {trendArrow} {B}{Math.Abs(velocityTrend)}{R}{D} tasks{R}"),
                     col.Text(""),
                     col.Text($"  \x1b[32m✅ {done}{R}  \x1b[33m🔄 {active}{R}  {D}⏳ {pending}{R}  \x1b[31m🚫 {blocked}{R}"),
                     col.Text(""),

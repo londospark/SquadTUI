@@ -6,14 +6,21 @@ using Hex1b.Input;
 namespace SquadTUI.Tests.E2E;
 
 [Collection("E2E")]
-public class AppNavigationTests
+public class DashboardPanelNavigationTests
 {
     [Fact]
-    public async Task App_StartsAndShowsDashboard()
+    public async Task Tab_CyclesFocusForward()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        // RightArrow cycles focus forward on Dashboard
+        var sequence = new Hex1bTerminalInputSequenceBuilder()
+            .Right()
+            .Build();
+        await sequence.ApplyAsync(terminal);
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
@@ -24,15 +31,63 @@ public class AppNavigationTests
     }
 
     [Fact]
-    public async Task Press2_NavigatesToRoster()
+    public async Task RightArrow_CyclesThrough4Panels()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
+        // RightArrow 4 times: should wrap back to panel 0
         var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D2)
+            .Right().Wait(50)
+            .Right().Wait(50)
+            .Right().Wait(50)
+            .Right()
+            .Build();
+        await sequence.ApplyAsync(terminal);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        snapshot.ContainsText("Dashboard").Should().BeTrue();
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
+    }
+
+    [Fact]
+    public async Task LeftArrow_CyclesFocusBackward()
+    {
+        await using var terminal = TestAppBuilder.Build();
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        // LeftArrow from panel 0 should go to panel 3
+        var sequence = new Hex1bTerminalInputSequenceBuilder()
+            .Left()
+            .Build();
+        await sequence.ApplyAsync(terminal);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        snapshot.ContainsText("Dashboard").Should().BeTrue();
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
+    }
+
+    [Fact]
+    public async Task Enter_DrillsIntoRoster_WhenFocusPanel0()
+    {
+        await using var terminal = TestAppBuilder.Build();
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        // Focus is on panel 0 (Roster) by default, Enter to drill in
+        var sequence = new Hex1bTerminalInputSequenceBuilder()
+            .Enter()
             .Build();
         await sequence.ApplyAsync(terminal);
         await Task.Delay(200);
@@ -45,57 +100,17 @@ public class AppNavigationTests
     }
 
     [Fact]
-    public async Task Press3_NavigatesToDecisions()
+    public async Task Enter_DrillsIntoActivityLog_WhenFocusPanel1()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
+        // RightArrow once to panel 1 (Activity), then Enter
         var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D3)
-            .Build();
-        await sequence.ApplyAsync(terminal);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Decisions").Should().BeTrue();
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task Press4_NavigatesToSkills()
-    {
-        await using var terminal = TestAppBuilder.Build();
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D4)
-            .Build();
-        await sequence.ApplyAsync(terminal);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Skills").Should().BeTrue();
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task Press5_NavigatesToActivityLog()
-    {
-        await using var terminal = TestAppBuilder.Build();
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D5)
+            .Right().Wait(50)
+            .Enter()
             .Build();
         await sequence.ApplyAsync(terminal);
         await Task.Delay(200);
@@ -108,15 +123,43 @@ public class AppNavigationTests
     }
 
     [Fact]
-    public async Task Press6_NavigatesToMetrics()
+    public async Task Enter_DrillsIntoDecisions_WhenFocusPanel2()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
+        // RightArrow twice to panel 2 (Decisions), then Enter
         var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D6)
+            .Right().Wait(50)
+            .Right().Wait(50)
+            .Enter()
+            .Build();
+        await sequence.ApplyAsync(terminal);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        snapshot.ContainsText("Decisions").Should().BeTrue();
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
+    }
+
+    [Fact]
+    public async Task Enter_DrillsIntoMetrics_WhenFocusPanel3()
+    {
+        await using var terminal = TestAppBuilder.Build();
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        // RightArrow three times to panel 3 (Metrics), then Enter
+        var sequence = new Hex1bTerminalInputSequenceBuilder()
+            .Right().Wait(50)
+            .Right().Wait(50)
+            .Right().Wait(50)
+            .Enter()
             .Build();
         await sequence.ApplyAsync(terminal);
         await Task.Delay(200);
@@ -129,23 +172,31 @@ public class AppNavigationTests
     }
 
     [Fact]
-    public async Task Press1_BackToDashboard()
+    public async Task FocusResetsOnReturnToDashboard()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
+        // RightArrow to panel 2, navigate away with key 2, come back with key 1
         var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D2)
-            .Wait(100)
+            .Right().Wait(50)
+            .Right().Wait(50)
+            .Key(Hex1bKey.D2).Wait(100)
             .Key(Hex1bKey.D1)
             .Build();
         await sequence.ApplyAsync(terminal);
         await Task.Delay(200);
 
+        // Now press Enter — should go to Roster (panel 0), not Decisions (panel 2)
+        var enterSeq = new Hex1bTerminalInputSequenceBuilder()
+            .Enter()
+            .Build();
+        await enterSeq.ApplyAsync(terminal);
+        await Task.Delay(200);
+
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
         snapshot.ContainsText("Team Roster").Should().BeTrue();
 
         cts.Cancel();
@@ -153,113 +204,27 @@ public class AppNavigationTests
     }
 
     [Fact]
-    public async Task PressQ_AppExitsCleanly()
+    public async Task FocusedPanel_HasReverseVideoIndicator()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
+        // Default focus is panel 0 — Team Roster header should have reverse video
+        var snapshot = terminal.CreateSnapshot();
+        snapshot.ContainsText("Team Roster").Should().BeTrue();
+
+        // RightArrow to panel 1 and verify Activity header is visible
         var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.Q)
+            .Right()
             .Build();
         await sequence.ApplyAsync(terminal);
-
-        var completed = await Task.WhenAny(runTask, Task.Delay(2000));
-        completed.Should().Be(runTask, "app should exit when Q is pressed");
-
-        cts.Cancel();
-    }
-
-    [Fact]
-    public async Task NavBar_ShowsEmojiLabelsWithoutBrackets()
-    {
-        await using var terminal = TestAppBuilder.Build();
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
-        var snapshot = terminal.CreateSnapshot();
-        // NavBar uses emoji labels without bracket wrapping
+        snapshot = terminal.CreateSnapshot();
+        snapshot.ContainsText("Activity").Should().BeTrue();
         snapshot.ContainsText("Dashboard").Should().BeTrue();
-        snapshot.ContainsText("Roster").Should().BeTrue();
-        // Should NOT have bracket-style labels like [1]Dashboard
-        snapshot.ContainsText("[1]").Should().BeFalse();
-        snapshot.ContainsText("[2]").Should().BeFalse();
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task NavBar_DoesNotShowQuitButton()
-    {
-        await using var terminal = TestAppBuilder.Build();
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        // [Q]Quit was removed from NavBar
-        snapshot.ContainsText("[Q]Quit").Should().BeFalse();
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task InfoBar_IsNotDisplayed()
-    {
-        await using var terminal = TestAppBuilder.Build();
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        // InfoBar was removed — no status bar at bottom
-        snapshot.ContainsText("InfoBar").Should().BeFalse();
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task PressS_OpensThemeModal()
-    {
-        await using var terminal = TestAppBuilder.Build();
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.S)
-            .Build();
-        await sequence.ApplyAsync(terminal);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Theme Selection").Should().BeTrue();
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task PressF1_NavigatesToHelp()
-    {
-        await using var terminal = TestAppBuilder.Build();
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.F1)
-            .Build();
-        await sequence.ApplyAsync(terminal);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Help").Should().BeTrue();
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

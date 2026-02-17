@@ -1,6 +1,8 @@
 using Hex1b;
 using Hex1b.Input;
 using Hex1b.Widgets;
+using SquadTUI.Models;
+using SquadTUI.Rendering;
 using SquadTUI.Services;
 using SquadTUI.Themes;
 
@@ -28,6 +30,12 @@ public static class AppLayout
         Hex1bApp app,
         Hex1bAppOptions options)
     {
+        // Theme settings modal overlay — renders instead of normal content
+        if (state.ShowSettingsOverlay)
+        {
+            return RenderThemeModal(ctx, state, app, options);
+        }
+
         // NoSquad screen — no tabs
         if (state.CurrentScreen == Screen.NoSquad)
         {
@@ -125,13 +133,96 @@ public static class AppLayout
         ]).WithInputBindings(keys => BindKeys(keys, state, app, options));
     }
 
+    private static Hex1bWidget RenderThemeModal(
+        RootContext ctx,
+        AppState state,
+        Hex1bApp app,
+        Hex1bAppOptions options)
+    {
+        var ti = state.SelectedThemeIndex;
+        var acc = ThemeManager.GetAccentCode(ti);
+        var sec = ThemeManager.GetSecondaryAccent(ti);
+        var R = PanelRenderer.Reset;
+        var B = PanelRenderer.Bold;
+        var D = PanelRenderer.Dim;
+        var panelBg = ThemeManager.GetPanelBgColor(ti);
+
+        var themeItems = ThemeManager.ThemeNames
+            .Select((name, idx) => idx == ti ? $"  ► {name}" : $"    {name}")
+            .ToList() as IReadOnlyList<string>;
+
+        return ctx.VStack(v =>
+        [
+            v.Text(""),
+            v.Text(""),
+            new BackgroundPanelWidget(panelBg, v.VStack(modal =>
+            [
+                modal.Text($"  {B}{acc}🎨 Theme Selection{R}"),
+                modal.Text($"  {sec}{new string('━', 36)}{R}"),
+                modal.Text(""),
+                modal.List(themeItems)
+                    .OnSelectionChanged(e =>
+                    {
+                        state.SelectedThemeIndex = e.SelectedIndex;
+                        options.Theme = ThemeManager.GetTheme(e.SelectedIndex);
+                    })
+                    .OnItemActivated(_ =>
+                    {
+                        // Enter confirms selection and closes modal
+                        state.Settings.ThemeName = ThemeManager.ThemeNames[state.SelectedThemeIndex];
+                        SettingsService.Save(state.Settings);
+                        state.ShowSettingsOverlay = false;
+                    })
+                    .Fill(),
+                modal.Text(""),
+                modal.Text($"  {D}↑↓ Navigate  Enter Confirm  Esc Cancel{R}"),
+                modal.Text(""),
+            ]).FillWidth(1).FillHeight()),
+        ]).WithInputBindings(keys => BindModalKeys(keys, state, app, options));
+    }
+
+    private static void BindModalKeys(
+        InputBindingsBuilder keys,
+        AppState state,
+        Hex1bApp app,
+        Hex1bAppOptions options)
+    {
+        keys.Key(Hex1bKey.Escape).Action(() =>
+        {
+            // Revert to original theme
+            state.SelectedThemeIndex = state.OriginalThemeIndex;
+            options.Theme = ThemeManager.GetTheme(state.OriginalThemeIndex);
+            state.ShowSettingsOverlay = false;
+        }, "Cancel");
+        keys.Key(Hex1bKey.Enter).Action(() =>
+        {
+            // Confirm selection and save
+            state.Settings.ThemeName = ThemeManager.ThemeNames[state.SelectedThemeIndex];
+            SettingsService.Save(state.Settings);
+            state.ShowSettingsOverlay = false;
+        }, "Confirm");
+        keys.Key(Hex1bKey.J).Action(() =>
+        {
+            var newIndex = (state.SelectedThemeIndex + 1) % ThemeManager.ThemeNames.Length;
+            state.SelectedThemeIndex = newIndex;
+            options.Theme = ThemeManager.GetTheme(newIndex);
+        }, "Down");
+        keys.Key(Hex1bKey.K).Action(() =>
+        {
+            var newIndex = (state.SelectedThemeIndex - 1 + ThemeManager.ThemeNames.Length) % ThemeManager.ThemeNames.Length;
+            state.SelectedThemeIndex = newIndex;
+            options.Theme = ThemeManager.GetTheme(newIndex);
+        }, "Up");
+        keys.Key(Hex1bKey.Q).Action(() => { app.RequestStop(); }, "Quit");
+    }
+
     private static void BindKeys(
         InputBindingsBuilder keys,
         AppState state,
         Hex1bApp app,
         Hex1bAppOptions options)
     {
-        keys.Key(Hex1bKey.D1).Action(() => { if (state.CurrentScreen != Screen.NoSquad) state.CurrentScreen = Screen.Dashboard; }, "Dashboard");
+        keys.Key(Hex1bKey.D1).Action(() => { if (state.CurrentScreen != Screen.NoSquad) { state.CurrentScreen = Screen.Dashboard; state.DashboardFocusedPanel = 0; } }, "Dashboard");
         keys.Key(Hex1bKey.D2).Action(() => { if (state.CurrentScreen != Screen.NoSquad) state.CurrentScreen = Screen.Roster; }, "Roster");
         keys.Key(Hex1bKey.D3).Action(() => { if (state.CurrentScreen != Screen.NoSquad) state.CurrentScreen = Screen.Decisions; }, "Decisions");
         keys.Key(Hex1bKey.D4).Action(() => { if (state.CurrentScreen != Screen.NoSquad) state.CurrentScreen = Screen.Skills; }, "Skills");
@@ -143,7 +234,14 @@ public static class AppLayout
             state.SelectedThemeIndex = (state.SelectedThemeIndex + 1) % ThemeManager.ThemeNames.Length;
             options.Theme = ThemeManager.GetTheme(state.SelectedThemeIndex);
         }, "Theme");
-        keys.Key(Hex1bKey.S).Action(() => { if (state.CurrentScreen != Screen.NoSquad) state.CurrentScreen = Screen.Settings; }, "Settings");
+        keys.Key(Hex1bKey.S).Action(() =>
+        {
+            if (state.CurrentScreen != Screen.NoSquad)
+            {
+                state.OriginalThemeIndex = state.SelectedThemeIndex;
+                state.ShowSettingsOverlay = true;
+            }
+        }, "Settings");
         keys.Key(Hex1bKey.Escape).Action(() =>
         {
             if (state.CurrentScreen == Screen.MemberDetail)
@@ -151,7 +249,10 @@ public static class AppLayout
             else if (state.CurrentScreen == Screen.Charter)
                 state.CurrentScreen = Screen.MemberDetail;
             else if (state.CurrentScreen != Screen.Dashboard)
+            {
                 state.CurrentScreen = Screen.Dashboard;
+                state.DashboardFocusedPanel = 0;
+            }
         }, "Back");
         keys.Key(Hex1bKey.E).Action(() =>
         {
@@ -161,13 +262,13 @@ public static class AppLayout
         keys.Key(Hex1bKey.J).Action(() =>
         {
             if (state.CurrentScreen == Screen.Roster)
-                state.RosterSelectedIndex = Math.Min(state.RosterSelectedIndex + 1, (state.Members?.Count ?? 6) - 1);
+                state.RosterSelectedIndex = Math.Min(state.RosterSelectedIndex + 1, (state.Members.GetOrEmpty().Count is var mc && mc > 0 ? mc : 6) - 1);
             else if (state.CurrentScreen == Screen.Decisions)
-                state.DecisionSelectedIndex = Math.Min(state.DecisionSelectedIndex + 1, (state.Decisions?.Count ?? 4) - 1);
+                state.DecisionSelectedIndex = Math.Min(state.DecisionSelectedIndex + 1, (state.Decisions.GetOrEmpty().Count is var dc && dc > 0 ? dc : 4) - 1);
             else if (state.CurrentScreen == Screen.ActivityLog)
-                state.LogSelectedIndex = Math.Min(state.LogSelectedIndex + 1, (state.LogEntries?.Count ?? 3) - 1);
+                state.LogSelectedIndex = Math.Min(state.LogSelectedIndex + 1, (state.LogEntries.GetOrEmpty().Count is var lc && lc > 0 ? lc : 3) - 1);
             else if (state.CurrentScreen == Screen.Skills)
-                state.SkillSelectedIndex = Math.Min(state.SkillSelectedIndex + 1, (state.Skills?.Count ?? 5) - 1);
+                state.SkillSelectedIndex = Math.Min(state.SkillSelectedIndex + 1, (state.Skills.GetOrEmpty().Count is var sc && sc > 0 ? sc : 5) - 1);
             else if (state.CurrentScreen == Screen.Settings)
                 state.SettingsSelectedIndex = Math.Min(state.SettingsSelectedIndex + 1, 4);
         }, "Down");
@@ -251,5 +352,40 @@ public static class AppLayout
             if (state.CurrentScreen == Screen.Metrics)
                 state.ShowBurndown = !state.ShowBurndown;
         }, "Toggle Burndown");
+        keys.Key(Hex1bKey.Tab).OverridesCapture().Action(() =>
+        {
+            if (state.CurrentScreen == Screen.Dashboard)
+                state.DashboardFocusedPanel = (state.DashboardFocusedPanel + 1) % 4;
+        }, "Next Panel");
+        keys.Shift().Key(Hex1bKey.Tab).OverridesCapture().Action(() =>
+        {
+            if (state.CurrentScreen == Screen.Dashboard)
+                state.DashboardFocusedPanel = (state.DashboardFocusedPanel + 3) % 4;
+        }, "Prev Panel");
+        keys.Key(Hex1bKey.RightArrow).Action(() =>
+        {
+            if (state.CurrentScreen == Screen.Dashboard)
+                state.DashboardFocusedPanel = (state.DashboardFocusedPanel + 1) % 4;
+        }, "Next Panel");
+        keys.Key(Hex1bKey.LeftArrow).Action(() =>
+        {
+            if (state.CurrentScreen == Screen.Dashboard)
+                state.DashboardFocusedPanel = (state.DashboardFocusedPanel + 3) % 4;
+        }, "Prev Panel");
+        keys.Key(Hex1bKey.Enter).Action(() =>
+        {
+            if (state.CurrentScreen == Screen.Dashboard)
+            {
+                state.CurrentScreen = state.DashboardFocusedPanel switch
+                {
+                    0 => Screen.Roster,
+                    1 => Screen.ActivityLog,
+                    2 => Screen.Decisions,
+                    3 => Screen.Metrics,
+                    _ => Screen.Dashboard
+                };
+                state.DashboardFocusedPanel = 0;
+            }
+        }, "Drill In");
     }
 }

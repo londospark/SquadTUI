@@ -1,6 +1,7 @@
 using FluentAssertions;
 using SquadTUI.Screens;
 using SquadTUI.Themes;
+using SquadTUI.Tests.Fixtures;
 
 namespace SquadTUI.Tests.Integration;
 

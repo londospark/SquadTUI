@@ -1,5 +1,6 @@
 using Hex1b;
 using Hex1b.Widgets;
+using SquadTUI.Models;
 using SquadTUI.Rendering;
 using SquadTUI.Themes;
 
@@ -9,7 +10,16 @@ public static class ActivityLogScreen
 {
     public static Hex1bWidget Render(WidgetContext<VStackWidget> v, AppState state, Hex1bApp app)
     {
-        var logs = state.LogEntries ?? SampleData.LogEntries;
+        var logs = state.LogEntries.GetOrEmpty();
+        if (logs.Count == 0)
+        {
+            var D0 = PanelRenderer.Dim;
+            var R0 = PanelRenderer.Reset;
+            return v.VStack(empty => [
+                empty.Text(""),
+                empty.Text($"  {D0}No activity log entries found. Ensure your .squad/ directory contains log files.{R0}"),
+            ]).Fill();
+        }
         var listItems = logs.Select(l => $"  📅 {l.Date}  {l.Topic}").ToList() as IReadOnlyList<string>;
 
         var selectedIdx = Math.Clamp(state.LogSelectedIndex, 0, logs.Count - 1);

@@ -1,5 +1,6 @@
 using Hex1b;
 using Hex1b.Widgets;
+using SquadTUI.Models;
 using SquadTUI.Rendering;
 using SquadTUI.Themes;
 
@@ -9,7 +10,16 @@ public static class DecisionsScreen
 {
     public static Hex1bWidget Render(WidgetContext<VStackWidget> v, AppState state, Hex1bApp app)
     {
-        var decisions = state.Decisions ?? SampleData.Decisions;
+        var decisions = state.Decisions.GetOrEmpty();
+        if (decisions.Count == 0)
+        {
+            var D0 = PanelRenderer.Dim;
+            var R0 = PanelRenderer.Reset;
+            return v.VStack(empty => [
+                empty.Text(""),
+                empty.Text($"  {D0}No decisions found. Ensure your .squad/ directory contains decision files.{R0}"),
+            ]).Fill();
+        }
         var listItems = decisions.Select(d => $"  📋 {d.Date}  {d.Title}").ToList() as IReadOnlyList<string>;
 
         var selectedIdx = Math.Clamp(state.DecisionSelectedIndex, 0, decisions.Count - 1);

@@ -25,27 +25,19 @@ else
 var bridge = new DataBridge(ServiceProvider.Instance);
 _ = Task.Run(async () =>
 {
-    try
-    {
-        state.IsLoading = true;
-        var membersTask = bridge.LoadRosterDataAsync();
-        var decisionsTask = bridge.LoadDecisionsDataAsync();
-        var skillsTask = bridge.LoadSkillsDataAsync();
-        var logsTask = bridge.LoadLogDataAsync();
-        var tasksTask = bridge.LoadTasksFromRosterAsync();
-        await Task.WhenAll(membersTask, decisionsTask, skillsTask, logsTask, tasksTask);
-        state.Members = await membersTask;
-        state.Decisions = await decisionsTask;
-        state.Skills = await skillsTask;
-        state.LogEntries = await logsTask;
-        state.Tasks = await tasksTask;
-        state.IsLoading = false;
-    }
-    catch (Exception ex)
-    {
-        state.ErrorMessage = $"Failed to load data: {ex.Message}";
-        state.IsLoading = false;
-    }
+    state.IsLoading = true;
+    var membersTask = bridge.LoadRosterDataAsync();
+    var decisionsTask = bridge.LoadDecisionsDataAsync();
+    var skillsTask = bridge.LoadSkillsDataAsync();
+    var logsTask = bridge.LoadLogDataAsync();
+    var tasksTask = bridge.LoadTasksFromRosterAsync();
+    await Task.WhenAll(membersTask, decisionsTask, skillsTask, logsTask, tasksTask);
+    state.Members = await membersTask;
+    state.Decisions = await decisionsTask;
+    state.Skills = await skillsTask;
+    state.LogEntries = await logsTask;
+    state.Tasks = await tasksTask;
+    state.IsLoading = false;
 });
 
 // Start file watcher for live dashboard updates

@@ -1,5 +1,6 @@
 using Hex1b;
 using Hex1b.Widgets;
+using SquadTUI.Models;
 using SquadTUI.Rendering;
 using SquadTUI.Themes;
 
@@ -16,15 +17,15 @@ public static class DashboardScreen
             state.LastRefreshTime = DateTime.Now;
         }
 
-        var members = state.Members ?? SampleData.Members;
-        var tasks = state.Tasks ?? SampleData.Tasks;
+        var members = state.Members.GetOrEmpty();
+        var tasks = state.Tasks.GetOrEmpty();
         var activeCount = members.Count(m => m.Status == Models.MemberStatus.Active);
         var inProgressTasks = tasks.Count(t => t.Status == Models.SquadTaskStatus.InProgress);
         var completedTasks = tasks.Count(t => t.Status == Models.SquadTaskStatus.Done);
         var pendingTasks = tasks.Count(t => t.Status == Models.SquadTaskStatus.Pending);
         var blockedTasks = tasks.Count(t => t.Status == Models.SquadTaskStatus.Blocked);
-        var logEntries = state.LogEntries ?? SampleData.LogEntries;
-        var decisions = state.Decisions ?? SampleData.Decisions;
+        var logEntries = state.LogEntries.GetOrEmpty();
+        var decisions = state.Decisions.GetOrEmpty();
         var acc = ThemeManager.GetAccentCode(state.SelectedThemeIndex);
         var sec = ThemeManager.GetSecondaryAccent(state.SelectedThemeIndex);
         var rule = ThemeManager.GetDimRule(state.SelectedThemeIndex, 36);
@@ -38,6 +39,12 @@ public static class DashboardScreen
 
         var liveText = state.IsLiveEnabled ? $"\x1b[32m● LIVE\x1b[0m" : "";
         var refreshText = $"{D}Updated: {state.LastRefreshTime:HH:mm:ss}{R}";
+        var focus = state.DashboardFocusedPanel;
+
+        string PanelHeader(int panelIndex, string emoji, string title) =>
+            focus == panelIndex
+                ? $"  \x1b[7m {emoji} {title} \x1b[0m"
+                : $"  {hBg}{B}{acc}{emoji} {title}{R}";
 
         return v.Responsive(r =>
         [
@@ -55,7 +62,7 @@ public static class DashboardScreen
                     {
                         var w = new List<Hex1bWidget>
                         {
-                            left.Text($"  {hBg}{B}{acc}👥 Team Roster{R}"),
+                            left.Text(PanelHeader(0, "👥", "Team Roster")),
                             left.Text($"  {sec}{new string('━', 28)}{R}"),
                         };
                         foreach (var m in members)
@@ -74,7 +81,7 @@ public static class DashboardScreen
                     {
                         var w = new List<Hex1bWidget>
                         {
-                            mid.Text($"  {hBg}{B}{acc}📊 Activity & Progress{R}"),
+                            mid.Text(PanelHeader(1, "📊", "Activity & Progress")),
                             mid.Text($"  {sec}{new string('━', 36)}{R}"),
                             mid.Text(""),
                             mid.Text($"  {D}Tasks:{R}  {B}{tasks.Count}{R}  total"),
@@ -104,7 +111,7 @@ public static class DashboardScreen
                     {
                         var w = new List<Hex1bWidget>
                         {
-                            right.Text($"  {hBg}{B}{acc}📋 Decisions{R}"),
+                            right.Text(PanelHeader(2, "📋", "Decisions")),
                             right.Text($"  {sec}{new string('━', 28)}{R}"),
                         };
                         foreach (var d in decisions.Take(5))
@@ -112,7 +119,7 @@ public static class DashboardScreen
 
                         w.Add(right.Text(""));
                         w.Add(right.Text($"  {sec}{new string('━', 28)}{R}"));
-                        w.Add(right.Text($"  {hBg}{B}{acc}📈 Sprint Metrics{R}"));
+                        w.Add(right.Text(PanelHeader(3, "📈", "Sprint Metrics")));
                         w.Add(right.Text($"  {D}Velocity:{R}    {B}{completedTasks}{R} {D}tasks/sprint{R}"));
                         w.Add(right.Text($"  {D}Throughput:{R}  {B}{completedTasks + inProgressTasks}{R} {D}active items{R}"));
                         w.Add(right.Text($"  {D}Blocked:{R}    {B}{blockedTasks}{R} {D}items{R}"));
@@ -136,7 +143,7 @@ public static class DashboardScreen
                     {
                         var w = new List<Hex1bWidget>
                         {
-                            left.Text($"  {hBg}{B}{acc}👥 Team{R}  {D}({members.Count} members, {activeCount} active){R}"),
+                            left.Text(PanelHeader(0, "👥", "Team")),
                             left.Text($"  {sec}{new string('━', 32)}{R}"),
                         };
                         foreach (var m in members)
@@ -145,7 +152,7 @@ public static class DashboardScreen
                         w.Add(left.Text($"  {D}📊 Tasks:{R} {B}{tasks.Count}{R} {D}— {inProgressTasks} active, {completedTasks} done{R}"));
                         w.Add(left.Text(""));
                         w.Add(left.Text($"  {sec}{new string('━', 32)}{R}"));
-                        w.Add(left.Text($"  {hBg}{B}{acc}📅 Recent{R}"));
+                        w.Add(left.Text(PanelHeader(1, "📅", "Recent")));
                         foreach (var l in logEntries.Take(3))
                             w.Add(left.Text($"  {D}{l.Date}{R}  {l.Topic}"));
                         return w.ToArray();
@@ -155,14 +162,14 @@ public static class DashboardScreen
                     {
                         var w = new List<Hex1bWidget>
                         {
-                            right.Text($"  {hBg}{B}{acc}📋 Decisions{R}"),
+                            right.Text(PanelHeader(2, "📋", "Decisions")),
                             right.Text($"  {sec}{new string('━', 24)}{R}"),
                         };
                         foreach (var d in decisions.Take(4))
                             w.Add(right.Text($"  {D}{d.Date}{R}  {d.Title}"));
                         w.Add(right.Text(""));
                         w.Add(right.Text($"  {sec}{new string('━', 24)}{R}"));
-                        w.Add(right.Text($"  {hBg}{B}{acc}📈 Metrics{R}"));
+                        w.Add(right.Text(PanelHeader(3, "📈", "Metrics")));
                         w.Add(right.Text($"  {D}Velocity:{R}  {B}{completedTasks}{R} {D}tasks/sprint{R}"));
                         w.Add(right.Text($"  {D}Pending:{R}   {B}{pendingTasks}{R}"));
                         return w.ToArray();
@@ -179,12 +186,12 @@ public static class DashboardScreen
                     col.Text($"  {sec}{new string('━', 24)}{R}"),
                     col.Text($"  {D}👥 Members:{R} {B}{members.Count}{R}  {D}Tasks:{R} {B}{tasks.Count}{R}"),
                     col.Text(""),
-                    col.Text($"  {hBg}{B}{acc}📅 Recent{R}"),
+                    col.Text(PanelHeader(1, "📅", "Recent")),
                 };
                 foreach (var l in logEntries.Take(2))
                     w.Add(col.Text($"  {D}{l.Date}{R}  {l.Topic}"));
                 w.Add(col.Text(""));
-                w.Add(col.Text($"  {hBg}{B}{acc}📋 Decisions{R}"));
+                w.Add(col.Text(PanelHeader(2, "📋", "Decisions")));
                 foreach (var d in decisions.Take(2))
                     w.Add(col.Text($"  {D}{d.Date}{R}  {d.Title}  {D}({d.Author}){R}"));
                 return w.ToArray();

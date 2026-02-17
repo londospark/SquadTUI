@@ -225,3 +225,44 @@ The user has stated NO BORDERS multiple times. Yet `┌─┐│└─┘` box-d
 - It's a passthrough widget — all layout, focus, and input behavior is delegated unchanged to the child.
 - `Hex1bColor.FromRgb(r, g, b)` creates RGB colors.
 - Pattern: `new BackgroundPanelWidget(bg, h.VStack(left => [...]).FillWidth(1).FillHeight())` — the VStack with sizing is the child.
+
+### Frontend Research Sprint — Hex1b Deep Dive (2026-02-18)
+
+**BackdropWidget for Modals:**
+- `BackdropWidget` (Hex1b.Widgets) fills entire bounds, intercepts all input, auto-centers child. Perfect for modal overlays.
+- API: `ctx.Backdrop(child).Opaque(color).OnClickAway(() => dismiss())` — Escape auto-triggers OnClickAway.
+- `BackdropStyle.Transparent` lets base layer show through; `.Opaque(color)` fills with solid color.
+- For modals, combine with `ZStack`: layer 0 = app content, layer 1 = Backdrop + modal content.
+- Alternative: `WindowPanel` + `WindowManager` gives full modal dialog semantics (title bar, drag, resize, `.Modal()`, `OnResult<T>`).
+
+**Hex1b Chart Widgets Available:**
+- `ColumnChart` — vertical columns with `ChartLayout.Simple/Stacked/Stacked100/Grouped` and multi-series support.
+- `TimeSeriesChart` — braille line plots with `Fill(FillStyle.Braille)` for sub-cell precision. Supports `.Layout(ChartLayout.Stacked)` for stacked area charts.
+- `ScatterChart` — braille dot plots with `.X()`, `.Y()`, `.GroupBy()`.
+- `Progress` — native progress bar widget with determinate/indeterminate modes, theming via `ProgressTheme`.
+- All charts support `.Title()`, `.ShowValues()`, `.ShowGridLines()`, `.Min/.Max/.Range()`, `.FormatValue()`.
+- `RedrawAfter(ms)` enables live-updating charts.
+
+**Other Hex1b Widgets Discovered:**
+- `Table` — data tables with header, row builder, `SizeHint.Fill/Content/Fixed(n)`, sorting, selection column, virtualization, `OnRowActivated`.
+- `Picker` — dropdown selection with popup list, `OnSelectionChanged` fires on confirm (not navigation).
+- `Slider` — numeric value selection with keyboard/mouse, `OnValueChanged`.
+- `ToggleSwitch` — on/off toggle.
+- `WindowPanel` — floating draggable windows, modal support, result handling.
+- `NotificationPanel` — floating toast notifications with actions, drawer (Alt+N), timeout, `ZStack` required.
+- `Navigator` — stack-based page navigation with `Push/Pop` pattern.
+- `ThemePanel` — scoped theme mutations: `ctx.ThemePanel(theme => theme.Clone().Set(...), child)`.
+- `EffectPanel` — post-processing effects on rendered output via `Surface` cell manipulation.
+- `StatePanel` — identity-anchored state and animations.
+
+**Dashboard Tab Navigation Planning:**
+- Hex1b's `TabPanel` already uses Tab/Shift+Tab at the top level. Dashboard sub-panel focus needs a state-driven focus ring (not native Hex1b Tab) to avoid conflict.
+- Visual focus indicator: reverse-video `\x1b[7m` on focused panel header.
+- Enter maps focused panel to its full screen (Roster, ActivityLog, Decisions, Metrics).
+
+**Theme Design (6 new themes):**
+- Forest (emerald green), Cyberpunk (neon pink/purple), Midnight (ice blue), Ember (amber/orange), Arctic (light theme), Retro (CRT green phosphor).
+- Arctic is the first light theme — needs careful contrast testing since all existing ANSI foreground codes assume dark backgrounds.
+- All themes follow the established pattern: `WithModernBorders()`, invisible border chars, three-tier panel backgrounds.
+
+📌 Research documented in `.ai-team/decisions/inbox/siegmeyer-frontend-research.md` — includes code sketches for BackdropWidget modal, dashboard focus ring, all 6 theme color specs, chart widget adoption plan, and 15 user stories.
