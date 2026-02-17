@@ -246,5 +246,10 @@ public static class AppLayout
                 }
             }
         }, "Help");
+        keys.Key(Hex1bKey.V).Action(() =>
+        {
+            if (state.CurrentScreen == Screen.Metrics)
+                state.ShowBurndown = !state.ShowBurndown;
+        }, "Toggle Burndown");
     }
 }

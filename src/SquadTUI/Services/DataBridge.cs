@@ -22,6 +22,30 @@ public class DataBridge
         return roster.Members ?? [];
     }
 
+    public async Task<IReadOnlyList<SquadTask>> LoadTasksFromRosterAsync(CancellationToken ct = default)
+    {
+        var roster = await _services.Team.GetRosterAsync(ct);
+        var members = roster.Members ?? [];
+        var tasks = new List<SquadTask>();
+        var idx = 1;
+        foreach (var m in members)
+        {
+            if (!string.IsNullOrEmpty(m.CurrentTask))
+            {
+                var status = m.Status switch
+                {
+                    MemberStatus.Working => SquadTaskStatus.InProgress,
+                    MemberStatus.Active => SquadTaskStatus.InProgress,
+                    MemberStatus.Idle => SquadTaskStatus.Pending,
+                    _ => SquadTaskStatus.Pending
+                };
+                tasks.Add(new SquadTask($"task-{idx}", m.CurrentTask, null, status, m.Name));
+            }
+            idx++;
+        }
+        return tasks;
+    }
+
     public async Task<IReadOnlyList<DecisionEntry>> LoadDecisionsDataAsync(CancellationToken ct = default)
     {
         return await _services.Decisions.GetDecisionsAsync(ct);

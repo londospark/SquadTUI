@@ -33,6 +33,7 @@ public class AppState
     public IReadOnlyList<DecisionEntry>? Decisions { get; set; }
     public IReadOnlyList<Skill>? Skills { get; set; }
     public IReadOnlyList<OrchestrationLogEntry>? LogEntries { get; set; }
+    public IReadOnlyList<SquadTask>? Tasks { get; set; }
     public DashboardData? Dashboard { get; set; }
 
     // Loading state
@@ -43,6 +44,7 @@ public class AppState
     public int SelectedThemeIndex { get; set; } = 0;
     public int ActiveTab { get; set; } = 0;
     public bool ShowHelp { get; set; } = false;
+    public bool ShowBurndown { get; set; } = false;
 
     // Squad detection
     public bool SquadDetected { get; set; } = true;

@@ -9,12 +9,13 @@ public static class MemberDetailScreen
 {
     public static Hex1bWidget Render(WidgetContext<VStackWidget> v, AppState state, Hex1bApp app)
     {
-        var memberName = state.SelectedMemberName ?? "Solaire";
+        var memberName = state.SelectedMemberName ?? "Sonic";
         var members = state.Members ?? SampleData.Members;
         var member = members.FirstOrDefault(m => m.Name == memberName) ?? members[0];
 
         var charter = SampleData.GetCharterFor(member.Name);
-        var memberTasks = SampleData.Tasks.Where(t => t.Assignee == member.Name).ToList();
+        var allTasks = state.Tasks ?? SampleData.Tasks;
+        var memberTasks = allTasks.Where(t => t.Assignee == member.Name).ToList();
         var logs = state.LogEntries ?? SampleData.LogEntries;
         var recentLogs = logs.Where(l => l.Participants.Contains(member.Name)).Take(3).ToList();
 

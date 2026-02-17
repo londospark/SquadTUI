@@ -44,7 +44,7 @@ public class DecisionsScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Solaire").Should().BeTrue();
+        snapshot.ContainsText("Sonic").Should().BeTrue();
         snapshot.ContainsText("2026-02-16").Should().BeTrue();
 
         cts.Cancel();

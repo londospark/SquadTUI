@@ -22,7 +22,8 @@ public static class RosterScreen
 
         var charter = SampleData.GetCharterFor(selected.Name);
         var charterExcerpt = charter.Split('\n').Where(l => !string.IsNullOrWhiteSpace(l) && !l.StartsWith('#')).Take(3);
-        var memberTasks = SampleData.Tasks.Where(t => t.Assignee == selected.Name).ToList();
+        var allTasks = state.Tasks ?? SampleData.Tasks;
+        var memberTasks = allTasks.Where(t => t.Assignee == selected.Name).ToList();
         var logs = state.LogEntries ?? SampleData.LogEntries;
         var recentLogs = logs.Where(l => l.Participants.Contains(selected.Name)).Take(3).ToList();
         var hBg = ThemeManager.GetPanelHeaderBg(state.SelectedThemeIndex);
