@@ -47,5 +47,7 @@ public class AppState
     // Squad detection
     public bool SquadDetected { get; set; } = true;
     public string? SquadRootPath { get; set; }
+    public bool NeedsMigration { get; set; }
+    public string? MigrationMessage { get; set; }
     public AppSettings Settings { get; set; } = new();
 }

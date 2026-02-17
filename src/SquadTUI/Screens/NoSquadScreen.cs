@@ -14,11 +14,12 @@ public static class NoSquadScreen
         var R = PanelRenderer.Reset;
         var B = PanelRenderer.Bold;
         var D = PanelRenderer.Dim;
+        var panelBg = ThemeManager.GetPanelBgColor(state.SelectedThemeIndex);
 
         return v.HStack(outer =>
         [
             outer.Text("").Fill(),
-            outer.VStack(center =>
+            new BackgroundPanelWidget(panelBg, outer.VStack(center =>
             [
                 center.Text("").Fill(),
 
@@ -69,7 +70,7 @@ public static class NoSquadScreen
                 center.Text($"    {B}C{R}  {D}Create basic squad structure{R}        {B}Q{R}  {D}Quit{R}"),
 
                 center.Text("").Fill(),
-            ]),
+            ])),
             outer.Text("").Fill(),
         ]).Fill();
     }

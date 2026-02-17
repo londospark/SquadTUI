@@ -18,6 +18,7 @@ if (squadRoot == null || !SquadDetector.HasValidSquad(squadRoot))
 else
 {
     state.SquadRootPath = squadRoot;
+    state.NeedsMigration = SquadPathResolver.NeedsMigration(squadRoot);
 }
 
 // Load initial data asynchronously

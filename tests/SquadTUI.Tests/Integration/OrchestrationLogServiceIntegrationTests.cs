@@ -6,7 +6,7 @@ namespace SquadTUI.Tests.Integration;
 public class OrchestrationLogServiceIntegrationTests
 {
     private static string GetFixturesPath() =>
-        Path.Combine(AppContext.BaseDirectory, "Fixtures");
+        Path.Combine(AppContext.BaseDirectory, "Fixtures", ".ai-team");
 
     [Fact]
     public async Task FullParse_FixtureLogFiles_CorrectEntries()

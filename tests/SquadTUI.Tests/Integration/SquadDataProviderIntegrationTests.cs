@@ -6,7 +6,7 @@ namespace SquadTUI.Tests.Integration;
 public class SquadDataProviderIntegrationTests
 {
     private static string GetFixturesPath() =>
-        Path.Combine(AppContext.BaseDirectory, "Fixtures");
+        Path.Combine(AppContext.BaseDirectory, "Fixtures", ".ai-team");
 
     [Fact]
     public async Task EndToEnd_FixtureFiles_DashboardDataPopulated()

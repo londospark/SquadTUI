@@ -2,9 +2,9 @@ using SquadTUI.Models;
 
 namespace SquadTUI.Services;
 
-public class SkillService(string teamRootPath) : ISkillService
+public class SkillService(string squadDirPath) : ISkillService
 {
-    private readonly string _skillsPath = Path.Combine(teamRootPath, ".ai-team", "skills");
+    private readonly string _skillsPath = Path.Combine(squadDirPath, "skills");
 
     public async Task<IReadOnlyList<Skill>> GetSkillsAsync(CancellationToken ct = default)
     {

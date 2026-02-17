@@ -1,6 +1,7 @@
 using Hex1b;
 using Hex1b.Input;
 using Hex1b.Widgets;
+using SquadTUI.Services;
 using SquadTUI.Themes;
 
 namespace SquadTUI.Screens;
@@ -33,6 +34,38 @@ public static class AppLayout
             return ctx.VStack(v =>
             [
                 NoSquadScreen.Render(v, state, app)
+            ]).WithInputBindings(keys => BindKeys(keys, state, app, options));
+        }
+
+        // Deprecation banner for .ai-team/ users
+        if (state.NeedsMigration)
+        {
+            return ctx.VStack(v =>
+            [
+                v.Text($"\x1b[93m ⚠  Your squad uses .ai-team/ which is being renamed to .squad/ in v0.5.0. Press M to migrate.\x1b[0m"),
+                v.TabPanel(tp =>
+                    TabScreens.Select(tab =>
+                        tp.Tab(tab.Label, t =>
+                        [
+                            tab.Screen switch
+                            {
+                                Screen.Dashboard => DashboardScreen.Render(t, state, app),
+                                Screen.Roster => RosterScreen.Render(t, state, app),
+                                Screen.Decisions => DecisionsScreen.Render(t, state, app),
+                                Screen.Skills => SkillsScreen.Render(t, state, app),
+                                Screen.ActivityLog => ActivityLogScreen.Render(t, state, app),
+                                Screen.Metrics => MetricsScreen.Render(t, state, app),
+                                _ => t.Text("")
+                            }
+                        ]).WithIcon(tab.Icon).Selected(state.CurrentScreen == tab.Screen)
+                    )
+                )
+                .OnSelectionChanged(e =>
+                {
+                    state.CurrentScreen = TabScreens[e.SelectedIndex].Screen;
+                })
+                .Compact()
+                .Fill()
             ]).WithInputBindings(keys => BindKeys(keys, state, app, options));
         }
 
@@ -170,16 +203,29 @@ public static class AppLayout
             if (state.CurrentScreen == Screen.NoSquad)
             {
                 var root = Directory.GetCurrentDirectory();
-                var aiTeamDir = Path.Combine(root, ".ai-team");
-                var agentsDir = Path.Combine(aiTeamDir, "agents");
+                var squadDir = Path.Combine(root, SquadPathResolver.NewDirectoryName);
+                var agentsDir = Path.Combine(squadDir, "agents");
                 Directory.CreateDirectory(agentsDir);
-                File.WriteAllText(Path.Combine(aiTeamDir, "team.md"), "# Team Roster\n\n*Created by SquadTUI*\n");
-                File.WriteAllText(Path.Combine(aiTeamDir, "decisions.md"), "# Decisions\n\n*No decisions yet.*\n");
+                File.WriteAllText(Path.Combine(squadDir, "team.md"), "# Team Roster\n\n*Created by SquadTUI*\n");
+                File.WriteAllText(Path.Combine(squadDir, "decisions.md"), "# Decisions\n\n*No decisions yet.*\n");
                 state.SquadDetected = true;
                 state.SquadRootPath = root;
                 state.CurrentScreen = Screen.Dashboard;
             }
         }, "Create Squad");
+        keys.Key(Hex1bKey.M).Action(() =>
+        {
+            if (state.NeedsMigration && state.SquadRootPath != null)
+            {
+                var result = MigrationService.Migrate(state.SquadRootPath);
+                state.MigrationMessage = result.Message;
+                if (result.Success)
+                {
+                    state.NeedsMigration = false;
+                    ServiceProvider.Reset();
+                }
+            }
+        }, "Migrate");
         keys.Key(Hex1bKey.F1).Action(() =>
         {
             if (state.CurrentScreen != Screen.Help)

@@ -3,8 +3,8 @@ namespace SquadTUI.Services;
 public static class SquadDetector
 {
     /// <summary>
-    /// Check if an .ai-team directory exists by walking up from CWD or checking git root.
-    /// Returns the path to the project root containing .ai-team, or null if not found.
+    /// Check if a squad directory (.squad/ or .ai-team/) exists by walking up from CWD or checking git root.
+    /// Returns the path to the project root, or null if not found.
     /// </summary>
     public static string? FindSquadRoot()
     {
@@ -30,18 +30,17 @@ public static class SquadDetector
             if (process.ExitCode == 0 && !string.IsNullOrWhiteSpace(gitRoot))
             {
                 gitRoot = gitRoot.Replace('/', Path.DirectorySeparatorChar);
-                var aiTeamPath = Path.Combine(gitRoot, ".ai-team");
-                if (Directory.Exists(aiTeamPath))
+                if (SquadPathResolver.HasSquadDirectory(gitRoot))
                     return gitRoot;
             }
         }
         catch { }
 
-        // Walk up from CWD
+        // Walk up from CWD — check .squad/ first, then .ai-team/
         var current = Directory.GetCurrentDirectory();
         while (current != null)
         {
-            if (Directory.Exists(Path.Combine(current, ".ai-team")))
+            if (SquadPathResolver.HasSquadDirectory(current))
                 return current;
             current = Directory.GetParent(current)?.FullName;
         }
@@ -49,12 +48,12 @@ public static class SquadDetector
         return null;
     }
 
-    /// <summary>Check if the required squad structure exists.</summary>
+    /// <summary>Check if the required squad structure exists (supports both .squad/ and .ai-team/).</summary>
     public static bool HasValidSquad(string rootPath)
     {
-        var aiTeamDir = Path.Combine(rootPath, ".ai-team");
-        return Directory.Exists(aiTeamDir) &&
-               (File.Exists(Path.Combine(aiTeamDir, "team.md")) ||
-                Directory.Exists(Path.Combine(aiTeamDir, "agents")));
+        var squadDir = SquadPathResolver.Resolve(rootPath);
+        return Directory.Exists(squadDir) &&
+               (File.Exists(Path.Combine(squadDir, "team.md")) ||
+                Directory.Exists(Path.Combine(squadDir, "agents")));
     }
 }

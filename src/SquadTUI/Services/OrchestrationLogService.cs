@@ -2,10 +2,10 @@ using SquadTUI.Models;
 
 namespace SquadTUI.Services;
 
-public class OrchestrationLogService(string teamRootPath) : IOrchestrationLogService
+public class OrchestrationLogService(string squadDirPath) : IOrchestrationLogService
 {
-    private readonly string _orchestrationLogPath = Path.Combine(teamRootPath, ".ai-team", "orchestration-log");
-    private readonly string _logPath = Path.Combine(teamRootPath, ".ai-team", "log");
+    private readonly string _orchestrationLogPath = Path.Combine(squadDirPath, "orchestration-log");
+    private readonly string _logPath = Path.Combine(squadDirPath, "log");
 
     public async Task<IReadOnlyList<OrchestrationLogEntry>> GetEntriesAsync(CancellationToken ct = default)
     {
