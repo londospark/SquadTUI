@@ -119,6 +119,62 @@ npx github:bradygaster/squad
 7. **Settings** (`S`) — Configure app preferences
 8. **Help** (`F1`) — Quick keybinding reference
 
+## 📈 Metrics & Analytics
+
+SquadTUI includes a dedicated **Metrics** screen (press `6`) and a **Dashboard** summary for tracking squad performance at a glance.
+
+### What the Metrics Screen Shows
+
+- **Sprint Progress** — Visual progress bar showing completion percentage with task counts
+- **Task Breakdown** — Done, in-progress, pending, and blocked counts with status icons
+- **Velocity** — Completed tasks per sprint cycle with trend direction
+- **Per-Member Contributions** — Bar chart of completed + active tasks per team member
+- **Member Status** — Individual breakdown of each member's task distribution
+
+### Sprint Data Structure
+
+Sprint history is modeled with `SprintMetrics` and `MemberContribution` records:
+
+```
+SprintMetrics
+├── SprintNumber, SprintName, StartDate, EndDate
+├── PlannedTasks, CompletedTasks, CarriedOver
+├── Contributions[] → MemberContribution
+│   ├── MemberName, TasksCompleted, TasksAssigned, PointsEarned
+│   └── Utilization (computed: completed / assigned)
+├── CompletionRate (computed: completed / planned)
+└── Velocity (completed tasks per sprint)
+```
+
+Cross-sprint aggregates (average velocity, velocity trend, team utilization) are available via `SampleData` helpers.
+
+### Dashboard Metrics Summary
+
+The Dashboard screen (`1`) shows a live squad status panel including:
+- Active member count and team roster with status badges
+- Task progress bar and counts (active, done, pending, blocked)
+- Sprint velocity and throughput at a glance
+- Recent activity log and decision timeline
+
+### Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| `6` | Jump to Metrics screen |
+| `V` | Toggle velocity / burndown chart view |
+| `j` / `k` | Scroll within metrics panels |
+| `T` | Cycle theme (affects chart colors) |
+
+### Responsive Layouts
+
+Metrics adapt to terminal width:
+- **Wide (≥120 cols)** — 3-column: progress + chart + member detail
+- **Medium (80–119)** — 2-column: progress + chart side-by-side
+- **Narrow (<80)** — Single column: stacked summary
+
+<!-- TODO: Add screenshot once metrics screen is finalized -->
+<!-- ![Metrics Screen](docs/images/screenshot-metrics.svg) -->
+
 ## 🛠️ Tech Stack
 
 - **Framework:** [.NET 10](https://dotnet.microsoft.com/)
