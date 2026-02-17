@@ -266,3 +266,30 @@ The user has stated NO BORDERS multiple times. Yet `┌─┐│└─┘` box-d
 - All themes follow the established pattern: `WithModernBorders()`, invisible border chars, three-tier panel backgrounds.
 
 📌 Research documented in `.ai-team/decisions/inbox/siegmeyer-frontend-research.md` — includes code sketches for BackdropWidget modal, dashboard focus ring, all 6 theme color specs, chart widget adoption plan, and 15 user stories.
+
+### Sprint 17 — Stack Navigation + Modal Settings + Panel Sizing
+
+**TabPanel → Stack Navigation:**
+- Removed all 3 TabPanel render paths from AppLayout.Build(). Navigation is now purely stack-driven: Enter pushes, Escape pops.
+- Removed D1-D6 number key bindings and H/L screen cycling from BindKeys. Dashboard panel focus via Left/Right arrows + Enter to drill in.
+- `AppState.NavigationStack` (Stack<Screen>) tracks navigation depth. `NavigateTo()` pushes current screen, `NavigateBack()` pops.
+- When stack is empty, `NavigateBack()` returns to Dashboard with `DashboardFocusedPanel=0`.
+- `GetTabScreens()` array eliminated entirely — no longer needed.
+
+**Settings Modal via ZStack+Backdrop:**
+- `ctx.ZStack(z => [...])` layers widgets. Layer 0 = `RenderCurrentScreen` + footer. Layer 1 = `z.Backdrop(modalContent)` with centered modal.
+- `z.Backdrop(child)` auto-centers child, intercepts all input, `.OnClickAway()` fires on Escape or click outside.
+- Modal uses `.FixedWidth(56).FixedHeight(17)` for consistent sizing.
+- `RenderSettingsModalContent` returns `Hex1bWidget[]` for composition inside VStack passed to Backdrop.
+- `BackgroundPanelWidget` wraps modal inner content for panel background color.
+
+**Dashboard PanelHeader Sizing Fix:**
+- Focused header had extra space padding: `" {Icon} {title} "` vs unfocused `"{Icon} {title}"`.
+- Unified to `"{Icon} {title}"` for both — only ANSI color codes differ (hlBg+hlFg for focused, hBg+B+acc for unfocused).
+- Eliminates layout reflow when cycling panel focus.
+
+**Test Migration:**
+- All E2E tests migrated from D1-D6 key sequences to Enter/Right+Enter/Escape navigation patterns.
+- NoSquadGuardTests simplified — now tests Enter/Right/Left instead of nonexistent D1-D6 keys.
+- VimKeybindingTests reduced — H/L tests removed since screen cycling no longer exists.
+- Navigation patterns: Roster = `Enter()`, ActivityLog = `Right().Enter()`, Decisions = `Right()×2.Enter()`, Metrics = `Right()×3.Enter()`.

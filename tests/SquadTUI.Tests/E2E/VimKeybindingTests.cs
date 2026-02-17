@@ -8,70 +8,24 @@ namespace SquadTUI.Tests.E2E;
 public class VimKeybindingTests
 {
     [Fact]
-    public async Task VimH_SwitchesToPreviousScreen()
+    public async Task VimJ_NavigatesDownInRoster()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
-        // Go to Roster first, then H should go back to Dashboard
+        // Enter to Roster, then J to navigate down
         var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D2)
+            .Enter()
             .Wait(100)
-            .Key(Hex1bKey.H)
-            .Build();
-        await sequence.ApplyAsync(terminal);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Dashboard"));
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task VimL_SwitchesToNextScreen()
-    {
-        await using var terminal = TestAppBuilder.Build();
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        // From Dashboard, L should go to Roster
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.L)
+            .Key(Hex1bKey.J)
             .Build();
         await sequence.ApplyAsync(terminal);
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
         Assert.True(snapshot.ContainsText("Team Roster"));
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task VimHL_NavigatesAcrossMultipleScreens()
-    {
-        await using var terminal = TestAppBuilder.Build();
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        // L three times: Dashboard → Roster → Decisions → Skills
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.L).Wait(50)
-            .Key(Hex1bKey.L).Wait(50)
-            .Key(Hex1bKey.L)
-            .Build();
-        await sequence.ApplyAsync(terminal);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Installed Skills"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -85,8 +39,11 @@ public class VimKeybindingTests
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
+        // Navigate to Decisions via panel 2, then Escape back
         var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D3)
+            .Right().Wait(50)
+            .Right().Wait(50)
+            .Enter()
             .Wait(100)
             .Key(Hex1bKey.Escape)
             .Build();
@@ -108,8 +65,12 @@ public class VimKeybindingTests
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
+        // Navigate to Metrics via panel 3, then Escape back
         var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D6)
+            .Right().Wait(50)
+            .Right().Wait(50)
+            .Right().Wait(50)
+            .Enter()
             .Wait(100)
             .Key(Hex1bKey.Escape)
             .Build();

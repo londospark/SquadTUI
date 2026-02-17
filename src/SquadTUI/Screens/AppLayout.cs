@@ -10,20 +10,11 @@ using static SquadTUI.Rendering.IconHelper;
 namespace SquadTUI.Screens;
 
 /// <summary>
-/// Shared app layout using Hex1b TabPanel for main navigation.
-/// Used by both Program.cs and TestAppBuilder to keep rendering in sync.
+/// Shared app layout using stack-based navigation.
+/// Dashboard is home. Enter drills in. Escape pops back.
 /// </summary>
 public static class AppLayout
 {
-    private static (string Label, string Emoji, string Ascii, Screen Screen)[] GetTabScreens() =>
-    [
-        ("   Dashboard   ", "🏠", "▸", Screen.Dashboard),
-        ("   Roster   ", "👥", "◆", Screen.Roster),
-        ("   Decisions   ", "📋", "▪", Screen.Decisions),
-        ("   Skills   ", "🔧", "◇", Screen.Skills),
-        ("   Log   ", "📊", "▪", Screen.ActivityLog),
-        ("   Metrics   ", "📈", "▪", Screen.Metrics),
-    ];
 
     /// <summary>Renders a contextual status bar footer with screen-specific keybindings.</summary>
     public static Hex1bWidget RenderFooter(WidgetContext<VStackWidget> v, AppState state)
@@ -33,18 +24,18 @@ public static class AppLayout
 
         var keys = state.CurrentScreen switch
         {
-            Screen.Dashboard => $"  {D}Tab: Next Panel  Enter: Drill In  T: Theme  S: Settings  Q: Quit  F1: Help{R}",
-            Screen.Roster => $"  {D}j/k: Navigate  Enter: Detail  A: Add  D: Remove  T: Theme  S: Settings  Q: Quit  F1: Help{R}",
-            Screen.MemberDetail => $"  {D}E: Edit Charter  Esc: Back  T: Theme  S: Settings  Q: Quit  F1: Help{R}",
-            Screen.Decisions => $"  {D}j/k: Navigate  Esc: Back  T: Theme  S: Settings  Q: Quit  F1: Help{R}",
-            Screen.Skills => $"  {D}j/k: Navigate  Esc: Back  T: Theme  S: Settings  Q: Quit  F1: Help{R}",
-            Screen.ActivityLog => $"  {D}j/k: Navigate  Esc: Back  T: Theme  S: Settings  Q: Quit  F1: Help{R}",
-            Screen.Metrics => $"  {D}V: Toggle Burndown  Esc: Back  T: Theme  S: Settings  Q: Quit  F1: Help{R}",
-            Screen.Charter => $"  {D}j/k: Scroll  Esc: Back  T: Theme  Q: Quit  F1: Help{R}",
+            Screen.Dashboard => $"  {D}Tab/←→: Focus Panel  Enter: Open  T: Theme  S: Settings  Q: Quit  F1: Help{R}",
+            Screen.Roster => $"  {D}j/k: Navigate  Enter: Detail  A: Add  D: Remove  Esc: Back  Q: Quit  F1: Help{R}",
+            Screen.MemberDetail => $"  {D}E: Edit Charter  Esc: Back  Q: Quit  F1: Help{R}",
+            Screen.Decisions => $"  {D}j/k: Navigate  Esc: Back  Q: Quit  F1: Help{R}",
+            Screen.Skills => $"  {D}j/k: Navigate  Esc: Back  Q: Quit  F1: Help{R}",
+            Screen.ActivityLog => $"  {D}j/k: Navigate  Esc: Back  Q: Quit  F1: Help{R}",
+            Screen.Metrics => $"  {D}V: Toggle Burndown  Esc: Back  Q: Quit  F1: Help{R}",
+            Screen.Charter => $"  {D}j/k: Scroll  Esc: Back  Q: Quit  F1: Help{R}",
             Screen.Settings => $"  {D}j/k: Navigate  Enter: Toggle  Esc: Back  Q: Quit  F1: Help{R}",
             Screen.Help => $"  {D}F1/Esc: Dismiss  Q: Quit{R}",
             Screen.NoSquad => $"  {D}C: Create Squad  Q: Quit  F1: Help{R}",
-            _ => $"  {D}T: Theme  S: Settings  Q: Quit  F1: Help{R}",
+            _ => $"  {D}Esc: Back  Q: Quit  F1: Help{R}",
         };
 
         return v.VStack(footer =>
@@ -61,13 +52,6 @@ public static class AppLayout
         Hex1bAppOptions options)
     {
         var em = state.Settings.ShowEmoji;
-        var TabScreens = GetTabScreens();
-
-        // Settings modal overlay — renders instead of normal content
-        if (state.ShowSettingsModal)
-        {
-            return RenderSettingsModal(ctx, state, app, options);
-        }
 
         // Theme settings modal overlay — renders instead of normal content
         if (state.ShowSettingsOverlay)
@@ -75,7 +59,7 @@ public static class AppLayout
             return RenderThemeModal(ctx, state, app, options);
         }
 
-        // NoSquad screen — no tabs
+        // NoSquad screen — no navigation
         if (state.CurrentScreen == Screen.NoSquad)
         {
             return ctx.VStack(v =>
@@ -85,95 +69,55 @@ public static class AppLayout
             ]).WithInputBindings(keys => BindKeys(keys, state, app, options));
         }
 
-        // Deprecation banner for .ai-team/ users
-        if (state.NeedsMigration)
+        // Settings modal as centered overlay on top of current screen
+        if (state.ShowSettingsModal)
         {
-            return ctx.VStack(v =>
+            return ctx.ZStack(z =>
             [
-                v.Text($"\x1b[93m {Icon("⚠", "!", em)}  Your squad uses .ai-team/ which is being renamed to .squad/ in v0.5.0. Press M to migrate.\x1b[0m"),
-                v.TabPanel(tp =>
-                    TabScreens.Select(tab =>
-                        tp.Tab(tab.Label, t =>
-                        [
-                            tab.Screen switch
-                            {
-                                Screen.Dashboard => DashboardScreen.Render(t, state, app),
-                                Screen.Roster => RosterScreen.Render(t, state, app),
-                                Screen.Decisions => DecisionsScreen.Render(t, state, app),
-                                Screen.Skills => SkillsScreen.Render(t, state, app),
-                                Screen.ActivityLog => ActivityLogScreen.Render(t, state, app),
-                                Screen.Metrics => MetricsScreen.Render(t, state, app),
-                                _ => t.Text("")
-                            }
-                        ]).WithIcon(Icon(tab.Emoji, tab.Ascii, em)).Selected(state.CurrentScreen == tab.Screen)
-                    )
-                )
-                .OnSelectionChanged(e =>
-                {
-                    state.CurrentScreen = TabScreens[e.SelectedIndex].Screen;
-                })
-                .Compact()
-                .Fill(),
-                RenderFooter(v, state)
-            ]).WithInputBindings(keys => BindKeys(keys, state, app, options));
+                // Layer 0: current screen underneath
+                z.VStack(v =>
+                [
+                    RenderCurrentScreen(v, state, app, options),
+                    RenderFooter(v, state)
+                ]),
+                // Layer 1: backdrop + centered settings modal
+                z.Backdrop(
+                    z.VStack(modal =>
+                    {
+                        return RenderSettingsModalContent(modal, state, app, options);
+                    }).FixedWidth(56).FixedHeight(17)
+                ).OnClickAway(() => { state.ShowSettingsModal = false; })
+            ]).WithInputBindings(keys => BindSettingsModalKeys(keys, state, app, options));
         }
 
-        // Sub-screens that overlay tabs (MemberDetail, Charter, Help, Settings)
-        if (state.CurrentScreen is Screen.MemberDetail or Screen.Charter or Screen.Help or Screen.Settings)
-        {
-            return ctx.VStack(v =>
-            [
-                v.TabPanel(tp =>
-                    TabScreens.Select(tab =>
-                        tp.Tab(tab.Label, _ => []).WithIcon(Icon(tab.Emoji, tab.Ascii, em)).Selected(false)
-                    )
-                )
-                .OnSelectionChanged(e =>
-                {
-                    state.CurrentScreen = TabScreens[e.SelectedIndex].Screen;
-                })
-                .Compact(),
-
-                (state.CurrentScreen switch
-                {
-                    Screen.MemberDetail => MemberDetailScreen.Render(v, state, app),
-                    Screen.Charter => CharterScreen.Render(v, state, app),
-                    Screen.Help => HelpScreen.Render(v, state, app),
-                    Screen.Settings => SettingsScreen.Render(v, state, app, options),
-                    _ => v.Text("")
-                }),
-                RenderFooter(v, state)
-            ]).WithInputBindings(keys => BindKeys(keys, state, app, options));
-        }
-
-        // Main tabbed view
+        // Main view — render current screen directly (no tabs)
         return ctx.VStack(v =>
         [
-            v.TabPanel(tp =>
-                TabScreens.Select(tab =>
-                    tp.Tab(tab.Label, t =>
-                    [
-                        tab.Screen switch
-                        {
-                            Screen.Dashboard => DashboardScreen.Render(t, state, app),
-                            Screen.Roster => RosterScreen.Render(t, state, app),
-                            Screen.Decisions => DecisionsScreen.Render(t, state, app),
-                            Screen.Skills => SkillsScreen.Render(t, state, app),
-                            Screen.ActivityLog => ActivityLogScreen.Render(t, state, app),
-                            Screen.Metrics => MetricsScreen.Render(t, state, app),
-                            _ => t.Text("")
-                        }
-                    ]).WithIcon(Icon(tab.Emoji, tab.Ascii, em)).Selected(state.CurrentScreen == tab.Screen)
-                )
-            )
-            .OnSelectionChanged(e =>
-            {
-                state.CurrentScreen = TabScreens[e.SelectedIndex].Screen;
-            })
-            .Compact()
-            .Fill(),
+            RenderCurrentScreen(v, state, app, options),
             RenderFooter(v, state)
         ]).WithInputBindings(keys => BindKeys(keys, state, app, options));
+    }
+
+    private static Hex1bWidget RenderCurrentScreen(
+        WidgetContext<VStackWidget> v,
+        AppState state,
+        Hex1bApp app,
+        Hex1bAppOptions options)
+    {
+        return state.CurrentScreen switch
+        {
+            Screen.Dashboard => DashboardScreen.Render(v, state, app),
+            Screen.Roster => RosterScreen.Render(v, state, app),
+            Screen.Decisions => DecisionsScreen.Render(v, state, app),
+            Screen.Skills => SkillsScreen.Render(v, state, app),
+            Screen.ActivityLog => ActivityLogScreen.Render(v, state, app),
+            Screen.Metrics => MetricsScreen.Render(v, state, app),
+            Screen.MemberDetail => MemberDetailScreen.Render(v, state, app),
+            Screen.Charter => CharterScreen.Render(v, state, app),
+            Screen.Help => HelpScreen.Render(v, state, app),
+            Screen.Settings => SettingsScreen.Render(v, state, app, options),
+            _ => v.Text("")
+        };
     }
 
     private static Hex1bWidget RenderThemeModal(
@@ -285,8 +229,8 @@ public static class AppLayout
         "Default Screen"
     ];
 
-    private static Hex1bWidget RenderSettingsModal(
-        RootContext ctx,
+    private static Hex1bWidget[] RenderSettingsModalContent(
+        WidgetContext<VStackWidget> modal,
         AppState state,
         Hex1bApp app,
         Hex1bAppOptions options)
@@ -314,16 +258,14 @@ public static class AppLayout
             $"  {Icon("🏠", "▸", em)} Default Screen   {B}{state.Settings.DefaultScreen}{R}"
         } as IReadOnlyList<string>;
 
-        return ctx.VStack(v =>
+        return
         [
-            v.Text(""),
-            v.Text(""),
-            new BackgroundPanelWidget(panelBg, v.VStack(modal =>
+            new BackgroundPanelWidget(panelBg, modal.VStack(inner =>
             [
-                modal.Text($"  {B}{acc}{Icon("⚙️", "◆", em)}  Settings{R}"),
-                modal.Text($"  {sec}{new string('━', 36)}{R}"),
-                modal.Text(""),
-                modal.List(listItems)
+                inner.Text($"  {B}{acc}{Icon("⚙️", "◆", em)}  Settings{R}"),
+                inner.Text($"  {sec}{new string('━', 36)}{R}"),
+                inner.Text(""),
+                inner.List(listItems)
                     .OnSelectionChanged(e =>
                     {
                         state.SettingsModalSelectedIndex = e.SelectedIndex;
@@ -333,11 +275,11 @@ public static class AppLayout
                         ToggleSettingsModalItem(state, e.ActivatedIndex, options);
                     })
                     .Fill(),
-                modal.Text(""),
-                modal.Text($"  {D}j/k Navigate  Enter Toggle  Esc Close{R}"),
-                modal.Text(""),
+                inner.Text(""),
+                inner.Text($"  {D}j/k Navigate  Enter Toggle  Esc Close{R}"),
+                inner.Text(""),
             ]).FillWidth(1).FillHeight()),
-        ]).WithInputBindings(keys => BindSettingsModalKeys(keys, state, app, options));
+        ];
     }
 
     private static void ToggleSettingsModalItem(AppState state, int index, Hex1bAppOptions options)
@@ -417,12 +359,6 @@ public static class AppLayout
         Hex1bApp app,
         Hex1bAppOptions options)
     {
-        keys.Key(Hex1bKey.D1).Action(() => { if (state.CurrentScreen != Screen.NoSquad) { state.CurrentScreen = Screen.Dashboard; state.DashboardFocusedPanel = 0; } }, "Dashboard");
-        keys.Key(Hex1bKey.D2).Action(() => { if (state.CurrentScreen != Screen.NoSquad) state.CurrentScreen = Screen.Roster; }, "Roster");
-        keys.Key(Hex1bKey.D3).Action(() => { if (state.CurrentScreen != Screen.NoSquad) state.CurrentScreen = Screen.Decisions; }, "Decisions");
-        keys.Key(Hex1bKey.D4).Action(() => { if (state.CurrentScreen != Screen.NoSquad) state.CurrentScreen = Screen.Skills; }, "Skills");
-        keys.Key(Hex1bKey.D5).Action(() => { if (state.CurrentScreen != Screen.NoSquad) state.CurrentScreen = Screen.ActivityLog; }, "Log");
-        keys.Key(Hex1bKey.D6).Action(() => { if (state.CurrentScreen != Screen.NoSquad) state.CurrentScreen = Screen.Metrics; }, "Metrics");
         keys.Key(Hex1bKey.Q).Action(() => { app.RequestStop(); }, "Quit");
         keys.Key(Hex1bKey.T).Action(() =>
         {
@@ -443,20 +379,15 @@ public static class AppLayout
             {
                 state.ConfirmingRemove = false;
             }
-            else if (state.CurrentScreen == Screen.MemberDetail)
-                state.CurrentScreen = Screen.Roster;
-            else if (state.CurrentScreen == Screen.Charter)
-                state.CurrentScreen = Screen.MemberDetail;
-            else if (state.CurrentScreen != Screen.Dashboard)
+            else
             {
-                state.CurrentScreen = Screen.Dashboard;
-                state.DashboardFocusedPanel = 0;
+                state.NavigateBack();
             }
         }, "Back");
         keys.Key(Hex1bKey.E).Action(() =>
         {
             if (state.CurrentScreen == Screen.MemberDetail)
-                state.CurrentScreen = Screen.Charter;
+                state.NavigateTo(Screen.Charter);
         }, "Edit Charter");
         keys.Key(Hex1bKey.A).Action(() =>
         {
@@ -539,20 +470,6 @@ public static class AppLayout
             else if (state.CurrentScreen == Screen.Charter)
                 state.CharterScrollOffset = Math.Max(state.CharterScrollOffset - 1, 0);
         }, "Up");
-        keys.Key(Hex1bKey.H).Action(() =>
-        {
-            if (state.CurrentScreen == Screen.NoSquad) return;
-            var screens = new[] { Screen.Dashboard, Screen.Roster, Screen.Decisions, Screen.Skills, Screen.ActivityLog, Screen.Metrics };
-            var idx = Array.IndexOf(screens, state.CurrentScreen);
-            if (idx > 0) state.CurrentScreen = screens[idx - 1];
-        }, "Prev Screen");
-        keys.Key(Hex1bKey.L).Action(() =>
-        {
-            if (state.CurrentScreen == Screen.NoSquad) return;
-            var screens = new[] { Screen.Dashboard, Screen.Roster, Screen.Decisions, Screen.Skills, Screen.ActivityLog, Screen.Metrics };
-            var idx = Array.IndexOf(screens, state.CurrentScreen);
-            if (idx >= 0 && idx < screens.Length - 1) state.CurrentScreen = screens[idx + 1];
-        }, "Next Screen");
         keys.Key(Hex1bKey.C).Action(() =>
         {
             if (state.CurrentScreen == Screen.NoSquad)
@@ -584,20 +501,11 @@ public static class AppLayout
         {
             if (state.CurrentScreen != Screen.Help)
             {
-                state.PreviousScreen = state.CurrentScreen;
-                state.CurrentScreen = Screen.Help;
+                state.NavigateTo(Screen.Help);
             }
             else
             {
-                if (state.PreviousScreen.HasValue)
-                {
-                    state.CurrentScreen = state.PreviousScreen.Value;
-                    state.PreviousScreen = null;
-                }
-                else
-                {
-                    state.CurrentScreen = Screen.Dashboard;
-                }
+                state.NavigateBack();
             }
         }, "Help");
         keys.Key(Hex1bKey.V).Action(() =>
@@ -624,7 +532,7 @@ public static class AppLayout
         keys.Shift().Key(Hex1bKey.E).Action(() =>
         {
             if (state.CurrentScreen == Screen.MemberDetail)
-                state.CurrentScreen = Screen.Charter;
+                state.NavigateTo(Screen.Charter);
         }, "Edit Charter");
         keys.Shift().Key(Hex1bKey.A).Action(() =>
         {
@@ -707,20 +615,6 @@ public static class AppLayout
             else if (state.CurrentScreen == Screen.Charter)
                 state.CharterScrollOffset = Math.Max(state.CharterScrollOffset - 1, 0);
         }, "Up");
-        keys.Shift().Key(Hex1bKey.H).Action(() =>
-        {
-            if (state.CurrentScreen == Screen.NoSquad) return;
-            var screens = new[] { Screen.Dashboard, Screen.Roster, Screen.Decisions, Screen.Skills, Screen.ActivityLog, Screen.Metrics };
-            var idx = Array.IndexOf(screens, state.CurrentScreen);
-            if (idx > 0) state.CurrentScreen = screens[idx - 1];
-        }, "Prev Screen");
-        keys.Shift().Key(Hex1bKey.L).Action(() =>
-        {
-            if (state.CurrentScreen == Screen.NoSquad) return;
-            var screens = new[] { Screen.Dashboard, Screen.Roster, Screen.Decisions, Screen.Skills, Screen.ActivityLog, Screen.Metrics };
-            var idx = Array.IndexOf(screens, state.CurrentScreen);
-            if (idx >= 0 && idx < screens.Length - 1) state.CurrentScreen = screens[idx + 1];
-        }, "Next Screen");
         keys.Shift().Key(Hex1bKey.C).Action(() =>
         {
             if (state.CurrentScreen == Screen.NoSquad)
@@ -777,15 +671,19 @@ public static class AppLayout
         {
             if (state.CurrentScreen == Screen.Dashboard)
             {
-                state.CurrentScreen = state.DashboardFocusedPanel switch
+                var target = state.DashboardFocusedPanel switch
                 {
                     0 => Screen.Roster,
                     1 => Screen.ActivityLog,
                     2 => Screen.Decisions,
                     3 => Screen.Metrics,
-                    _ => Screen.Dashboard
+                    _ => (Screen?)null
                 };
-                state.DashboardFocusedPanel = 0;
+                if (target.HasValue)
+                {
+                    state.NavigateTo(target.Value);
+                    state.DashboardFocusedPanel = 0;
+                }
             }
         }, "Drill In");
     }

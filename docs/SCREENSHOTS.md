@@ -77,13 +77,16 @@ Use `hex1b keys` to send keystrokes:
 
 ```bash
 # Navigate to Roster
-hex1b keys <terminal-id> "2"
+hex1b keys <terminal-id> --text "2"
 
 # Navigate to Decisions
-hex1b keys <terminal-id> "3"
+hex1b keys <terminal-id> --text "3"
 
 # Cycle theme
-hex1b keys <terminal-id> "T"
+hex1b keys <terminal-id> --text "T"
+
+# Open help (named key)
+hex1b keys <terminal-id> --key F1
 ```
 
 ### Step 5: Stop the terminal
@@ -97,7 +100,7 @@ hex1b terminal stop <terminal-id>
 ### Start a recording
 
 ```bash
-hex1b capture recording start <terminal-id>
+hex1b capture recording start <terminal-id> --output docs/images/demo.cast --title "SquadTUI Demo" --idle-limit 2
 ```
 
 ### Interact with the app
@@ -107,7 +110,7 @@ Navigate screens, scroll lists, switch themes — everything is recorded.
 ### Stop and save
 
 ```bash
-hex1b capture recording stop <terminal-id> --output docs/images/demo.cast
+hex1b capture recording stop <terminal-id>
 ```
 
 ### Upload to asciinema.org

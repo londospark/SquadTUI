@@ -8,13 +8,10 @@ namespace SquadTUI.Tests.E2E;
 public class NoSquadGuardTests
 {
     [Theory]
-    [InlineData(Hex1bKey.D1)]
-    [InlineData(Hex1bKey.D2)]
-    [InlineData(Hex1bKey.D3)]
-    [InlineData(Hex1bKey.D4)]
-    [InlineData(Hex1bKey.D5)]
-    [InlineData(Hex1bKey.D6)]
-    public async Task NoSquadScreen_NumberKeys_DoNotNavigateAway(Hex1bKey key)
+    [InlineData(Hex1bKey.Enter)]
+    [InlineData(Hex1bKey.RightArrow)]
+    [InlineData(Hex1bKey.LeftArrow)]
+    public async Task NoSquadScreen_NavigationKeys_DoNotNavigateAway(Hex1bKey key)
     {
         await using var terminal = TestAppBuilder.Build(squadDetected: false);
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -28,7 +25,6 @@ public class NoSquadGuardTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        // Should still be on NoSquad screen — look for welcome text
         Assert.True(snapshot.ContainsText("Welcome to SquadTUI"),
             $"pressing {key} should not navigate away from NoSquad screen");
 

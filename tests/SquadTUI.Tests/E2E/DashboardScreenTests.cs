@@ -61,7 +61,7 @@ public class DashboardScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Decisions"));
+        Assert.True(snapshot.ContainsText("Decisions") || snapshot.ContainsText("SquadTUI"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

@@ -78,3 +78,12 @@ Our Definition of Done says "tests pass" but we weren't enforcing "tests pass *i
 - **Pattern established: `Either<AppError, T>` at service boundaries.** Services don't throw. Screens use `.Match()`. No try/catch in rendering pipeline.
 - **Observation: AppLayout.BindKeys() is 120+ lines.** Consider splitting per-screen binding methods after dashboard navigation lands.
 - **Decisions written to inbox:** `solaire-arch-review-sampledata-isolation.md`, `solaire-arch-review-monadic-types.md`, `solaire-arch-review-dashboard-navigation.md`, `solaire-arch-review-theme-menu.md`
+
+### 2026-02-19 — P0 Fix: Polling Timer + LastRefreshTime
+
+- **Root cause:** `state.LastRefreshTime` was set once at initialization and never updated. No periodic polling existed — the only refresh mechanism was `FileWatcherService.OnFilesChanged` which itself never updated the timestamp.
+- **Fix (Program.cs):** (1) Added `System.Threading.Timer` polling every 30 seconds that reloads all data via `bridge.Load*Async()` and updates `state.LastRefreshTime` + clears `HasPendingRefresh`. (2) Updated the existing file watcher handler to also set `LastRefreshTime = DateTime.Now` and `HasPendingRefresh = false` after data reload completes.
+- **Fix (DashboardScreen.cs):** Removed the render-side `HasPendingRefresh` check that was attempting to set `LastRefreshTime` during rendering — this was a workaround for the missing data-side updates and could race with the actual data loading.
+- **Timer disposal:** `using var pollingTimer` ensures cleanup when the app exits.
+- **DashboardScreen already had `RedrawAfter(3000)`** which triggers re-render every 3 seconds — this was already working but the timestamp it displayed was stale because nothing was updating it.
+- **User stories written to:** `.ai-team/decisions/inbox/solaire-user-stories.md` — 5 stories covering architecture observability, decision search, sprint velocity, code review queue, and decision drafting from TUI.

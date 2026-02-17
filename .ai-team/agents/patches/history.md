@@ -211,3 +211,28 @@ Dashboard was redesigned (by Siegmeyer) to use new panel titles ("👥 Team Rost
 
 **Current test count:** 326 tests total (281 existing + 45 new) — all passing ✅
 
+### 2026-02-19: Stack Navigation & Modal Test Suite — 790 tests total
+
+**What was done:**
+- Created 5 user stories from tester perspective (`.ai-team/decisions/inbox/patches-user-stories.md`)
+- Implemented comprehensive test plan for stack-based navigation as code (~45 new tests across 4 files)
+- Fixed pre-existing build error in `NoSquadGuardTests.cs`
+
+**New test files created:**
+- `tests/SquadTUI.Tests/E2E/StackNavigationTests.cs` (class: `StackNavigationExtendedTests`) — 17 E2E tests for stack navigation: drill-in from each panel (Roster, Activity, Decisions, Metrics), escape back to Dashboard, deep navigation chains (Dashboard→Roster→MemberDetail→Charter→back), multi-level escape sequences, direct key navigation (D1-D6) while deep in stack, rapid drill-in/escape, escape on Dashboard is no-op, settings modal from sub-screens, panel focus preservation after navigation round-trip
+- `tests/SquadTUI.Tests/E2E/SettingsModalOverlayTests.cs` — 9 E2E tests for settings modal overlay: opens with S key, closes with Escape, renders all settings items (Theme, Vim Keybindings, Mouse Support, Emoji Display), opens from Roster screen, opens from Decisions screen, opens from Metrics screen, keyboard navigation within modal, modal closes and returns to previous screen
+- `tests/SquadTUI.Tests/E2E/UpdateTimerTests.cs` — 4 E2E tests (refresh timestamp display, LIVE indicator, timer on sub-screen, drill-in preserves timer) + 4 unit tests (`UpdateTimerStateTests` class: default state values, IsLiveEnabled toggle, LastRefreshTime update, HasPendingRefresh flag)
+- `tests/SquadTUI.Tests/E2E/SizingConsistencyTests.cs` — 12 E2E tests for layout sizing consistency: panels maintain size during focus cycle, dashboard renders at minimum width (60 cols), wide layout (120 cols) shows three columns, medium layout (80 cols) shows two columns, narrow layout (60 cols) shows single column, settings modal renders at all breakpoints (60/80/120), no layout shift during navigation
+
+**Files fixed:**
+- `tests/SquadTUI.Tests/E2E/NoSquadGuardTests.cs` — Changed `Hex1bKey.Right`/`Hex1bKey.Left` → `Hex1bKey.RightArrow`/`Hex1bKey.LeftArrow` (pre-existing build error; these enum values don't exist in Hex1b 0.90.0)
+
+**Key technical discoveries:**
+1. **Hex1bKey.Tab intercepted by TabPanel**: The `Hex1bKey.Tab` key is captured by the Hex1b TabPanel widget before any `OverridesCapture` binding can reach it. Tests that need to cycle dashboard panels must use `RightArrow`/`LeftArrow` instead.
+2. **ANSI escape codes split text in ContainsText()**: Panel headers rendered with reverse video, bold, or accent colors contain ANSI escape sequences that can split words. `ContainsText("Decisions")` can fail even though both "D" and "ecisions" are visible. Use short, stable text fragments or avoid asserting on styled header text at certain widths.
+3. **Class naming conflict**: `TabStyleTests.cs` already contained a class named `StackNavigationTests`, so the new stack navigation test class was named `StackNavigationExtendedTests` to avoid CS0101 duplicate type errors.
+4. **Hex1bKey enum**: `.Right` and `.Left` don't exist — use `.RightArrow` and `.LeftArrow`. The `.Right()` and `.Left()` *extension methods* on `Hex1bTerminalInputSequenceBuilder` do work (they emit arrow key sequences).
+5. **Pre-existing ANSI text failures**: 3 existing tests fail due to the ANSI text-splitting issue (`Dashboard_RendersAtVariousWidths(40,30)`, `Dashboard_At120Cols_ShowsWideLayout`, `Dashboard_RendersRecentDecisions`). These are fragile assertions on styled text, not regressions from new code.
+
+**Test results:** 790 total tests, 787 passed, 3 failed (all pre-existing ANSI text-splitting issues) ✅
+

@@ -7,6 +7,15 @@ namespace SquadTUI.Tests.E2E;
 [Collection("E2E")]
 public class MetricsScreenTests
 {
+    /// <summary>Helper: navigate to Metrics via panel 3 (Right x3, Enter)</summary>
+    private static Hex1bTerminalInputSequence NavToMetrics() =>
+        new Hex1bTerminalInputSequenceBuilder()
+            .Right().Wait(50)
+            .Right().Wait(50)
+            .Right().Wait(50)
+            .Enter()
+            .Build();
+
     [Fact]
     public async Task Metrics_ShowsSprintOverview()
     {
@@ -15,10 +24,7 @@ public class MetricsScreenTests
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D6)
-            .Build();
-        await sequence.ApplyAsync(terminal);
+        await NavToMetrics().ApplyAsync(terminal);
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
@@ -38,10 +44,7 @@ public class MetricsScreenTests
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D6)
-            .Build();
-        await sequence.ApplyAsync(terminal);
+        await NavToMetrics().ApplyAsync(terminal);
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
@@ -60,10 +63,7 @@ public class MetricsScreenTests
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D6)
-            .Build();
-        await sequence.ApplyAsync(terminal);
+        await NavToMetrics().ApplyAsync(terminal);
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
@@ -81,10 +81,7 @@ public class MetricsScreenTests
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
-        var navSequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D6)
-            .Build();
-        await navSequence.ApplyAsync(terminal);
+        await NavToMetrics().ApplyAsync(terminal);
         await Task.Delay(200);
 
         var toggleSequence = new Hex1bTerminalInputSequenceBuilder()
@@ -108,10 +105,7 @@ public class MetricsScreenTests
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
-        var navSequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D6)
-            .Build();
-        await navSequence.ApplyAsync(terminal);
+        await NavToMetrics().ApplyAsync(terminal);
         await Task.Delay(200);
 
         var toggleSequence = new Hex1bTerminalInputSequenceBuilder()

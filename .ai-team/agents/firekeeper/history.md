@@ -69,3 +69,36 @@ The NoSquad screen uses manual Unicode box-drawing characters (┌─┐│└�
 2. Review every screen implementation against the design spec before sign-off
 3. Actively explore the widget catalog — we're using ~30% of what Hex1b offers. Table, TabPanel, Progress, and InfoBar would immediately improve quality
 4. Push for a "visual QA" step in our definition of done
+
+### Stack Navigation UX Specification & User Stories (2026-02-18)
+
+**What I created:**
+- **`firekeeper-stack-nav-ux-spec.md`** (19.3K): Complete UX specification for removing the tab bar in favor of stack-based navigation. Covers 11 sections: Dashboard as home, Back navigation, Transition feel, Settings modal, Keyboard consistency, Footer updates, Responsive behavior, First-run experience, Error states, Accessibility, and implementation roadmap.
+- **`firekeeper-user-stories.md`** (17.1K): 8 user stories addressing the core UX pain points: Dashboard-first navigation, discoverable keyboards, settings modal, error handling, responsive layout, breadcrumbs, first-run experience, and accessibility.
+
+**Why I wrote these:**
+LondoSpark explicitly requested stack-based navigation without the tab bar. The current tab-bar model (1–6 number keys for 6 screens) is confusing and doesn't scale. Moving to "Dashboard as home, Tab to focus panels, Enter to drill in, Escape to pop back" is more intuitive and aligns with modern app conventions (browser back button, mobile navigation).
+
+**Design decisions made:**
+1. **No visible breadcrumb widget** — footer text + screen title provide sufficient context cue without wasting vertical space
+2. **Instant transitions** (no fade/slide) — terminals should feel snappy, not cinematic
+3. **Settings as modal overlay** — users adjust theme/keybindings without losing their place
+4. **Responsive at 5+ breakpoints** (60/80/100/120/160 cols) — SquadTUI works on narrow terminals
+5. **Footer is context-sensitive** — shows only actions available on current screen (no 1–6 clutter)
+
+**Why these decisions matter:**
+- **Clarity:** One entry point (Dashboard) eliminates the "which number is Roster?" confusion
+- **Speed:** Tab-and-Enter rhythm is muscle-memory faster than hunting for numbers
+- **Accessibility:** Keyboard-only navigation is consistent across all screens
+- **Discoverability:** New users see panels and naturally press Tab (vs. guessing 1–6)
+- **Resilience:** Modal Settings keeps users oriented; they don't lose context when adjusting theme
+
+**Stories reflect team intent, not just specs:**
+Each story is written from the **user's perspective**, not the builder's. They describe the problem (current pain), desired outcome, and acceptance criteria — but NOT implementation details. This lets Siegmeyer (frontend) and Andre (backend) design their solutions without constraint.
+
+**Learnings from this work:**
+1. **User stories are the missing link** between design vision and implementation. The UX spec is detailed; the stories are the narrative that justifies each decision.
+2. **Specs must address edge cases explicitly** (very narrow terminals, modal over empty data, rapid input). Users will find them, and unclear specs lead to bugs.
+3. **Accessibility isn't a P2 feature** — it's foundational (Story 8). If we design for keyboard-only from the start, we don't retrofit it later.
+4. **First-run matters** — Story 7 (onboarding tour) is P1, not P2. New users decide in 30 seconds if they'll keep using the app.
+5. **Responsive design is mandatory, not optional** — Story 5 ensures SquadTUI works at 60 cols (mobile SSH) and 160 cols (wide monitor). That's 8x width range.

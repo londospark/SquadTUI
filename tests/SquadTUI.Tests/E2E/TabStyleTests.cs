@@ -5,10 +5,10 @@ using Hex1b.Input;
 namespace SquadTUI.Tests.E2E;
 
 [Collection("E2E")]
-public class TabStyleTests
+public class StackNavigationTests
 {
     [Fact]
-    public async Task TabBar_RendersOnDashboardScreen()
+    public async Task Dashboard_RendersWithoutTabs()
     {
         await using var terminal = TestAppBuilder.Build(width: 200);
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -17,50 +17,70 @@ public class TabStyleTests
 
         var snapshot = terminal.CreateSnapshot();
         Assert.True(snapshot.ContainsText("Dashboard"));
-        Assert.True(snapshot.ContainsText("Roster"));
-        Assert.True(snapshot.ContainsText("Decisions"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
     }
 
     [Fact]
-    public async Task TabBar_ActiveTabHasIndicator()
+    public async Task Enter_DrillsIn_Escape_PopsBack()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
+        // Enter drills into Roster (panel 0)
+        var sequence = new Hex1bTerminalInputSequenceBuilder()
+            .Enter()
+            .Build();
+        await sequence.ApplyAsync(terminal);
+        await Task.Delay(200);
+
         var snapshot = terminal.CreateSnapshot();
-        // The active tab should have the ▶ indicator (ANSI stripped, but text preserved)
+        Assert.True(snapshot.ContainsText("Team Roster"));
+
+        // Escape pops back to Dashboard
+        var back = new Hex1bTerminalInputSequenceBuilder()
+            .Key(Hex1bKey.Escape)
+            .Build();
+        await back.ApplyAsync(terminal);
+        await Task.Delay(200);
+
+        snapshot = terminal.CreateSnapshot();
         Assert.True(snapshot.ContainsText("Dashboard"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
     }
 
-    [Theory]
-    [InlineData(Hex1bKey.D2, "Team Roster")]
-    [InlineData(Hex1bKey.D3, "Decisions")]
-    [InlineData(Hex1bKey.D4, "Skills")]
-    [InlineData(Hex1bKey.D5, "Activity")]
-    [InlineData(Hex1bKey.D6, "Metrics")]
-    public async Task TabBar_PressingNumberKey_SwitchesScreen(Hex1bKey key, string expectedContent)
+    [Fact]
+    public async Task StackNavigation_MultipleDepth()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
+        // Dashboard → Roster (Enter) → should show Roster
         var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(key)
+            .Enter()
             .Build();
         await sequence.ApplyAsync(terminal);
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText(expectedContent));
+        Assert.True(snapshot.ContainsText("Team Roster"));
+
+        // Escape → back to Dashboard
+        var back = new Hex1bTerminalInputSequenceBuilder()
+            .Key(Hex1bKey.Escape)
+            .Build();
+        await back.ApplyAsync(terminal);
+        await Task.Delay(200);
+
+        snapshot = terminal.CreateSnapshot();
+        Assert.True(snapshot.ContainsText("Dashboard"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -71,7 +91,7 @@ public class TabStyleTests
     [InlineData(80, 30)]
     [InlineData(120, 30)]
     [InlineData(200, 30)]
-    public async Task TabBar_RendersAtVariousWidths(int width, int height)
+    public async Task Dashboard_RendersAtVariousWidths(int width, int height)
     {
         await using var terminal = TestAppBuilder.Build(width, height);
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -79,45 +99,23 @@ public class TabStyleTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        // Should not crash and should contain at least Dashboard label
         Assert.NotNull(snapshot);
-        Assert.True(snapshot.ContainsText("Dashboard"));
+        Assert.True(snapshot.ContainsText("SquadTUI"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
     }
 
     [Fact]
-    public async Task TabBar_ContainsTabLabelsWithEmoji()
-    {
-        // Use wide terminal to ensure all tabs fit
-        await using var terminal = TestAppBuilder.Build(width: 200);
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        // Check for tab labels (ANSI stripped but text preserved)
-        Assert.True(snapshot.ContainsText("Dashboard"));
-        Assert.True(snapshot.ContainsText("Roster"));
-        Assert.True(snapshot.ContainsText("Decisions"));
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task TabBar_SwitchingBack_UpdatesActiveIndicator()
+    public async Task EscapeOnDashboard_StaysOnDashboard()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
-        // Switch to Roster, then back to Dashboard
         var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D2).Wait(100)
-            .Key(Hex1bKey.D1)
+            .Key(Hex1bKey.Escape)
             .Build();
         await sequence.ApplyAsync(terminal);
         await Task.Delay(200);
