@@ -2,6 +2,7 @@ using Hex1b;
 using Hex1b.Input;
 using Hex1b.Widgets;
 using SquadTUI.Models;
+using SquadTUI.Rendering;
 using SquadTUI.Services;
 using SquadTUI.Themes;
 
@@ -29,6 +30,12 @@ public static class AppLayout
         Hex1bApp app,
         Hex1bAppOptions options)
     {
+        // Theme settings modal overlay — renders instead of normal content
+        if (state.ShowSettingsOverlay)
+        {
+            return RenderThemeModal(ctx, state, app, options);
+        }
+
         // NoSquad screen — no tabs
         if (state.CurrentScreen == Screen.NoSquad)
         {
@@ -126,6 +133,89 @@ public static class AppLayout
         ]).WithInputBindings(keys => BindKeys(keys, state, app, options));
     }
 
+    private static Hex1bWidget RenderThemeModal(
+        RootContext ctx,
+        AppState state,
+        Hex1bApp app,
+        Hex1bAppOptions options)
+    {
+        var ti = state.SelectedThemeIndex;
+        var acc = ThemeManager.GetAccentCode(ti);
+        var sec = ThemeManager.GetSecondaryAccent(ti);
+        var R = PanelRenderer.Reset;
+        var B = PanelRenderer.Bold;
+        var D = PanelRenderer.Dim;
+        var panelBg = ThemeManager.GetPanelBgColor(ti);
+
+        var themeItems = ThemeManager.ThemeNames
+            .Select((name, idx) => idx == ti ? $"  ► {name}" : $"    {name}")
+            .ToList() as IReadOnlyList<string>;
+
+        return ctx.VStack(v =>
+        [
+            v.Text(""),
+            v.Text(""),
+            new BackgroundPanelWidget(panelBg, v.VStack(modal =>
+            [
+                modal.Text($"  {B}{acc}🎨 Theme Selection{R}"),
+                modal.Text($"  {sec}{new string('━', 36)}{R}"),
+                modal.Text(""),
+                modal.List(themeItems)
+                    .OnSelectionChanged(e =>
+                    {
+                        state.SelectedThemeIndex = e.SelectedIndex;
+                        options.Theme = ThemeManager.GetTheme(e.SelectedIndex);
+                    })
+                    .OnItemActivated(_ =>
+                    {
+                        // Enter confirms selection and closes modal
+                        state.Settings.ThemeName = ThemeManager.ThemeNames[state.SelectedThemeIndex];
+                        SettingsService.Save(state.Settings);
+                        state.ShowSettingsOverlay = false;
+                    })
+                    .Fill(),
+                modal.Text(""),
+                modal.Text($"  {D}↑↓ Navigate  Enter Confirm  Esc Cancel{R}"),
+                modal.Text(""),
+            ]).FillWidth(1).FillHeight()),
+        ]).WithInputBindings(keys => BindModalKeys(keys, state, app, options));
+    }
+
+    private static void BindModalKeys(
+        InputBindingsBuilder keys,
+        AppState state,
+        Hex1bApp app,
+        Hex1bAppOptions options)
+    {
+        keys.Key(Hex1bKey.Escape).Action(() =>
+        {
+            // Revert to original theme
+            state.SelectedThemeIndex = state.OriginalThemeIndex;
+            options.Theme = ThemeManager.GetTheme(state.OriginalThemeIndex);
+            state.ShowSettingsOverlay = false;
+        }, "Cancel");
+        keys.Key(Hex1bKey.Enter).Action(() =>
+        {
+            // Confirm selection and save
+            state.Settings.ThemeName = ThemeManager.ThemeNames[state.SelectedThemeIndex];
+            SettingsService.Save(state.Settings);
+            state.ShowSettingsOverlay = false;
+        }, "Confirm");
+        keys.Key(Hex1bKey.J).Action(() =>
+        {
+            var newIndex = (state.SelectedThemeIndex + 1) % ThemeManager.ThemeNames.Length;
+            state.SelectedThemeIndex = newIndex;
+            options.Theme = ThemeManager.GetTheme(newIndex);
+        }, "Down");
+        keys.Key(Hex1bKey.K).Action(() =>
+        {
+            var newIndex = (state.SelectedThemeIndex - 1 + ThemeManager.ThemeNames.Length) % ThemeManager.ThemeNames.Length;
+            state.SelectedThemeIndex = newIndex;
+            options.Theme = ThemeManager.GetTheme(newIndex);
+        }, "Up");
+        keys.Key(Hex1bKey.Q).Action(() => { app.RequestStop(); }, "Quit");
+    }
+
     private static void BindKeys(
         InputBindingsBuilder keys,
         AppState state,
@@ -144,7 +234,14 @@ public static class AppLayout
             state.SelectedThemeIndex = (state.SelectedThemeIndex + 1) % ThemeManager.ThemeNames.Length;
             options.Theme = ThemeManager.GetTheme(state.SelectedThemeIndex);
         }, "Theme");
-        keys.Key(Hex1bKey.S).Action(() => { if (state.CurrentScreen != Screen.NoSquad) state.CurrentScreen = Screen.Settings; }, "Settings");
+        keys.Key(Hex1bKey.S).Action(() =>
+        {
+            if (state.CurrentScreen != Screen.NoSquad)
+            {
+                state.OriginalThemeIndex = state.SelectedThemeIndex;
+                state.ShowSettingsOverlay = true;
+            }
+        }, "Settings");
         keys.Key(Hex1bKey.Escape).Action(() =>
         {
             if (state.CurrentScreen == Screen.MemberDetail)

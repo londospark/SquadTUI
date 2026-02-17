@@ -131,6 +131,27 @@ public class AppStateTests
     }
 
     [Fact]
+    public void ShowSettingsOverlay_DefaultsToFalse()
+    {
+        var state = new AppState();
+        state.ShowSettingsOverlay.Should().BeFalse();
+    }
+
+    [Fact]
+    public void PreviewThemeIndex_DefaultsToNegativeOne()
+    {
+        var state = new AppState();
+        state.PreviewThemeIndex.Should().Be(-1);
+    }
+
+    [Fact]
+    public void OriginalThemeIndex_DefaultsToZero()
+    {
+        var state = new AppState();
+        state.OriginalThemeIndex.Should().Be(0);
+    }
+
+    [Fact]
     public void AllSelectedIndices_DefaultToZero()
     {
         var state = new AppState();

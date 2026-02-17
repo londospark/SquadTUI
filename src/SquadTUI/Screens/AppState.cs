@@ -51,6 +51,11 @@ public class AppState
     public bool ShowHelp { get; set; } = false;
     public bool ShowBurndown { get; set; } = false;
 
+    // Theme modal overlay
+    public bool ShowSettingsOverlay { get; set; } = false;
+    public int PreviewThemeIndex { get; set; } = -1; // -1 means "use SelectedThemeIndex"
+    public int OriginalThemeIndex { get; set; } = 0;
+
     // Live dashboard
     public bool IsLiveEnabled { get; set; } = true;
     public DateTime LastRefreshTime { get; set; } = DateTime.Now;
