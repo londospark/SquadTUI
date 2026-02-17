@@ -1,3 +1,4 @@
+using LanguageExt;
 using SquadTUI.Tests.Fixtures;
 
 namespace SquadTUI.Tests.Unit;
@@ -10,8 +11,7 @@ public class SampleDataTests
         var memberNames = SampleData.Members.Select(m => m.Name).ToHashSet();
         foreach (var task in SampleData.Tasks)
         {
-            if (task.Assignee is not null)
-                Assert.Contains(task.Assignee, memberNames);
+            task.Assignee.IfSome(a => Assert.Contains(a, memberNames));
         }
     }
 

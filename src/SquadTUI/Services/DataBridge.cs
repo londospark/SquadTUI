@@ -13,10 +13,8 @@ public class DataBridge
         _services = services;
     }
 
-    public async Task<DashboardData> LoadDashboardDataAsync(CancellationToken ct = default)
-    {
-        return await _services.SquadData.GetDashboardAsync(ct);
-    }
+    public async Task<DashboardData> LoadDashboardDataAsync(CancellationToken ct = default) =>
+        await _services.SquadData.GetDashboardAsync(ct);
 
     public async Task<Either<AppError, IReadOnlyList<SquadMember>>> LoadRosterDataAsync(CancellationToken ct = default)
     {
@@ -37,21 +35,18 @@ public class DataBridge
         {
             var roster = await _services.Team.GetRosterAsync(ct);
             var members = roster.Members ?? [];
-            var currentTasks = await _services.Team.GetCurrentTasksAsync(ct);
+            var currentTasks = await _services.Team.GetCurrentTasksAsync(ct)
+                ?? (IReadOnlyDictionary<string, string>)new Dictionary<string, string>();
             var tasks = new List<SquadTask>();
             var idx = 1;
             foreach (var m in members)
             {
-                var taskTitle = m.CurrentTask;
+                // Resolve task title: prefer member's current task, fall back to history
+                string? resolvedTitle = m.CurrentTask.IsSome
+                    ? (string)m.CurrentTask
+                    : currentTasks.TryGetValue(m.Name, out var fromHistory) ? fromHistory : null;
 
-                // Try to get task from agent history/inbox if not set on member
-                if (string.IsNullOrEmpty(taskTitle) &&
-                    currentTasks.TryGetValue(m.Name, out var fromHistory))
-                {
-                    taskTitle = fromHistory;
-                }
-
-                if (!string.IsNullOrEmpty(taskTitle))
+                if (!string.IsNullOrEmpty(resolvedTitle))
                 {
                     var status = m.Status switch
                     {
@@ -60,7 +55,7 @@ public class DataBridge
                         MemberStatus.Idle => SquadTaskStatus.Pending,
                         _ => SquadTaskStatus.Pending
                     };
-                    tasks.Add(new SquadTask($"task-{idx}", taskTitle, null, status, m.Name));
+                    tasks.Add(new SquadTask($"task-{idx}", resolvedTitle, default, status, m.Name));
                 }
                 idx++;
             }
@@ -113,10 +108,12 @@ public class DataBridge
         try
         {
             var member = await _services.Team.GetMemberAsync(memberName, ct);
-            if (member?.CharterPath == null || !File.Exists(member.CharterPath))
+            if (member == null)
                 return None;
-
-            return Some(await File.ReadAllTextAsync(member.CharterPath, ct));
+            var charterPath = member.CharterPath.Where(File.Exists);
+            return charterPath.IsSome
+                ? Some(await File.ReadAllTextAsync((string)charterPath, ct))
+                : None;
         }
         catch
         {

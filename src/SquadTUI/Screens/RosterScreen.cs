@@ -35,7 +35,9 @@ public static class RosterScreen
         var charter = state.CharterContent.Match(Some: s => s, None: () => "No charter loaded");
         var charterExcerpt = charter.Split('\n').Where(l => !string.IsNullOrWhiteSpace(l) && !l.StartsWith('#')).Take(3);
         var allTasks = state.Tasks.GetOrEmpty();
-        var memberTasks = allTasks.Where(t => t.Assignee == selected.Name).ToList();
+        var memberTasks = (from t in allTasks
+                          where t.Assignee.Match(Some: a => a == selected.Name, None: () => false)
+                          select t).ToList();
         var logs = state.LogEntries.GetOrEmpty();
         var recentLogs = logs.Where(l => l.Participants.Contains(selected.Name)).Take(3).ToList();
         var hBg = ThemeManager.GetPanelHeaderBg(state.SelectedThemeIndex);
@@ -63,7 +65,7 @@ public static class RosterScreen
                     detail.Text(""),
                     detail.Text($"  {D}Role:{R}      {B}{selected.Role}{R}"),
                     detail.Text($"  {D}Status:{R}    {GetStatusBadge(selected.Status, em)} {selected.Status}{R}"),
-                    detail.Text($"  {D}Task:{R}      {(memberTasks.Count > 0 ? memberTasks[0].Title : selected.CurrentTask ?? $"{D}None{R}")}{R}"),
+                    detail.Text($"  {D}Task:{R}      {(memberTasks.Count > 0 ? memberTasks[0].Title : selected.CurrentTask.IfNone($"{D}None{R}"))}{R}"),
                 };
 
                 // Tasks section
@@ -75,7 +77,7 @@ public static class RosterScreen
                 if (memberTasks.Count > 0)
                 {
                     foreach (var t in memberTasks)
-                        widgets.Add(detail.Text($"  {GetTaskBadge(t.Status, em)} {t.Title}  {D}{t.Description}{R}"));
+                        widgets.Add(detail.Text($"  {GetTaskBadge(t.Status, em)} {t.Title}  {D}{t.Description.IfNone("")}{R}"));
                 }
                 else
                 {

@@ -1,3 +1,5 @@
+using LanguageExt;
+using static LanguageExt.Prelude;
 using SquadTUI.Models;
 
 namespace SquadTUI.Services;
@@ -146,14 +148,15 @@ public class TeamService : ITeamService
     public async Task<SquadMember?> GetMemberAsync(string name, CancellationToken ct = default)
     {
         var roster = await GetRosterAsync(ct);
-        return roster.Members?.FirstOrDefault(m =>
-            m.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+        return (from m in roster.Members ?? []
+                where m.Name.Equals(name, StringComparison.OrdinalIgnoreCase)
+                select m).FirstOrDefault();
     }
 
-    private string? GetCharterPath(string memberName)
+    private Option<string> GetCharterPath(string memberName)
     {
         var charterFile = _fileLocations.GetCharterPath(memberName);
-        return File.Exists(charterFile) ? charterFile : null;
+        return File.Exists(charterFile) ? Some(charterFile) : None;
     }
 
     public async Task<IReadOnlyDictionary<string, string>> GetCurrentTasksAsync(CancellationToken ct = default)
@@ -348,10 +351,8 @@ public class TeamService : ITeamService
             Directory.Delete(agentDir, true);
     }
 
-    private static MemberStatus ParseMemberStatus(string text)
-    {
-        var cleaned = text.Replace("✅", "").Replace("📋", "").Replace("🔄", "").Trim().ToLowerInvariant();
-        return cleaned switch
+    private static MemberStatus ParseMemberStatus(string text) =>
+        text.Replace("✅", "").Replace("📋", "").Replace("🔄", "").Trim().ToLowerInvariant() switch
         {
             "active" => MemberStatus.Active,
             "idle" => MemberStatus.Idle,
@@ -361,7 +362,6 @@ public class TeamService : ITeamService
             "monitor" => MemberStatus.Active,
             _ => MemberStatus.Active
         };
-    }
 
     private static List<string> ParseTableRow(string line)
     {

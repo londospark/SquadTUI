@@ -39,10 +39,10 @@ public class SettingsScreenTests
     }
 
     [Fact]
-    public void AppState_Settings_ShowEmoji_DefaultsFalse()
+    public void AppState_Settings_ShowEmoji_DefaultsTrue()
     {
         var state = new AppState();
-        Assert.False(state.Settings.ShowEmoji);
+        Assert.True(state.Settings.ShowEmoji);
     }
 
     [Fact]

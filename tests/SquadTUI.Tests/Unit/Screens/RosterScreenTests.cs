@@ -56,10 +56,10 @@ public class RosterScreenTests
     }
 
     [Fact]
-    public void ShowEmoji_DefaultsFalse()
+    public void ShowEmoji_DefaultsTrue()
     {
         var settings = new AppSettings();
-        Assert.False(settings.ShowEmoji);
+        Assert.True(settings.ShowEmoji);
     }
 
     [Fact]

@@ -1,31 +1,17 @@
 using LanguageExt;
-using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 using SquadTUI.Models;
 using SquadTUI.Services;
+using SquadTUI.Tests.Stubs;
 
 namespace SquadTUI.Tests.Unit.Services;
 
 public class DataBridgeMemberTests
 {
-    private static ServiceProvider CreateServiceProvider(ITeamService? teamService = null)
-    {
-        teamService ??= Substitute.For<ITeamService>();
-        var decisionService = Substitute.For<IDecisionService>();
-        var skillService = Substitute.For<ISkillService>();
-        var logService = Substitute.For<IOrchestrationLogService>();
-        var squadData = Substitute.For<ISquadDataProvider>();
-        return new ServiceProvider(squadData, teamService, decisionService, skillService, logService);
-    }
-
     [Fact]
     public async Task AddMemberAsync_ReturnsRight_OnSuccess()
     {
-        var teamService = Substitute.For<ITeamService>();
-        teamService.AddMemberAsync("Basher", "QA", Arg.Any<CancellationToken>())
-            .Returns(Task.CompletedTask);
-
-        var sp = CreateServiceProvider(teamService);
+        var teamService = new StubTeamService();
+        var sp = StubServiceProviderFactory.Create(team: teamService);
         var bridge = new DataBridge(sp);
 
         var result = await bridge.AddMemberAsync("Basher", "QA");
@@ -35,11 +21,8 @@ public class DataBridgeMemberTests
     [Fact]
     public async Task RemoveMemberAsync_ReturnsRight_OnSuccess()
     {
-        var teamService = Substitute.For<ITeamService>();
-        teamService.RemoveMemberAsync("Basher", Arg.Any<CancellationToken>())
-            .Returns(Task.CompletedTask);
-
-        var sp = CreateServiceProvider(teamService);
+        var teamService = new StubTeamService();
+        var sp = StubServiceProviderFactory.Create(team: teamService);
         var bridge = new DataBridge(sp);
 
         var result = await bridge.RemoveMemberAsync("Basher");
@@ -49,11 +32,11 @@ public class DataBridgeMemberTests
     [Fact]
     public async Task AddMemberAsync_ReturnsLeft_OnError()
     {
-        var teamService = Substitute.For<ITeamService>();
-        teamService.AddMemberAsync("Basher", "QA", Arg.Any<CancellationToken>())
-            .ThrowsAsync(new InvalidOperationException("team.md does not exist"));
-
-        var sp = CreateServiceProvider(teamService);
+        var teamService = new StubTeamService
+        {
+            AddMemberException = new InvalidOperationException("team.md does not exist")
+        };
+        var sp = StubServiceProviderFactory.Create(team: teamService);
         var bridge = new DataBridge(sp);
 
         var result = await bridge.AddMemberAsync("Basher", "QA");
@@ -63,11 +46,11 @@ public class DataBridgeMemberTests
     [Fact]
     public async Task RemoveMemberAsync_ReturnsLeft_OnError()
     {
-        var teamService = Substitute.For<ITeamService>();
-        teamService.RemoveMemberAsync("Basher", Arg.Any<CancellationToken>())
-            .ThrowsAsync(new IOException("Permission denied"));
-
-        var sp = CreateServiceProvider(teamService);
+        var teamService = new StubTeamService
+        {
+            RemoveMemberException = new IOException("Permission denied")
+        };
+        var sp = StubServiceProviderFactory.Create(team: teamService);
         var bridge = new DataBridge(sp);
 
         var result = await bridge.RemoveMemberAsync("Basher");
@@ -77,11 +60,8 @@ public class DataBridgeMemberTests
     [Fact]
     public async Task AddMemberAsync_ErrorContainsServiceName()
     {
-        var teamService = Substitute.For<ITeamService>();
-        teamService.AddMemberAsync("X", "Y", Arg.Any<CancellationToken>())
-            .ThrowsAsync(new Exception("boom"));
-
-        var sp = CreateServiceProvider(teamService);
+        var teamService = new StubTeamService { AddMemberException = new Exception("boom") };
+        var sp = StubServiceProviderFactory.Create(team: teamService);
         var bridge = new DataBridge(sp);
 
         var result = await bridge.AddMemberAsync("X", "Y");
@@ -91,11 +71,8 @@ public class DataBridgeMemberTests
     [Fact]
     public async Task RemoveMemberAsync_ErrorContainsServiceName()
     {
-        var teamService = Substitute.For<ITeamService>();
-        teamService.RemoveMemberAsync("X", Arg.Any<CancellationToken>())
-            .ThrowsAsync(new Exception("boom"));
-
-        var sp = CreateServiceProvider(teamService);
+        var teamService = new StubTeamService { RemoveMemberException = new Exception("boom") };
+        var sp = StubServiceProviderFactory.Create(team: teamService);
         var bridge = new DataBridge(sp);
 
         var result = await bridge.RemoveMemberAsync("X");

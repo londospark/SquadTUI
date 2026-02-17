@@ -1,3 +1,5 @@
+using LanguageExt;
+using static LanguageExt.Prelude;
 using SquadTUI.Models;
 
 namespace SquadTUI.Services;
@@ -53,8 +55,8 @@ public class SkillService : ISkillService
         var lines = content.Split('\n');
         string? name = null;
         string? description = null;
-        string? source = null;
-        string? confidence = null;
+        Option<string> source = None;
+        string confidence = "medium";
 
         var inFrontmatter = false;
         var bodyLines = new List<string>();
@@ -86,7 +88,7 @@ public class SkillService : ISkillService
                     {
                         case "name": name = value; break;
                         case "description": description = value; break;
-                        case "source": source = value; break;
+                        case "source": source = Some(value); break;
                         case "confidence": confidence = value; break;
                     }
                 }
@@ -108,6 +110,8 @@ public class SkillService : ISkillService
 
         var bodyContent = string.Join('\n', bodyLines).Trim();
 
-        return new Skill(name, description, source, confidence, bodyContent, slug);
+        return new Skill(name, description, source, confidence,
+            string.IsNullOrEmpty(bodyContent) ? None : Some(bodyContent),
+            Some(slug));
     }
 }

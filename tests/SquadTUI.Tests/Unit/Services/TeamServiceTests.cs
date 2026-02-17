@@ -1,3 +1,4 @@
+using LanguageExt;
 using SquadTUI.Models;
 using SquadTUI.Services;
 
@@ -234,12 +235,12 @@ public class TeamServiceTests : IDisposable
         var svc = new TeamService(SquadDir);
         var roster = await svc.GetRosterAsync();
 
-        Assert.NotNull(roster.Members!.First().CharterPath);
-        Assert.True(File.Exists(roster.Members!.First().CharterPath));
+        Assert.True(roster.Members!.First().CharterPath.IsSome);
+        roster.Members!.First().CharterPath.IfSome(p => Assert.True(File.Exists(p)));
     }
 
     [Fact]
-    public async Task ParseTeamMd_CharterPathNullWhenFileDoesNotExist()
+    public async Task ParseTeamMd_CharterPathNoneWhenFileDoesNotExist()
     {
         WriteTeamFile("""
             # Team Roster
@@ -254,6 +255,6 @@ public class TeamServiceTests : IDisposable
         var svc = new TeamService(SquadDir);
         var roster = await svc.GetRosterAsync();
 
-        Assert.Null(roster.Members!.First().CharterPath);
+        Assert.True(roster.Members!.First().CharterPath.IsNone);
     }
 }

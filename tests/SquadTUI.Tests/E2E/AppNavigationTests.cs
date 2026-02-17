@@ -223,7 +223,7 @@ public class AppNavigationTests
     }
 
     [Fact]
-    public async Task PressS_OpensThemeModal()
+    public async Task PressS_OpensSettingsModal()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -237,7 +237,7 @@ public class AppNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Theme Selection"));
+        Assert.True(snapshot.ContainsText("Settings"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

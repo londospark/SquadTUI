@@ -1,3 +1,5 @@
+using LanguageExt;
+using static LanguageExt.Prelude;
 using SquadTUI.Models;
 
 namespace SquadTUI.Tests.Unit.Models;
@@ -12,17 +14,17 @@ public class ModelTests
     }
 
     [Fact]
-    public void SquadMember_DefaultsNullCurrentTask()
+    public void SquadMember_DefaultsNoneCurrentTask()
     {
         var member = new SquadMember("Test", "Dev");
-        Assert.Null(member.CurrentTask);
+        Assert.True(member.CurrentTask.IsNone);
     }
 
     [Fact]
-    public void SquadMember_DefaultsNullCharterPath()
+    public void SquadMember_DefaultsNoneCharterPath()
     {
         var member = new SquadMember("Test", "Dev");
-        Assert.Null(member.CharterPath);
+        Assert.True(member.CharterPath.IsNone);
     }
 
     [Fact]
@@ -33,10 +35,10 @@ public class ModelTests
     }
 
     [Fact]
-    public void SquadTask_DefaultsNullAssignee()
+    public void SquadTask_DefaultsNoneAssignee()
     {
         var task = new SquadTask("t1", "Test Task");
-        Assert.Null(task.Assignee);
+        Assert.True(task.Assignee.IsNone);
     }
 
     [Fact]
@@ -95,13 +97,13 @@ public class ModelTests
     [Fact]
     public void Skill_StoresAllFields()
     {
-        var skill = new Skill("test", "desc", "manual", "high", "body", "test-slug");
+        var skill = new Skill("test", "desc", Some("manual"), "high", Some("body"), Some("test-slug"));
         Assert.Equal("test", skill.Name);
         Assert.Equal("desc", skill.Description);
-        Assert.Equal("manual", skill.Source);
+        Assert.Equal(Some("manual"), skill.Source);
         Assert.Equal("high", skill.Confidence);
-        Assert.Equal("body", skill.Content);
-        Assert.Equal("test-slug", skill.Slug);
+        Assert.Equal(Some("body"), skill.Content);
+        Assert.Equal(Some("test-slug"), skill.Slug);
     }
 
     [Fact]

@@ -1,22 +1,11 @@
-using NSubstitute;
 using SquadTUI.Models;
 using SquadTUI.Services;
+using SquadTUI.Tests.Stubs;
 
 namespace SquadTUI.Tests.Unit.Services;
 
 public class SquadDataProviderTests
 {
-    private readonly ITeamService _teamService = Substitute.For<ITeamService>();
-    private readonly IOrchestrationLogService _logService = Substitute.For<IOrchestrationLogService>();
-    private readonly IDecisionService _decisionService = Substitute.For<IDecisionService>();
-    private readonly ISkillService _skillService = Substitute.For<ISkillService>();
-    private readonly SquadDataProvider _provider;
-
-    public SquadDataProviderTests()
-    {
-        _provider = new SquadDataProvider(_teamService, _logService, _decisionService, _skillService);
-    }
-
     [Fact]
     public async Task GetDashboardAsync_AggregatesAllServices()
     {
@@ -32,11 +21,12 @@ public class SquadDataProviderTests
             new(DateTimeOffset.Now, "2026-01-01", "kickoff", ["Danny"], "Summary", [], [])
         };
 
-        _teamService.GetRosterAsync(Arg.Any<CancellationToken>()).Returns(roster);
-        _decisionService.GetDecisionsAsync(Arg.Any<CancellationToken>()).Returns(decisions);
-        _logService.GetEntriesAsync(Arg.Any<CancellationToken>()).Returns(logEntries);
+        var teamService = new StubTeamService { RosterResult = roster };
+        var decisionService = new StubDecisionService { Result = decisions };
+        var logService = new StubOrchestrationLogService { Result = logEntries };
 
-        var dashboard = await _provider.GetDashboardAsync();
+        var provider = new SquadDataProvider(teamService, logService, decisionService, new StubSkillService());
+        var dashboard = await provider.GetDashboardAsync();
 
         Assert.NotNull(dashboard.Team);
         Assert.NotEmpty(dashboard.Decisions);
@@ -53,15 +43,13 @@ public class SquadDataProviderTests
             new("Scribe", "Logger", MemberStatus.Idle),
         };
         var roster = new TeamRoster("Test", null, members);
+        var teamService = new StubTeamService { RosterResult = roster };
 
-        _teamService.GetRosterAsync(Arg.Any<CancellationToken>()).Returns(roster);
-        _decisionService.GetDecisionsAsync(Arg.Any<CancellationToken>()).Returns(new List<DecisionEntry>());
-        _logService.GetEntriesAsync(Arg.Any<CancellationToken>()).Returns(new List<OrchestrationLogEntry>());
-
-        var dashboard = await _provider.GetDashboardAsync();
+        var provider = new SquadDataProvider(teamService, new StubOrchestrationLogService(), new StubDecisionService(), new StubSkillService());
+        var dashboard = await provider.GetDashboardAsync();
 
         Assert.Equal(3, dashboard.Team.TotalMembers);
-        Assert.Equal(2, dashboard.Team.ActiveMembers); // Active + Working
+        Assert.Equal(2, dashboard.Team.ActiveMembers);
     }
 
     [Fact]
@@ -77,11 +65,11 @@ public class SquadDataProviderTests
             new(DateTimeOffset.Now, "2026-01-01", "kickoff", ["Danny"], "Summary", [], [])
         };
 
-        _teamService.GetRosterAsync(Arg.Any<CancellationToken>()).Returns(roster);
-        _decisionService.GetDecisionsAsync(Arg.Any<CancellationToken>()).Returns(new List<DecisionEntry>());
-        _logService.GetEntriesAsync(Arg.Any<CancellationToken>()).Returns(logEntries);
+        var teamService = new StubTeamService { RosterResult = roster };
+        var logService = new StubOrchestrationLogService { Result = logEntries };
 
-        var dashboard = await _provider.GetDashboardAsync();
+        var provider = new SquadDataProvider(teamService, logService, new StubDecisionService(), new StubSkillService());
+        var dashboard = await provider.GetDashboardAsync();
 
         Assert.Single(dashboard.Activity);
         Assert.Equal("Danny", dashboard.Activity[0].MemberName);
@@ -92,9 +80,10 @@ public class SquadDataProviderTests
     public async Task GetRosterAsync_DelegatesToTeamService()
     {
         var roster = new TeamRoster("Test");
-        _teamService.GetRosterAsync(Arg.Any<CancellationToken>()).Returns(roster);
+        var teamService = new StubTeamService { RosterResult = roster };
 
-        var result = await _provider.GetRosterAsync();
+        var provider = new SquadDataProvider(teamService, new StubOrchestrationLogService(), new StubDecisionService(), new StubSkillService());
+        var result = await provider.GetRosterAsync();
 
         Assert.Equal(roster, result);
     }
@@ -103,9 +92,10 @@ public class SquadDataProviderTests
     public async Task GetDecisionsAsync_DelegatesToDecisionService()
     {
         var decisions = new List<DecisionEntry> { new("D1", "2026-01-01", "Danny", "Content") };
-        _decisionService.GetDecisionsAsync(Arg.Any<CancellationToken>()).Returns(decisions);
+        var decisionService = new StubDecisionService { Result = decisions };
 
-        var result = await _provider.GetDecisionsAsync();
+        var provider = new SquadDataProvider(new StubTeamService(), new StubOrchestrationLogService(), decisionService, new StubSkillService());
+        var result = await provider.GetDecisionsAsync();
 
         Assert.Equal(decisions, result);
     }
@@ -117,9 +107,10 @@ public class SquadDataProviderTests
         {
             new(DateTimeOffset.Now, "2026-01-01", "test", [], "Summary", [], [])
         };
-        _logService.GetEntriesAsync(Arg.Any<CancellationToken>()).Returns(logs);
+        var logService = new StubOrchestrationLogService { Result = logs };
 
-        var result = await _provider.GetLogEntriesAsync();
+        var provider = new SquadDataProvider(new StubTeamService(), logService, new StubDecisionService(), new StubSkillService());
+        var result = await provider.GetLogEntriesAsync();
 
         Assert.Equal(logs, result);
     }
@@ -128,9 +119,10 @@ public class SquadDataProviderTests
     public async Task GetSkillsAsync_DelegatesToSkillService()
     {
         var skills = new List<Skill> { new("test", "desc") };
-        _skillService.GetSkillsAsync(Arg.Any<CancellationToken>()).Returns(skills);
+        var skillService = new StubSkillService { Result = skills };
 
-        var result = await _provider.GetSkillsAsync();
+        var provider = new SquadDataProvider(new StubTeamService(), new StubOrchestrationLogService(), new StubDecisionService(), skillService);
+        var result = await provider.GetSkillsAsync();
 
         Assert.Equal(skills, result);
     }

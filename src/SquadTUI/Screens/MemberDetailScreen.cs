@@ -1,3 +1,4 @@
+using LanguageExt;
 using Hex1b;
 using Hex1b.Widgets;
 using SquadTUI.Models;
@@ -26,7 +27,9 @@ public static class MemberDetailScreen
 
         var charter = state.CharterContent.Match(Some: s => s, None: () => "No charter loaded");
         var allTasks = state.Tasks.GetOrEmpty();
-        var memberTasks = allTasks.Where(t => t.Assignee == member.Name).ToList();
+        var memberTasks = (from t in allTasks
+                          where t.Assignee.Match(Some: a => a == member.Name, None: () => false)
+                          select t).ToList();
         var logs = state.LogEntries.GetOrEmpty();
         var recentLogs = logs.Where(l => l.Participants.Contains(member.Name)).Take(3).ToList();
 
@@ -48,7 +51,7 @@ public static class MemberDetailScreen
                     header.Text($"  {D}{sec}{new string('━', 44)}{R}"),
                     header.Text(""),
                     header.Text($"  {GetStatusBadge(member.Status, em)} {B}{member.Name}{R}  {D}—{R}  {member.Role}{R}"),
-                    header.Text($"  {D}Status:{R} {member.Status}    {D}Current Task:{R} {member.CurrentTask ?? $"{D}None{R}"}{R}"),
+                    header.Text($"  {D}Status:{R} {member.Status}    {D}Current Task:{R} {member.CurrentTask.IfNone($"{D}None{R}")}{R}"),
                 ]),
 
                 inner.VStack(taskSection =>
@@ -63,7 +66,7 @@ public static class MemberDetailScreen
                     };
                     if (memberTasks.Count > 0)
                         foreach (var t in memberTasks)
-                            tw.Add(taskSection.Text($"  {GetTaskBadge(t.Status, em)} {B}{t.Title}{R}  {D}{t.Description}{R}"));
+                            tw.Add(taskSection.Text($"  {GetTaskBadge(t.Status, em)} {B}{t.Title}{R}  {D}{t.Description.IfNone("")}{R}"));
                     else
                         tw.Add(taskSection.Text($"  {D}No tasks assigned{R}"));
                     return tw.ToArray();

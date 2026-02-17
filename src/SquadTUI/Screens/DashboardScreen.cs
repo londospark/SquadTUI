@@ -1,3 +1,4 @@
+using LanguageExt;
 using Hex1b;
 using Hex1b.Widgets;
 using SquadTUI.Models;
@@ -73,7 +74,7 @@ public static class DashboardScreen
                         foreach (var m in members)
                         {
                             w.Add(left.Text($"  {GetStatusBadge(m.Status, em)} {B}{m.Name}{R}  {D}{m.Role}{R}"));
-                            var task = m.CurrentTask ?? "No active task";
+                            var task = m.CurrentTask.IfNone("No active task");
                             w.Add(left.Text($"     {D}↳ {task}{R}"));
                         }
                         w.Add(left.Text(""));

@@ -12,7 +12,7 @@ public class SettingsServiceTests
         Assert.Equal("Ocean", settings.ThemeName);
         Assert.True(settings.VimBindings);
         Assert.True(settings.MouseEnabled);
-        Assert.False(settings.ShowEmoji);
+        Assert.True(settings.ShowEmoji);
         Assert.True(settings.MarkdownRendering);
         Assert.Equal("Dashboard", settings.DefaultScreen);
     }
