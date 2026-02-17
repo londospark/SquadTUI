@@ -39,35 +39,65 @@ try {
     hex1b capture screenshot $terminalId --format svg --output "$OutputDir/screenshot-dashboard.svg"
 
     # --- Navigate to Roster (key 2) and capture ---
-    hex1b keys $terminalId "2"
+    hex1b keys $terminalId --text "2"
     Start-Sleep -Milliseconds 500
     Write-Host "Capturing Roster..." -ForegroundColor Green
     hex1b capture screenshot $terminalId --format svg --output "$OutputDir/screenshot-roster.svg"
 
     # --- Navigate to Decisions (key 3) and capture ---
-    hex1b keys $terminalId "3"
+    hex1b keys $terminalId --text "3"
     Start-Sleep -Milliseconds 500
     Write-Host "Capturing Decisions..." -ForegroundColor Green
     hex1b capture screenshot $terminalId --format svg --output "$OutputDir/screenshot-decisions.svg"
 
+    # --- Navigate to Skills (key 4) and capture ---
+    hex1b keys $terminalId --text "4"
+    Start-Sleep -Milliseconds 500
+    Write-Host "Capturing Skills..." -ForegroundColor Green
+    hex1b capture screenshot $terminalId --format svg --output "$OutputDir/screenshot-skills.svg"
+
+    # --- Navigate to Activity (key 5) and capture ---
+    hex1b keys $terminalId --text "5"
+    Start-Sleep -Milliseconds 500
+    Write-Host "Capturing Activity Log..." -ForegroundColor Green
+    hex1b capture screenshot $terminalId --format svg --output "$OutputDir/screenshot-activity.svg"
+
+    # --- Navigate to Metrics (key 6) and capture ---
+    hex1b keys $terminalId --text "6"
+    Start-Sleep -Milliseconds 500
+    Write-Host "Capturing Metrics..." -ForegroundColor Green
+    hex1b capture screenshot $terminalId --format svg --output "$OutputDir/screenshot-metrics.svg"
+
+    # --- Navigate to Settings (S) and capture ---
+    hex1b keys $terminalId --text "S"
+    Start-Sleep -Milliseconds 500
+    Write-Host "Capturing Settings..." -ForegroundColor Green
+    hex1b capture screenshot $terminalId --format svg --output "$OutputDir/screenshot-settings.svg"
+
+    # --- Navigate to Help (F1) and capture ---
+    hex1b keys $terminalId --key F1
+    Start-Sleep -Milliseconds 500
+    Write-Host "Capturing Help..." -ForegroundColor Green
+    hex1b capture screenshot $terminalId --format svg --output "$OutputDir/screenshot-help.svg"
+
     # --- Navigate back to Dashboard ---
-    hex1b keys $terminalId "1"
+    hex1b keys $terminalId --text "1"
     Start-Sleep -Milliseconds 500
 
     # --- Optional: Record asciinema demo ---
     if ($Record) {
         Write-Host "Recording asciinema demo ($RecordDuration seconds)..." -ForegroundColor Magenta
-        hex1b capture recording start $terminalId
+        hex1b capture recording start $terminalId --output "$OutputDir/demo.cast" --title "SquadTUI Demo" --idle-limit 2
         Start-Sleep -Seconds 2
 
         # Walk through screens for the demo
         $screens = @("1", "2", "3", "4", "5", "6")
         foreach ($key in $screens) {
-            hex1b keys $terminalId $key
+            hex1b keys $terminalId --text $key
             Start-Sleep -Seconds ([math]::Floor($RecordDuration / $screens.Length))
         }
 
-        hex1b capture recording stop $terminalId --output "$OutputDir/demo.cast"
+        hex1b capture recording stop $terminalId
         Write-Host "Recording saved to $OutputDir/demo.cast" -ForegroundColor Green
     }
 

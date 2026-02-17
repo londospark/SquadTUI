@@ -26,22 +26,39 @@
 
 ## 🎬 Demo
 
-[![SquadTUI Demo](https://asciinema.org/a/placeholder.svg)](https://asciinema.org/a/placeholder)
+A recorded demo is available at `docs/images/demo.cast` — play it locally with [asciinema](https://asciinema.org/):
 
-*Click above to watch a live demo of SquadTUI in action.*
+```bash
+asciinema play docs/images/demo.cast
+```
 
 ## 📸 Screenshots
 
 ### Dashboard
 ![Dashboard](docs/images/screenshot-dashboard.svg)
 
-### Roster with Inline Detail
+### Roster
 ![Roster](docs/images/screenshot-roster.svg)
 
 ### Decisions
 ![Decisions](docs/images/screenshot-decisions.svg)
 
-*Screenshots captured on a 120-column terminal with the Ocean theme using [hex1b CLI](https://hex1b.dev/). See [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md) for how to capture fresh screenshots. Currently placeholder SVGs.*
+### Skills
+![Skills](docs/images/screenshot-skills.svg)
+
+### Activity Log
+![Activity Log](docs/images/screenshot-activity.svg)
+
+### Metrics
+![Metrics](docs/images/screenshot-metrics.svg)
+
+### Settings
+![Settings](docs/images/screenshot-settings.svg)
+
+### Help
+![Help](docs/images/screenshot-help.svg)
+
+*Screenshots captured on a 120×30 terminal with the Ocean theme using [hex1b CLI](https://hex1b.dev/). See [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md) for how to capture fresh screenshots.*
 
 ## 🚀 Installation
 
@@ -172,8 +189,7 @@ Metrics adapt to terminal width:
 - **Medium (80–119)** — 2-column: progress + chart side-by-side
 - **Narrow (<80)** — Single column: stacked summary
 
-<!-- TODO: Add screenshot once metrics screen is finalized -->
-<!-- ![Metrics Screen](docs/images/screenshot-metrics.svg) -->
+![Metrics Screen](docs/images/screenshot-metrics.svg)
 
 ## 🛠️ Tech Stack
 

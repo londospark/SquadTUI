@@ -103,3 +103,23 @@ Honest answer: I was heads-down on service integration and trusted that "it comp
 - When working on a feature branch, always check `git status` before starting — uncommitted changes from other branches (cross-branch contamination) can cause confusing build errors
 - `git stash pop` after editing files can revert your changes if there are merge conflicts — better to commit WIP before stashing
 - Changing service constructor contracts requires updating ALL callers: unit tests, integration tests, E2E tests, and the ServiceProvider. Miss one and the build breaks.
+
+### 2026-02-18: Screenshots and demo capture — hex1b CLI patterns
+
+**What was done:**
+- Captured 8 SVG screenshots (Dashboard, Roster, Decisions, Skills, Activity, Metrics, Settings, Help) using `hex1b terminal start` + `hex1b capture screenshot`
+- Recorded an asciinema `.cast` demo file walking through all screens with theme cycling
+- Updated README.md: replaced placeholder screenshot references with all 8 real SVGs, updated demo section to reference local `.cast` file
+- Fixed `scripts/capture-screenshots.ps1`: corrected `hex1b keys` syntax (requires `--text` or `--key` flags, not positional args), corrected `hex1b capture recording start` syntax (`--output` goes on `start`, not `stop`), expanded to capture all 8 screens
+- Updated `docs/SCREENSHOTS.md` with corrected CLI syntax
+
+**hex1b CLI learnings:**
+- `hex1b keys <id> --text "2"` for text/character keys, `hex1b keys <id> --key F1` for named keys — positional args no longer accepted
+- `hex1b capture recording start <id> --output <file>` — output path is specified on start, not stop
+- `hex1b terminal start` with a full quoted command string ("dotnet run ...") fails with `Win32Exception (2)` — use the compiled exe path directly instead
+- SVG screenshots are ~491KB each (cell-level rendering) — fine for docs, not suitable for inline embedding
+- Terminal host runs as a background process; `hex1b terminal list` discovers running instances
+
+**User stories written:**
+- 5 backend-perspective user stories filed to `.ai-team/decisions/inbox/andre-user-stories.md`
+- Topics: file watcher debouncing, data export (JSON/CSV), cached data layer, squad CLI sync, git conflict detection
