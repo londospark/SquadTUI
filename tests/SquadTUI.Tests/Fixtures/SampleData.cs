@@ -1,6 +1,6 @@
 using SquadTUI.Models;
 
-namespace SquadTUI.Screens;
+namespace SquadTUI.Tests.Fixtures;
 
 public static class SampleData
 {

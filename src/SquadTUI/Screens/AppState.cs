@@ -34,6 +34,8 @@ public class AppState
     public IReadOnlyList<Skill>? Skills { get; set; }
     public IReadOnlyList<OrchestrationLogEntry>? LogEntries { get; set; }
     public IReadOnlyList<SquadTask>? Tasks { get; set; }
+    public IReadOnlyList<SprintMetrics>? SprintHistory { get; set; }
+    public string? CharterContent { get; set; }
     public DashboardData? Dashboard { get; set; }
 
     // Loading state

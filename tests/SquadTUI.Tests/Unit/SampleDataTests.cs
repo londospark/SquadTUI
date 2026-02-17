@@ -1,5 +1,5 @@
 using FluentAssertions;
-using SquadTUI.Screens;
+using SquadTUI.Tests.Fixtures;
 
 namespace SquadTUI.Tests.Unit;
 

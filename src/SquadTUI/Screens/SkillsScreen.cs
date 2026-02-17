@@ -9,7 +9,16 @@ public static class SkillsScreen
 {
     public static Hex1bWidget Render(WidgetContext<VStackWidget> v, AppState state, Hex1bApp app)
     {
-        var skills = state.Skills ?? SampleData.Skills;
+        var skills = state.Skills ?? [];
+        if (skills.Count == 0)
+        {
+            var D0 = PanelRenderer.Dim;
+            var R0 = PanelRenderer.Reset;
+            return v.VStack(empty => [
+                empty.Text(""),
+                empty.Text($"  {D0}No skills found. Ensure your .squad/ directory contains skill definitions.{R0}"),
+            ]).Fill();
+        }
         var listItems = skills.Select(s => $"  🔧 {s.Name} — {s.Description}").ToList() as IReadOnlyList<string>;
 
         var selectedIdx = Math.Clamp(state.SkillSelectedIndex, 0, skills.Count - 1);
@@ -20,7 +29,7 @@ public static class SkillsScreen
         var B = PanelRenderer.Bold;
         var D = PanelRenderer.Dim;
 
-        var members = state.Members ?? SampleData.Members;
+        var members = state.Members ?? [];
         var relatedMembers = GetRelatedMembers(selected.Name, members);
         var confidence = GetConfidenceLevel(selected.Name);
 

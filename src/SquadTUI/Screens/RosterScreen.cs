@@ -9,7 +9,16 @@ public static class RosterScreen
 {
     public static Hex1bWidget Render(WidgetContext<VStackWidget> v, AppState state, Hex1bApp app)
     {
-        var members = state.Members ?? SampleData.Members;
+        var members = state.Members ?? [];
+        if (members.Count == 0)
+        {
+            var D0 = PanelRenderer.Dim;
+            var R0 = PanelRenderer.Reset;
+            return v.VStack(empty => [
+                empty.Text(""),
+                empty.Text($"  {D0}No members found. Ensure your .squad/ directory contains a roster.{R0}"),
+            ]).Fill();
+        }
         var listItems = members.Select(m => $"  {GetStatusBadge(m.Status)} {m.Name} — {m.Role}").ToList() as IReadOnlyList<string>;
 
         var selectedIdx = Math.Clamp(state.RosterSelectedIndex, 0, members.Count - 1);
@@ -20,11 +29,11 @@ public static class RosterScreen
         var B = PanelRenderer.Bold;
         var D = PanelRenderer.Dim;
 
-        var charter = SampleData.GetCharterFor(selected.Name);
+        var charter = state.CharterContent ?? "No charter loaded";
         var charterExcerpt = charter.Split('\n').Where(l => !string.IsNullOrWhiteSpace(l) && !l.StartsWith('#')).Take(3);
-        var allTasks = state.Tasks ?? SampleData.Tasks;
+        var allTasks = state.Tasks ?? [];
         var memberTasks = allTasks.Where(t => t.Assignee == selected.Name).ToList();
-        var logs = state.LogEntries ?? SampleData.LogEntries;
+        var logs = state.LogEntries ?? [];
         var recentLogs = logs.Where(l => l.Participants.Contains(selected.Name)).Take(3).ToList();
         var hBg = ThemeManager.GetPanelHeaderBg(state.SelectedThemeIndex);
         var panelBg = ThemeManager.GetPanelBgColor(state.SelectedThemeIndex);

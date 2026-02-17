@@ -16,15 +16,15 @@ public static class DashboardScreen
             state.LastRefreshTime = DateTime.Now;
         }
 
-        var members = state.Members ?? SampleData.Members;
-        var tasks = state.Tasks ?? SampleData.Tasks;
+        var members = state.Members ?? [];
+        var tasks = state.Tasks ?? [];
         var activeCount = members.Count(m => m.Status == Models.MemberStatus.Active);
         var inProgressTasks = tasks.Count(t => t.Status == Models.SquadTaskStatus.InProgress);
         var completedTasks = tasks.Count(t => t.Status == Models.SquadTaskStatus.Done);
         var pendingTasks = tasks.Count(t => t.Status == Models.SquadTaskStatus.Pending);
         var blockedTasks = tasks.Count(t => t.Status == Models.SquadTaskStatus.Blocked);
-        var logEntries = state.LogEntries ?? SampleData.LogEntries;
-        var decisions = state.Decisions ?? SampleData.Decisions;
+        var logEntries = state.LogEntries ?? [];
+        var decisions = state.Decisions ?? [];
         var acc = ThemeManager.GetAccentCode(state.SelectedThemeIndex);
         var sec = ThemeManager.GetSecondaryAccent(state.SelectedThemeIndex);
         var rule = ThemeManager.GetDimRule(state.SelectedThemeIndex, 36);

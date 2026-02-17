@@ -2,6 +2,7 @@ using Hex1b;
 using Hex1b.Automation;
 using Hex1b.Input;
 using SquadTUI.Screens;
+using SquadTUI.Tests.Fixtures;
 using SquadTUI.Themes;
 
 namespace SquadTUI.Tests.E2E;
@@ -18,6 +19,17 @@ public static class TestAppBuilder
         {
             state.SquadDetected = false;
             state.CurrentScreen = Screen.NoSquad;
+        }
+        else
+        {
+            // Populate state with fixture data for E2E tests
+            state.Members = SampleData.Members;
+            state.Tasks = SampleData.Tasks;
+            state.Decisions = SampleData.Decisions;
+            state.Skills = SampleData.Skills;
+            state.LogEntries = SampleData.LogEntries;
+            state.SprintHistory = SampleData.SprintHistory;
+            state.CharterContent = SampleData.GetCharterFor("Sonic");
         }
 
         var terminal = Hex1bTerminal.CreateBuilder()
