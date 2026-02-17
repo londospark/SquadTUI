@@ -102,3 +102,8 @@ Each story is written from the **user's perspective**, not the builder's. They d
 3. **Accessibility isn't a P2 feature** — it's foundational (Story 8). If we design for keyboard-only from the start, we don't retrofit it later.
 4. **First-run matters** — Story 7 (onboarding tour) is P1, not P2. New users decide in 30 seconds if they'll keep using the app.
 5. **Responsive design is mandatory, not optional** — Story 5 ensures SquadTUI works at 60 cols (mobile SSH) and 160 cols (wide monitor). That's 8x width range.
+
+### 2026-02-17 Team Update: Stack Navigation UX Spec, User Stories, Responsive Breakpoints
+
+📌 **From decisions:** Comprehensive stack navigation UX spec finalized — Dashboard is home, Tab/Enter/Escape pattern, responsive breakpoints (≥120/80–119/<80 cols), settings modal design, accessibility guidelines. 8 user stories covering navigation clarity, keyboard discoverability, settings modal, error states, information density, breadcrumbs, onboarding, accessibility. Firekeeper to design ThemePanel style guide and panel background palette.
+

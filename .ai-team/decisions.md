@@ -259,3 +259,223 @@
 
 **Why:** README referenced `.png` screenshots that didn't exist. SVG is hex1b CLI's native high-quality format — scalable, crisp, version-control friendly. Automated script ensures screenshots can be regenerated after UI changes.
 
+---
+
+### 2026-02-17: Solaire's User Stories — Architecture Observability, Sprint Velocity, Code Review
+
+**By:** Solaire (Lead)
+
+**What:**
+1. **Architecture Observability:** See a tree view of squad's file structure (agents, charters, decisions, history) from the TUI
+2. **Decision Search and Filtering:** Search/filter decisions by author, date range, or keyword
+3. **Sprint Velocity Comparison:** Side-by-side comparison of current sprint vs previous two sprints
+4. **Code Review Queue:** Dedicated screen showing open PRs, CI status, and squad member ownership
+5. **Decision Drafting from TUI:** Draft and save new decision entries directly from the TUI
+
+**Why:** Lead needs visibility into architecture state and team progress without context-switching to GitHub/filesystem.
+
+---
+
+### 2026-02-17: Frontend Architecture Review
+
+**By:** Solaire (with input from Firekeeper & Siegmeyer perspectives)
+
+**What:** Comprehensive audit of Hex1b widget usage, theming approach, and panel backgrounds. Identified 11 unused widgets (Table, TabPanel, Progress, InfoBar, BreakdownChart, ColumnChart, TimeSeriesChart, Spinner, Tree, ToggleSwitch, Notifications). Found 41+ manual ANSI background escape codes across 7 screens that bypass Hex1b's GlobalTheme abstraction. Documented ThemePanel approach as correct pattern for panel backgrounds instead of raw ANSI codes.
+
+**Why:** Current codebase has ANSI codes scattered across 7 files, fragmenting theme logic. Using ThemePanel centralizes all theme mutations and allows proper dynamic theme updates.
+
+**Recommendations:** 
+- **Priority 1:** Remove manual ANSI codes, add Scroll widgets to long-content areas, replace progress bars with Progress widget
+- **Priority 2:** Add Border widgets, use TabPanel for tabs, add Align widget to NoSquadScreen
+- **Priority 3:** Add Table widget, TimeSeriesChart, BreakdownChart, Hyperlink, Notifications
+
+---
+
+### IFileLocationService — Centralized Path Resolution
+
+**By:** Solaire
+
+**What:** Introduced `IFileLocationService` as single interface for ALL file path resolution. Concrete `FileLocationService` handles `.squad/` vs `.ai-team/` transparently via `SquadPathResolver`. All services accept `IFileLocationService` instead of raw `Path.Combine` calls.
+
+**Why:** Single source of truth for paths. When directory structure changes, only `FileLocationService` needs updating. Backward compatible — legacy `string squadDirPath` constructor delegates to `FileLocationService.FromSquadDirectory()`.
+
+---
+
+### 2026-02-17: Theme Menu with Live Preview via Settings Modal Overlay
+
+**By:** Solaire (Architecture Review Ceremony)
+
+**What:** Settings become a modal overlay (not separate screen). Theme selection shows 3-line preview strip for each theme with immediate live preview. T key still cycles themes; S opens full settings modal for browsing. Both methods persist via `SettingsService.Save()`.
+
+**Why:** Modal overlay provides context continuity. Live preview lets users experiment with themes without committing. Settings modal is non-disruptive (vs full-screen swap).
+
+---
+
+### Decision: SampleData Isolation from Production Code
+
+**By:** Solaire (Architecture Review Ceremony)
+
+**What:** Move `SampleData.cs` entirely to test project. Replace all fallback patterns (`state.X ?? SampleData.X`) with explicit empty-state handling and `?? []`. Add `SprintHistory` and `CharterContent` to `AppState`. Wire `DataBridge.LoadCharterContentAsync()` through screens. Andre creates `ISprintService` for real sprint metrics.
+
+**Why:** SampleData shipping in production binary masks data loading failures. 100+ production references create silent data leaks. If real data fails to load, users see fabricated Sonic-themed data with no indication it's fake.
+
+---
+
+### Decision: Monadic Error Handling with Result<T> and Option<T>
+
+**By:** Solaire (Architecture Review Ceremony)
+
+**What:** Use `LanguageExt` NuGet package for `Option<T>`, `Either<L, R>`, and related types. DataBridge returns `Either<AppError, T>`. AppState stores `Either` results. Screens use `.Match()` pattern for rendering (Right arm for success, Left for error).
+
+**Why:** LondoSpark explicitly wants no exceptions in application flow — use LINQ and monadic types for validation. LanguageExt is battle-tested (10+ years, 3k+ stars) with full LINQ integration.
+
+---
+
+### Decision: Dashboard Panel Navigation with Tab/Enter/Escape
+
+**By:** Solaire (Architecture Review Ceremony)
+
+**What:** Implement panel focus cycling with Tab, drill-in with Enter, back-out with Escape. AppState.DashboardFocusedPanel tracks focus. Focused panel gets brighter border or subtle glow using theme's accent color. Non-focused panels use standard background.
+
+**Why:** Gives users way to explore panels without keyboard number keys. More discoverable than hidden shortcuts.
+
+---
+
+### 2026-02-17: Siegmeyer's User Stories — Stack Navigation, Settings Modal, Dashboard Panel Sizing
+
+**By:** Siegmeyer (Frontend Dev)
+
+**What:**
+1. **US-1: Stack-Based Navigation** — TabPanel removed, number keys removed, NavigationStack tracks depth, Enter drills in, Escape pops back
+2. **US-2: Settings Modal Overlay** — ZStack renders dashboard as layer 0, Backdrop+modal as layer 1, 56×17 char modal, OnClickAway dismisses
+3. **US-3: Dashboard Panel Sizing** — Focused/unfocused panel headers use identical text structure, no layout reflow
+
+**Why:** User stories captured for Sprint 17 delivery.
+
+---
+
+### Siegmeyer — Frontend Research: Dashboard Nav, Modal Themes, Charts, New Themes
+
+**By:** Siegmeyer (Frontend Dev)
+
+**What:** Researched Hex1b capabilities:
+- **BackdropWidget modal** (Option A): Simpler, auto-centered, works with ZStack, `.OnClickAway()` for dismissal
+- **WindowPanel modal** (Option B): Richer (title bar, close button, result handling), requires root wrapping
+- **6 new themes:** Forest (emerald), Cyberpunk (neon pink), Midnight (ice blue), Ember (amber), Arctic (light), Retro (green phosphor)
+- **Chart enhancements:** Replace manual `█▓░` with Progress widget, add TimeSeriesChart for velocity trends, ColumnChart for sprint breakdown, Table for per-member contributions
+
+**Why:** Specification request — catalog Hex1b capabilities and new theme designs.
+
+---
+
+### User Stories — Patches (Tester)
+
+**By:** Patches
+
+**What:**
+1. **US-1: Test Coverage Dashboard Panel** — Shows test count, pass/fail/skip, coverage % by file
+2. **US-2: Regression Detection** — CI build status badge on Dashboard, drill-in for failed jobs
+3. **US-3: Automated Quality Gate** — `dotnet test` pre-flight check before A/D operations
+4. **US-4: Error Detail Screen** — Full exception chain, stack traces, inner exceptions when data load fails
+5. **US-5: E2E Test Recording Playback** — `--replay events.json` mode for deterministic scenario reproduction
+
+**Why:** Tester perspective — need confidence mechanisms for quality.
+
+---
+
+### Comprehensive Test Plan — Patches
+
+**By:** Patches
+
+**What:** 180 total tests. Identified coverage gaps: DataBridge, SettingsService, FileWatcherService, MigrationService, SquadDetector, MarkdownRenderer, AppLayout migration banner, SkillsScreen private methods. Untested UI behaviors: Settings toggle via Enter, theme change from Settings, V key burndown toggle, live dashboard refresh, error state display, loading state display.
+
+**Why:** Systematic audit of what's tested vs what's critical but untested.
+
+---
+
+### SampleData Leak Audit — Patches
+
+**By:** Patches
+
+**What:** Every screen uses `state.X ?? SampleData.X` fallback. Critical hardcoded references: `SampleData.GetCharterFor()` always used by RosterScreen/MemberDetailScreen/CharterScreen (never reads real charters), `SampleData.SprintHistory` always used by MetricsScreen (no real sprint data service). SampleData names are Sonic-themed (Sonic, Tails, Knuckles) — will look bizarre to end users if loading fails.
+
+**Why:** Silent data leaks mask failures. MetricsScreen is 100% fabricated.
+
+---
+
+### User Stories — Firekeeper (UX)
+
+**By:** Firekeeper
+
+**What:**
+1. **Dashboard-First Navigation** — Dashboard is home, Tab moves focus between panels, Enter drills in, Escape pops back
+2. **Discoverable Keyboard Shortcuts** — Consistent patterns (↑↓ or J/K, Enter, Escape, Q, F1), footer self-documenting, organized help
+3. **Settings as Modal** — Centered overlay (not screen), doesn't interrupt workflow, live preview, Escape closes
+4. **Error States & Empty Data** — Welcome screen inviting, loading states explicit, error messages actionable, graceful fallback
+5. **Information Density at All Widths** — Responsive breakpoints (≥120/80–119/<80 cols), no horizontal scroll
+6. **Breadcrumb & Context** — Screen title includes back cue, footer always shows back hint, optional subtle breadcrumb
+7. **First-Run Experience** — Optional tour on first launch (never again), explains what each panel does
+8. **Accessible Terminal Navigation** — Keyboard-only, color+text for all states, high-contrast option, screen reader support
+
+**Why:** UX friction points identified post-audit — navigation clarity, information density, keyboard consistency, onboarding.
+
+---
+
+### Stack Navigation UX Specification — SquadTUI Dashboard Redesign
+
+**By:** Firekeeper
+
+**What:** 520-line specification covering:
+- **Dashboard as home** — no number-key navigation, Tab/Shift+Tab cycles panels, Enter drills, Escape pops
+- **Back navigation** — Escape always pops, footer contextual hints
+- **Settings modal** — Centered, sized 50–60 cols, dimmed background, interactive theme preview
+- **Keyboard consistency** — Escape=back, Enter=activate, Tab=navigate, Q=quit, F1=help
+- **Responsive behavior** — Wide (≥120) shows 4 panels, Medium (80–119) shows 2–3, Narrow (<80) shows 1 stacked
+- **Footer updates** — Max 70 chars, contextual action hints, no number hotkeys
+- **First-run tour** — Optional, runs once, explains panel purposes
+- **Accessibility** — Keyboard-only, color+text, high-contrast theme, screen reader hints
+- **Implementation roadmap** — Phase 1: foundation (Tab/Enter/Escape), Phase 2: polish (footer, modal, help), Phase 3: refinement (responsive testing, accessibility)
+
+**Why:** Comprehensive design blueprint for stack navigation implementation.
+
+---
+
+### 2026-02-17: Sprint 17 User Directives (consolidated)
+
+**By:** LondoSpark (via Copilot)
+
+**What:**
+1. **Navigation:** Remove tab bar entirely. Stack-based navigation from Dashboard (Tab/Shift+Tab for panel focus, Enter to drill, Escape to pop). Settings as centered modal overlay (not full-width screen). Fix panel sizing inconsistencies.
+2. **Screenshots & Demo (P0):** Update timer NOT updating (repeated defect). Screenshots/demo recordings missing from README (repeated request). Get these done immediately.
+3. **User Stories:** Each team member presents user stories for features they want to build.
+4. **Code Quality:**
+   - Case-insensitive commands
+   - Emoji enabled by default
+   - Code style: use Option types, LINQ, expression-bodied members
+   - Progress/confidence bars use widgets
+   - No hardcoded data (GetConfidenceLevel)
+   - F1 help is real and contextual
+   - Mouse users need hire/dismiss buttons (not add/delete)
+   - Markdown views scrollable with bold headings, formatted tables
+5. **Data & Error Handling:**
+   - SampleData ONLY in test project; production uses real data exclusively
+   - No exceptions in flow; use LINQ and monadic types (Result<T>, Option<T>)
+6. **Themes & Settings:** More themes with settings menu for easy choosing/previewing. Settings modal with live preview. BackgroundWidget for modal implementation.
+
+**Why:** User requests for navigation UX clarity, code quality, data integrity, and team alignment.
+
+---
+
+### Andre's User Stories — Backend/Data Layer
+
+**By:** Andre
+
+**What:**
+1. **US-1: File Change Debouncing** — Batch file changes within 500ms, one refresh per batch
+2. **US-2: Data Export to JSON/CSV** — `squadtui export --format json` for integration with external tools
+3. **US-3: Cached Data Layer** — In-memory cache with incremental updates on file changes, startup <500ms for 50-file squads
+4. **US-4: External Tool Integration** — Auto-refresh when squad CLI modifies files, detect new/deleted files
+5. **US-5: Offline-First with Git Conflict Detection** — Detect merge conflict markers in parsed files, show ⚠️ badge
+
+**Why:** Backend needs for reliability, performance, and external integration.
+

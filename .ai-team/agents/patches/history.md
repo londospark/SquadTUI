@@ -236,3 +236,8 @@ Dashboard was redesigned (by Siegmeyer) to use new panel titles ("👥 Team Rost
 
 **Test results:** 790 total tests, 787 passed, 3 failed (all pre-existing ANSI text-splitting issues) ✅
 
+
+### 2026-02-17 Team Update: SampleData Isolation & Monadic Error Handling
+
+📌 **From decisions:** SampleData.cs will move to test project only; production code uses real data with empty-state fallback. Implement monadic error handling (Result<T>/Option<T> via LanguageExt) — no exceptions in application flow. This affects all E2E tests that currently reference SampleData fixture data.
+

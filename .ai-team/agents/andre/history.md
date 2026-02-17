@@ -123,3 +123,8 @@ Honest answer: I was heads-down on service integration and trusted that "it comp
 **User stories written:**
 - 5 backend-perspective user stories filed to `.ai-team/decisions/inbox/andre-user-stories.md`
 - Topics: file watcher debouncing, data export (JSON/CSV), cached data layer, squad CLI sync, git conflict detection
+
+### 2026-02-17 Team Update: SampleData Isolation, Monadic Error Handling, IFileLocationService Centralization
+
+📌 **From decisions:** SampleData moves to test project; production uses real data with empty-state fallback. DataBridge returns Either<AppError, T> using LanguageExt. IFileLocationService centralizes all path resolution for .squad/ vs .ai-team/ handling. Implement ISprintService for real sprint metrics (MetricsScreen currently hardcoded).
+

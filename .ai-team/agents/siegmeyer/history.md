@@ -293,3 +293,8 @@ The user has stated NO BORDERS multiple times. Yet `┌─┐│└─┘` box-d
 - NoSquadGuardTests simplified — now tests Enter/Right/Left instead of nonexistent D1-D6 keys.
 - VimKeybindingTests reduced — H/L tests removed since screen cycling no longer exists.
 - Navigation patterns: Roster = `Enter()`, ActivityLog = `Right().Enter()`, Decisions = `Right()×2.Enter()`, Metrics = `Right()×3.Enter()`.
+
+### 2026-02-17 Team Update: Stack Navigation, Settings Modal, Frontend Architecture, New Themes
+
+📌 **From decisions:** Implement stack-based navigation (Tab/Shift+Tab for panel focus, Enter to drill, Escape to pop). Settings is centered modal overlay using BackdropWidget. Remove manual ANSI background codes, replace with ThemePanel. Add 6 new themes (Forest, Cyberpunk, Midnight, Ember, Arctic, Retro). Adopt unused Hex1b widgets (Progress, Scroll, Border, Table, TimeSeriesChart, ColumnChart).
+
