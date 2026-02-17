@@ -82,3 +82,24 @@ Honest answer: I was heads-down on service integration and trusted that "it comp
 2. Added `SprintMetrics` model with computed properties (`CompletionRate`, `Velocity`, `Utilization`) so metrics are derived from data, not hardcoded.
 3. SampleData now carries 3 sprints of history (Undead Burg, Sen's Fortress, Anor Londo) with per-member contributions, so the metrics screen can show trends and identify bottlenecks.
 4. Helper properties (`OverallCompletionRate`, `AverageVelocity`, `VelocityTrend`, `TeamUtilization`) provide ready-to-display values for any screen that needs them.
+
+### 2026-02-18: Dual-path support — .squad/ and .ai-team/ directory rename
+
+**Context:** Upstream `squad` CLI is renaming `.ai-team/` to `.squad/` (bradygaster/squad#69, #70). SquadTUI needs to support both during the transition.
+
+**Architecture:**
+- `SquadPathResolver` (new static utility): Central resolution logic. `Resolve()` checks `.squad/` first, falls back to `.ai-team/`, defaults to `.squad/` for new installs. `NeedsMigration()` returns true when only `.ai-team/` exists.
+- `MigrationService` (new): Handles `.ai-team/` → `.squad/` rename. Tries `git mv` first (preserves git history), falls back to `Directory.Move()`. Returns a `MigrationResult` record.
+- Service parameter contract changed: Services now take the fully resolved squad directory path (e.g., `/project/.squad`) instead of the project root. `ServiceProvider` does the resolution once in its constructor.
+- `ServiceProvider.Reset()` added for post-migration re-initialization of all services.
+
+**UI changes:**
+- Deprecation banner in `AppLayout` when `state.NeedsMigration` is true (yellow warning box)
+- C-key creates `.squad/` (not `.ai-team/`) for new projects
+- M-key triggers migration from `.ai-team/` to `.squad/`
+- `NoSquadScreen` mentions both directory names
+
+**Lessons learned:**
+- When working on a feature branch, always check `git status` before starting — uncommitted changes from other branches (cross-branch contamination) can cause confusing build errors
+- `git stash pop` after editing files can revert your changes if there are merge conflicts — better to commit WIP before stashing
+- Changing service constructor contracts requires updating ALL callers: unit tests, integration tests, E2E tests, and the ServiceProvider. Miss one and the build breaks.
