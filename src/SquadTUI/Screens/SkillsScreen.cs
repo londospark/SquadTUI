@@ -24,13 +24,13 @@ public static class SkillsScreen
         var relatedMembers = GetRelatedMembers(selected.Name, members);
         var confidence = GetConfidenceLevel(selected.Name);
 
-        var RV = "\x1b[7m"; // reverse video
+        var hBg = ThemeManager.GetPanelHeaderBg(state.SelectedThemeIndex);
 
         return v.HStack(h =>
         [
             h.VStack(left =>
             [
-                left.Text($"  {B}{acc}{RV} 🔧  Installed Skills {R}"),
+                left.Text($"  {hBg}{B}{acc} 🔧  Installed Skills {R}"),
                 left.Text($"  {D}Available capabilities for your squad{R}"),
                 left.Text(""),
                 left.Text($"  {sec}{new string('━', 30)}{R}"),
@@ -45,7 +45,7 @@ public static class SkillsScreen
                 var widgets = new List<Hex1bWidget>
                 {
                     detail.Text(""),
-                    detail.Text($"  {B}{acc}{RV} 🔧  {selected.Name} {R}"),
+                    detail.Text($"  {hBg}{B}{acc} 🔧  {selected.Name} {R}"),
                     detail.Text(""),
                     detail.Text($"  {sec}{new string('━', 36)}{R}"),
                     detail.Text(""),
@@ -54,7 +54,7 @@ public static class SkillsScreen
                     detail.Text(""),
                     detail.Text($"  {sec}{new string('━', 36)}{R}"),
                     detail.Text(""),
-                    detail.Text($"  {B}{acc}👥 Related Members{R}"),
+                    detail.Text($"  {hBg}{B}{acc}👥 Related Members{R}"),
                     detail.Text(""),
                 };
 
@@ -67,7 +67,7 @@ public static class SkillsScreen
                 widgets.Add(detail.Text(""));
                 widgets.Add(detail.Text($"  {sec}{new string('━', 36)}{R}"));
                 widgets.Add(detail.Text(""));
-                widgets.Add(detail.Text($"  {B}{acc}📊 Usage{R}"));
+                widgets.Add(detail.Text($"  {hBg}{B}{acc}📊 Usage{R}"));
                 widgets.Add(detail.Text(""));
                 widgets.Add(detail.Text($"    {D}This skill is available to all squad members{R}"));
                 widgets.Add(detail.Text($"    {D}and can be invoked during task execution.{R}"));

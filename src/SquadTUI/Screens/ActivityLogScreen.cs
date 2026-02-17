@@ -20,13 +20,13 @@ public static class ActivityLogScreen
         var B = PanelRenderer.Bold;
         var D = PanelRenderer.Dim;
 
-        var RV = "\x1b[7m"; // reverse video
+        var hBg = ThemeManager.GetPanelHeaderBg(state.SelectedThemeIndex);
 
         return v.HStack(h =>
         [
             h.VStack(left =>
             [
-                left.Text($"  {B}{acc}{RV} 📊  Activity Log {R}"),
+                left.Text($"  {hBg}{B}{acc} 📊  Activity Log {R}"),
                 left.Text($"  {D}Chronological record of squad interactions{R}"),
                 left.Text(""),
                 left.Text($"  {sec}{new string('━', 30)}{R}"),
@@ -41,7 +41,7 @@ public static class ActivityLogScreen
                 var widgets = new List<Hex1bWidget>
                 {
                     detail.Text(""),
-                    detail.Text($"  {B}{acc}{RV} 📅  {selected.Topic} {R}"),
+                    detail.Text($"  {hBg}{B}{acc} 📅  {selected.Topic} {R}"),
                     detail.Text(""),
                     detail.Text($"  {sec}{new string('━', 36)}{R}"),
                     detail.Text(""),
@@ -50,7 +50,7 @@ public static class ActivityLogScreen
                     detail.Text(""),
                     detail.Text($"  {sec}{new string('━', 36)}{R}"),
                     detail.Text(""),
-                    detail.Text($"  {B}{acc}Summary{R}"),
+                    detail.Text($"  {hBg}{B}{acc}Summary{R}"),
                     detail.Text(""),
                     detail.Text($"    {selected.Summary}{R}"),
                 };
@@ -60,7 +60,7 @@ public static class ActivityLogScreen
                     widgets.Add(detail.Text(""));
                     widgets.Add(detail.Text($"  {sec}{new string('━', 36)}{R}"));
                     widgets.Add(detail.Text(""));
-                    widgets.Add(detail.Text($"  {B}{acc}Decisions{R}"));
+                    widgets.Add(detail.Text($"  {hBg}{B}{acc}Decisions{R}"));
                     widgets.Add(detail.Text(""));
                     foreach (var d in selected.Decisions)
                         widgets.Add(detail.Text($"    • {d}{R}"));
@@ -71,7 +71,7 @@ public static class ActivityLogScreen
                     widgets.Add(detail.Text(""));
                     widgets.Add(detail.Text($"  {sec}{new string('━', 36)}{R}"));
                     widgets.Add(detail.Text(""));
-                    widgets.Add(detail.Text($"  {B}{acc}Outcomes{R}"));
+                    widgets.Add(detail.Text($"  {hBg}{B}{acc}Outcomes{R}"));
                     widgets.Add(detail.Text(""));
                     foreach (var o in selected.Outcomes)
                         widgets.Add(detail.Text($"    • {o}{R}"));
