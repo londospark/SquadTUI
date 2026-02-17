@@ -12,13 +12,6 @@ public static class DashboardScreen
 {
     public static Hex1bWidget Render(WidgetContext<VStackWidget> v, AppState state, Hex1bApp app)
     {
-        // Handle pending refresh from file watcher
-        if (state.HasPendingRefresh)
-        {
-            state.HasPendingRefresh = false;
-            state.LastRefreshTime = DateTime.Now;
-        }
-
         var members = state.Members.GetOrEmpty();
         var tasks = state.Tasks.GetOrEmpty();
         var activeCount = members.Count(m => m.Status == Models.MemberStatus.Active);
