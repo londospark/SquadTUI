@@ -46,6 +46,26 @@ public static class ThemeManager
     /// <summary>Returns a PanelColors record with accent code for backward compat.</summary>
     public static PanelColors GetPanelColors(int index) => new(GetAccentCode(index));
 
+    /// <summary>Returns an ANSI background code for a slightly lighter panel header shade.</summary>
+    public static string GetPanelHeaderBg(int index) => (index % ThemeNames.Length) switch
+    {
+        0 => "\x1b[48;2;22;28;38m",   // Ocean: slightly lighter navy
+        1 => "\x1b[48;2;32;28;52m",   // Heist: slightly lighter indigo
+        2 => "\x1b[48;2;42;28;36m",   // Sunset: slightly lighter charcoal-rose
+        3 => "\x1b[48;2;18;18;18m",   // HighContrast: dark gray
+        _ => "\x1b[48;2;22;28;38m"
+    };
+
+    /// <summary>Returns an ANSI background code for a secondary panel shade (e.g. detail pane).</summary>
+    public static string GetPanelDetailBg(int index) => (index % ThemeNames.Length) switch
+    {
+        0 => "\x1b[48;2;17;22;30m",   // Ocean: between base and header
+        1 => "\x1b[48;2;26;23;44m",   // Heist: between base and header
+        2 => "\x1b[48;2;35;23;30m",   // Sunset: between base and header
+        3 => "\x1b[48;2;12;12;12m",   // HighContrast: near-black
+        _ => "\x1b[48;2;17;22;30m"
+    };
+
     /// <summary>Modern borderless style — borders use space chars to become invisible.</summary>
     private static Hex1bTheme WithModernBorders(Hex1bTheme theme) => theme
         .Set(BorderTheme.TopLeftCorner, " ")

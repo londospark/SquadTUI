@@ -17,6 +17,7 @@ public static class MetricsScreen
         var R = PanelRenderer.Reset;
         var B = PanelRenderer.Bold;
         var D = PanelRenderer.Dim;
+        var hBg = ThemeManager.GetPanelHeaderBg(state.SelectedThemeIndex);
 
         var done = tasks.Count(t => t.Status == Models.SquadTaskStatus.Done);
         var active = tasks.Count(t => t.Status == Models.SquadTaskStatus.InProgress);
@@ -45,7 +46,7 @@ public static class MetricsScreen
             // Wide layout (≥120 cols): 3-column
             r.WhenMinWidth(120, r => r.VStack(outer =>
             [
-                outer.Text($"  {B}{acc}📈 Sprint Metrics{R}"),
+                outer.Text($"  {hBg}{B}{acc}📈 Sprint Metrics{R}"),
                 outer.Text($"  {D}{sec}Performance overview for the current sprint cycle{R}"),
                 outer.Text(""),
 
@@ -112,7 +113,7 @@ public static class MetricsScreen
             // Medium layout (≥80 cols): 2-column
             r.WhenMinWidth(80, r => r.VStack(outer =>
             [
-                outer.Text($"  {B}{acc}📈 Sprint Metrics{R}"),
+                outer.Text($"  {hBg}{B}{acc}📈 Sprint Metrics{R}"),
                 outer.Text($"  {D}{sec}Performance overview for the current sprint cycle{R}"),
                 outer.Text(""),
 
@@ -162,7 +163,7 @@ public static class MetricsScreen
             {
                 var w = new List<Hex1bWidget>
                 {
-                    col.Text($"  {B}{acc}📈 Sprint Metrics{R}"),
+                    col.Text($"  {hBg}{B}{acc}📈 Sprint Metrics{R}"),
                     col.Text(""),
                     col.Text($"  {progressBar}  {B}{pct}%{R}"),
                     col.Text($"  {D}{done}/{tasks.Count} done{R}"),
@@ -171,7 +172,7 @@ public static class MetricsScreen
                     col.Text(""),
                     col.Text($"  {D}Velocity:{R} {B}{done}{R} {D}tasks/sprint{R}"),
                     col.Text(""),
-                    col.Text($"  {B}{acc}📊 Tasks by Member{R}"),
+                    col.Text($"  {hBg}{B}{acc}📊 Tasks by Member{R}"),
                 };
                 foreach (var m in members)
                 {

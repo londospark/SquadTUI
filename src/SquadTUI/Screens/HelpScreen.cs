@@ -16,14 +16,14 @@ public static class HelpScreen
         var R = PanelRenderer.Reset;
         var B = PanelRenderer.Bold;
 
-        var RV = "\x1b[7m"; // reverse video
+        var hBg = ThemeManager.GetPanelHeaderBg(state.SelectedThemeIndex);
 
         return v.Responsive(r =>
         [
             // Wide: two-column help layout
             r.WhenMinWidth(100, r => r.VStack(outer =>
             [
-                outer.Text($"  {B}{acc}{RV} ❓  Help & Keybindings {R}"),
+                outer.Text($"  {hBg}{B}{acc} ❓  Help & Keybindings {R}"),
                 outer.Text($"  {D}Quick reference for all keyboard shortcuts{R}"),
                 outer.Text(""),
                 outer.Text($"  {sec}{new string('━', 44)}{R}"),
@@ -33,7 +33,7 @@ public static class HelpScreen
                 [
                     h.VStack(left =>
                     [
-                        left.Text($"  {B}{acc}NAVIGATION{R}"),
+                        left.Text($"  {hBg}{B}{acc}NAVIGATION{R}"),
                         left.Text(""),
                         left.Text($"    {D}1-6{R}          Jump to screen"),
                         left.Text($"    {D}h / l{R}        Previous / next screen"),
@@ -41,21 +41,21 @@ public static class HelpScreen
                         left.Text(""),
                         left.Text($"  {sec}{new string('━', 30)}{R}"),
                         left.Text(""),
-                        left.Text($"  {B}{acc}LIST NAVIGATION{R}"),
+                        left.Text($"  {hBg}{B}{acc}LIST NAVIGATION{R}"),
                         left.Text(""),
                         left.Text($"    {D}j / k{R}        Move down / up"),
                         left.Text($"    {D}↑ / ↓{R}        Arrow keys"),
                         left.Text(""),
                         left.Text($"  {sec}{new string('━', 30)}{R}"),
                         left.Text(""),
-                        left.Text($"  {B}{acc}HELP{R}"),
+                        left.Text($"  {hBg}{B}{acc}HELP{R}"),
                         left.Text(""),
                         left.Text($"    {D}?{R}            Toggle this help"),
                     ]).FillWidth(1).FillHeight(),
 
                     h.VStack(right =>
                     [
-                        right.Text($"  {B}{acc}ACTIONS{R}"),
+                        right.Text($"  {hBg}{B}{acc}ACTIONS{R}"),
                         right.Text(""),
                         right.Text($"    {D}Enter{R}        Activate / select item"),
                         right.Text($"    {D}T{R}            Toggle theme"),
@@ -74,12 +74,12 @@ public static class HelpScreen
             // Narrow: single column
             r.Otherwise(r => r.VStack(stack =>
             [
-                stack.Text($"  {B}{acc}{RV} ❓  Help & Keybindings {R}"),
+                stack.Text($"  {hBg}{B}{acc} ❓  Help & Keybindings {R}"),
                 stack.Text($"  {D}Quick reference for all keyboard shortcuts{R}"),
                 stack.Text(""),
                 stack.Text($"  {sec}{new string('━', 32)}{R}"),
                 stack.Text(""),
-                stack.Text($"  {B}{acc}NAVIGATION{R}"),
+                stack.Text($"  {hBg}{B}{acc}NAVIGATION{R}"),
                 stack.Text(""),
                 stack.Text($"    {D}1-6{R}          Jump to screen"),
                 stack.Text($"    {D}h / l{R}        Previous / next screen"),
@@ -87,14 +87,14 @@ public static class HelpScreen
                 stack.Text(""),
                 stack.Text($"  {sec}{new string('━', 32)}{R}"),
                 stack.Text(""),
-                stack.Text($"  {B}{acc}LIST NAVIGATION{R}"),
+                stack.Text($"  {hBg}{B}{acc}LIST NAVIGATION{R}"),
                 stack.Text(""),
                 stack.Text($"    {D}j / k{R}        Move down / up"),
                 stack.Text($"    {D}↑ / ↓{R}        Arrow keys"),
                 stack.Text(""),
                 stack.Text($"  {sec}{new string('━', 32)}{R}"),
                 stack.Text(""),
-                stack.Text($"  {B}{acc}ACTIONS{R}"),
+                stack.Text($"  {hBg}{B}{acc}ACTIONS{R}"),
                 stack.Text(""),
                 stack.Text($"    {D}Enter{R}        Activate / select item"),
                 stack.Text($"    {D}T{R}            Toggle theme"),
@@ -105,7 +105,7 @@ public static class HelpScreen
                 stack.Text(""),
                 stack.Text($"  {sec}{new string('━', 32)}{R}"),
                 stack.Text(""),
-                stack.Text($"  {B}{acc}HELP{R}"),
+                stack.Text($"  {hBg}{B}{acc}HELP{R}"),
                 stack.Text(""),
                 stack.Text($"    {D}?{R}            Toggle this help"),
                 stack.Text(""),

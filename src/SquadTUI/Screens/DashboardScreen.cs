@@ -24,6 +24,7 @@ public static class DashboardScreen
         var R = PanelRenderer.Reset;
         var B = PanelRenderer.Bold;
         var D = PanelRenderer.Dim;
+        var hBg = ThemeManager.GetPanelHeaderBg(state.SelectedThemeIndex);
 
         return v.Responsive(r =>
         [
@@ -41,7 +42,7 @@ public static class DashboardScreen
                     {
                         var w = new List<Hex1bWidget>
                         {
-                            left.Text($"  {B}{acc}👥 Team Roster{R}"),
+                            left.Text($"  {hBg}{B}{acc}👥 Team Roster{R}"),
                             left.Text($"  {sec}{new string('━', 28)}{R}"),
                         };
                         foreach (var m in members)
@@ -60,7 +61,7 @@ public static class DashboardScreen
                     {
                         var w = new List<Hex1bWidget>
                         {
-                            mid.Text($"  {B}{acc}📊 Activity & Progress{R}"),
+                            mid.Text($"  {hBg}{B}{acc}📊 Activity & Progress{R}"),
                             mid.Text($"  {sec}{new string('━', 36)}{R}"),
                             mid.Text(""),
                             mid.Text($"  {D}Tasks:{R}  {B}{tasks.Count}{R}  total"),
@@ -78,7 +79,7 @@ public static class DashboardScreen
                         w.Add(mid.Text(""));
 
                         w.Add(mid.Text($"  {sec}{new string('━', 36)}{R}"));
-                        w.Add(mid.Text($"  {B}{acc}📅 Recent Activity{R}"));
+                        w.Add(mid.Text($"  {hBg}{B}{acc}📅 Recent Activity{R}"));
                         foreach (var l in logEntries.Take(5))
                             w.Add(mid.Text($"  {D}{l.Date}{R}  {l.Topic}  {D}({string.Join(", ", l.Participants.Take(2))}){R}"));
 
@@ -90,7 +91,7 @@ public static class DashboardScreen
                     {
                         var w = new List<Hex1bWidget>
                         {
-                            right.Text($"  {B}{acc}📋 Decisions{R}"),
+                            right.Text($"  {hBg}{B}{acc}📋 Decisions{R}"),
                             right.Text($"  {sec}{new string('━', 28)}{R}"),
                         };
                         foreach (var d in decisions.Take(5))
@@ -98,7 +99,7 @@ public static class DashboardScreen
 
                         w.Add(right.Text(""));
                         w.Add(right.Text($"  {sec}{new string('━', 28)}{R}"));
-                        w.Add(right.Text($"  {B}{acc}📈 Sprint Metrics{R}"));
+                        w.Add(right.Text($"  {hBg}{B}{acc}📈 Sprint Metrics{R}"));
                         w.Add(right.Text($"  {D}Velocity:{R}    {B}{completedTasks}{R} {D}tasks/sprint{R}"));
                         w.Add(right.Text($"  {D}Throughput:{R}  {B}{completedTasks + inProgressTasks}{R} {D}active items{R}"));
                         w.Add(right.Text($"  {D}Blocked:{R}    {B}{blockedTasks}{R} {D}items{R}"));
@@ -122,7 +123,7 @@ public static class DashboardScreen
                     {
                         var w = new List<Hex1bWidget>
                         {
-                            left.Text($"  {B}{acc}👥 Team{R}  {D}({members.Count} members, {activeCount} active){R}"),
+                            left.Text($"  {hBg}{B}{acc}👥 Team{R}  {D}({members.Count} members, {activeCount} active){R}"),
                             left.Text($"  {sec}{new string('━', 32)}{R}"),
                         };
                         foreach (var m in members)
@@ -131,7 +132,7 @@ public static class DashboardScreen
                         w.Add(left.Text($"  {D}📊 Tasks:{R} {B}{tasks.Count}{R} {D}— {inProgressTasks} active, {completedTasks} done{R}"));
                         w.Add(left.Text(""));
                         w.Add(left.Text($"  {sec}{new string('━', 32)}{R}"));
-                        w.Add(left.Text($"  {B}{acc}📅 Recent{R}"));
+                        w.Add(left.Text($"  {hBg}{B}{acc}📅 Recent{R}"));
                         foreach (var l in logEntries.Take(3))
                             w.Add(left.Text($"  {D}{l.Date}{R}  {l.Topic}"));
                         return w.ToArray();
@@ -141,14 +142,14 @@ public static class DashboardScreen
                     {
                         var w = new List<Hex1bWidget>
                         {
-                            right.Text($"  {B}{acc}📋 Decisions{R}"),
+                            right.Text($"  {hBg}{B}{acc}📋 Decisions{R}"),
                             right.Text($"  {sec}{new string('━', 24)}{R}"),
                         };
                         foreach (var d in decisions.Take(4))
                             w.Add(right.Text($"  {D}{d.Date}{R}  {d.Title}"));
                         w.Add(right.Text(""));
                         w.Add(right.Text($"  {sec}{new string('━', 24)}{R}"));
-                        w.Add(right.Text($"  {B}{acc}📈 Metrics{R}"));
+                        w.Add(right.Text($"  {hBg}{B}{acc}📈 Metrics{R}"));
                         w.Add(right.Text($"  {D}Velocity:{R}  {B}{completedTasks}{R} {D}tasks/sprint{R}"));
                         w.Add(right.Text($"  {D}Pending:{R}   {B}{pendingTasks}{R}"));
                         return w.ToArray();
@@ -161,16 +162,16 @@ public static class DashboardScreen
             {
                 var w = new List<Hex1bWidget>
                 {
-                    col.Text($"  {B}{acc}☀️  SquadTUI{R}"),
+                    col.Text($"  {hBg}{B}{acc}☀️  SquadTUI{R}"),
                     col.Text($"  {sec}{new string('━', 24)}{R}"),
                     col.Text($"  {D}👥 Members:{R} {B}{members.Count}{R}  {D}Tasks:{R} {B}{tasks.Count}{R}"),
                     col.Text(""),
-                    col.Text($"  {B}{acc}📅 Recent{R}"),
+                    col.Text($"  {hBg}{B}{acc}📅 Recent{R}"),
                 };
                 foreach (var l in logEntries.Take(2))
                     w.Add(col.Text($"  {D}{l.Date}{R}  {l.Topic}"));
                 w.Add(col.Text(""));
-                w.Add(col.Text($"  {B}{acc}📋 Decisions{R}"));
+                w.Add(col.Text($"  {hBg}{B}{acc}📋 Decisions{R}"));
                 foreach (var d in decisions.Take(2))
                     w.Add(col.Text($"  {D}{d.Date}{R}  {d.Title}  {D}({d.Author}){R}"));
                 return w.ToArray();

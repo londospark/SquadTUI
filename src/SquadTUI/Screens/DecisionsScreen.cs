@@ -19,13 +19,13 @@ public static class DecisionsScreen
         var R = PanelRenderer.Reset;
         var B = PanelRenderer.Bold;
         var D = PanelRenderer.Dim;
-        var RV = "\x1b[7m"; // reverse video
+        var hBg = ThemeManager.GetPanelHeaderBg(state.SelectedThemeIndex);
 
         return v.HStack(h =>
         [
             h.VStack(left =>
             [
-                left.Text($"  {B}{acc}{RV} 📋  Decisions {R}"),
+                left.Text($"  {hBg}{B}{acc} 📋  Decisions {R}"),
                 left.Text($"  {D}Team decisions and architectural choices{R}"),
                 left.Text(""),
                 left.Text($"  {sec}{new string('━', 30)}{R}"),
@@ -38,7 +38,7 @@ public static class DecisionsScreen
             h.VStack(detail =>
             [
                 detail.Text(""),
-                detail.Text($"  {B}{acc}{RV} 📋  {selected.Title} {R}"),
+                detail.Text($"  {hBg}{B}{acc} 📋  {selected.Title} {R}"),
                 detail.Text(""),
                 detail.Text($"  {sec}{new string('━', 36)}{R}"),
                 detail.Text(""),
@@ -47,7 +47,7 @@ public static class DecisionsScreen
                 detail.Text(""),
                 detail.Text($"  {sec}{new string('━', 36)}{R}"),
                 detail.Text(""),
-                detail.Text($"  {B}{acc}Content{R}"),
+                detail.Text($"  {hBg}{B}{acc}Content{R}"),
                 detail.Text(""),
                 ..MarkdownRenderer.Render(detail, selected.Content).Select(w => w),
             ]).FillWidth(2).FillHeight(),
