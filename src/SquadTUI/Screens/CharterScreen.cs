@@ -17,8 +17,9 @@ public static class CharterScreen
         var R = PanelRenderer.Reset;
         var B = PanelRenderer.Bold;
         var D = PanelRenderer.Dim;
+        var panelBg = ThemeManager.GetPanelBgColor(state.SelectedThemeIndex);
 
-        return v.VStack(inner =>
+        return new BackgroundPanelWidget(panelBg, v.VStack(inner =>
         [
             inner.Text($"  {B}{acc}📜 Charter — {memberName}{R}"),
             inner.Text($"  {D}{sec}{new string('━', 44)}{R}"),
@@ -27,6 +28,6 @@ public static class CharterScreen
                 ..MarkdownRenderer.Render(scroll, charter),
             ]).Fill(),
             inner.Text($"  {D}Esc Back{R}"),
-        ]).Fill();
+        ]).Fill());
     }
 }

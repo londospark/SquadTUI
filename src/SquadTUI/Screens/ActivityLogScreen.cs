@@ -21,10 +21,12 @@ public static class ActivityLogScreen
         var D = PanelRenderer.Dim;
 
         var hBg = ThemeManager.GetPanelHeaderBg(state.SelectedThemeIndex);
+        var panelBg = ThemeManager.GetPanelBgColor(state.SelectedThemeIndex);
+        var detailBg = ThemeManager.GetPanelDetailBgColor(state.SelectedThemeIndex);
 
         return v.HStack(h =>
         [
-            h.VStack(left =>
+            new BackgroundPanelWidget(panelBg, h.VStack(left =>
             [
                 left.Text($"  {hBg}{B}{acc} 📊  Activity Log {R}"),
                 left.Text($"  {D}Chronological record of squad interactions{R}"),
@@ -34,9 +36,9 @@ public static class ActivityLogScreen
                 left.List(listItems)
                     .OnSelectionChanged(e => { state.LogSelectedIndex = e.SelectedIndex; })
                     .Fill()
-            ]).FillWidth(1).FillHeight(),
+            ]).FillWidth(1).FillHeight()),
 
-            h.VStack(detail =>
+            new BackgroundPanelWidget(detailBg, h.VStack(detail =>
             {
                 var widgets = new List<Hex1bWidget>
                 {
@@ -78,7 +80,7 @@ public static class ActivityLogScreen
                 }
 
                 return widgets.ToArray();
-            }).FillWidth(2).FillHeight(),
+            }).FillWidth(2).FillHeight()),
         ]).Fill();
     }
 }

@@ -17,6 +17,8 @@ public static class HelpScreen
         var B = PanelRenderer.Bold;
 
         var hBg = ThemeManager.GetPanelHeaderBg(state.SelectedThemeIndex);
+        var panelBg = ThemeManager.GetPanelBgColor(state.SelectedThemeIndex);
+        var detailBg = ThemeManager.GetPanelDetailBgColor(state.SelectedThemeIndex);
 
         return v.Responsive(r =>
         [
@@ -31,7 +33,7 @@ public static class HelpScreen
 
                 outer.HStack(h =>
                 [
-                    h.VStack(left =>
+                    new BackgroundPanelWidget(panelBg, h.VStack(left =>
                     [
                         left.Text($"  {hBg}{B}{acc}NAVIGATION{R}"),
                         left.Text(""),
@@ -51,9 +53,9 @@ public static class HelpScreen
                         left.Text($"  {hBg}{B}{acc}HELP{R}"),
                         left.Text(""),
                         left.Text($"    {D}?{R}            Toggle this help"),
-                    ]).FillWidth(1).FillHeight(),
+                    ]).FillWidth(1).FillHeight()),
 
-                    h.VStack(right =>
+                    new BackgroundPanelWidget(detailBg, h.VStack(right =>
                     [
                         right.Text($"  {hBg}{B}{acc}ACTIONS{R}"),
                         right.Text(""),
@@ -63,7 +65,7 @@ public static class HelpScreen
                         right.Text($"    {D}E{R}            Edit charter"),
                         right.Text($"    {D}C{R}            Create squad"),
                         right.Text($"    {D}Q{R}            Quit SquadTUI"),
-                    ]).FillWidth(1).FillHeight(),
+                    ]).FillWidth(1).FillHeight()),
                 ]).Fill(),
 
                 outer.Text(""),
@@ -72,7 +74,7 @@ public static class HelpScreen
             ])),
 
             // Narrow: single column
-            r.Otherwise(r => r.VStack(stack =>
+            r.Otherwise(r => new BackgroundPanelWidget(panelBg, r.VStack(stack =>
             [
                 stack.Text($"  {hBg}{B}{acc} ❓  Help & Keybindings {R}"),
                 stack.Text($"  {D}Quick reference for all keyboard shortcuts{R}"),
@@ -111,7 +113,7 @@ public static class HelpScreen
                 stack.Text(""),
                 stack.Text($"  {sec}{new string('━', 32)}{R}"),
                 stack.Text($"  {D}Press ? or Escape to dismiss{R}"),
-            ])),
+            ]))),
         ]).WithInputBindings(keys =>
         {
             keys.Key(Hex1bKey.F1).Action(() =>

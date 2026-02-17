@@ -28,6 +28,8 @@ public static class SettingsScreen
         var D = PanelRenderer.Dim;
 
         var selectedIdx = Math.Clamp(state.SettingsSelectedIndex, 0, SettingLabels.Length - 1);
+        var panelBg = ThemeManager.GetPanelBgColor(ti);
+        var detailBg = ThemeManager.GetPanelDetailBgColor(ti);
 
         var listItems = new List<string>
         {
@@ -40,7 +42,7 @@ public static class SettingsScreen
 
         return v.HStack(h =>
         [
-            h.VStack(left =>
+            new BackgroundPanelWidget(panelBg, h.VStack(left =>
             [
                 left.Text($"  {B}{acc}⚙️  Settings{R}"),
                 left.Text($"  {sec}{new string('━', 30)}{R}"),
@@ -52,9 +54,9 @@ public static class SettingsScreen
                         ToggleSetting(state, e.ActivatedIndex, options);
                     })
                     .Fill()
-            ]).FillWidth(1).FillHeight(),
+            ]).FillWidth(1).FillHeight()),
 
-            h.VStack(detail =>
+            new BackgroundPanelWidget(detailBg, h.VStack(detail =>
             {
                 var (label, description, currentValue) = GetSettingDetail(selectedIdx, settings);
                 var widgets = new List<Hex1bWidget>
@@ -72,7 +74,7 @@ public static class SettingsScreen
                 };
 
                 return widgets.ToArray();
-            }).FillWidth(1).FillHeight(),
+            }).FillWidth(1).FillHeight()),
         ]).Fill();
     }
 

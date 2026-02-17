@@ -20,10 +20,12 @@ public static class DecisionsScreen
         var B = PanelRenderer.Bold;
         var D = PanelRenderer.Dim;
         var hBg = ThemeManager.GetPanelHeaderBg(state.SelectedThemeIndex);
+        var panelBg = ThemeManager.GetPanelBgColor(state.SelectedThemeIndex);
+        var detailBg = ThemeManager.GetPanelDetailBgColor(state.SelectedThemeIndex);
 
         return v.HStack(h =>
         [
-            h.VStack(left =>
+            new BackgroundPanelWidget(panelBg, h.VStack(left =>
             [
                 left.Text($"  {hBg}{B}{acc} 📋  Decisions {R}"),
                 left.Text($"  {D}Team decisions and architectural choices{R}"),
@@ -33,9 +35,9 @@ public static class DecisionsScreen
                 left.List(listItems)
                     .OnSelectionChanged(e => { state.DecisionSelectedIndex = e.SelectedIndex; })
                     .Fill()
-            ]).FillWidth(1).FillHeight(),
+            ]).FillWidth(1).FillHeight()),
 
-            h.VStack(detail =>
+            new BackgroundPanelWidget(detailBg, h.VStack(detail =>
             [
                 detail.Text(""),
                 detail.Text($"  {hBg}{B}{acc} 📋  {selected.Title} {R}"),
@@ -50,7 +52,7 @@ public static class DecisionsScreen
                 detail.Text($"  {hBg}{B}{acc}Content{R}"),
                 detail.Text(""),
                 ..MarkdownRenderer.Render(detail, selected.Content).Select(w => w),
-            ]).FillWidth(2).FillHeight(),
+            ]).FillWidth(2).FillHeight()),
         ]).Fill();
     }
 }

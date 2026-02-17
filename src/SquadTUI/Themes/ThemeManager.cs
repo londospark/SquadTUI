@@ -66,6 +66,36 @@ public static class ThemeManager
         _ => "\x1b[48;2;17;22;30m"
     };
 
+    /// <summary>Panel background color — primary panels (list panes, main sections).</summary>
+    public static Hex1bColor GetPanelBgColor(int index) => (index % ThemeNames.Length) switch
+    {
+        0 => Hex1bColor.FromRgb(18, 23, 32),  // Ocean
+        1 => Hex1bColor.FromRgb(26, 23, 44),  // Heist
+        2 => Hex1bColor.FromRgb(35, 23, 30),  // Sunset
+        3 => Hex1bColor.FromRgb(14, 14, 14),  // HighContrast
+        _ => Hex1bColor.FromRgb(18, 23, 32)
+    };
+
+    /// <summary>Panel background color — detail/secondary panels.</summary>
+    public static Hex1bColor GetPanelDetailBgColor(int index) => (index % ThemeNames.Length) switch
+    {
+        0 => Hex1bColor.FromRgb(22, 28, 38),  // Ocean
+        1 => Hex1bColor.FromRgb(32, 28, 52),  // Heist
+        2 => Hex1bColor.FromRgb(42, 28, 36),  // Sunset
+        3 => Hex1bColor.FromRgb(20, 20, 20),  // HighContrast
+        _ => Hex1bColor.FromRgb(22, 28, 38)
+    };
+
+    /// <summary>Panel background color — tertiary/accent panels.</summary>
+    public static Hex1bColor GetPanelAltBgColor(int index) => (index % ThemeNames.Length) switch
+    {
+        0 => Hex1bColor.FromRgb(15, 20, 28),  // Ocean
+        1 => Hex1bColor.FromRgb(22, 20, 38),  // Heist
+        2 => Hex1bColor.FromRgb(30, 20, 26),  // Sunset
+        3 => Hex1bColor.FromRgb(10, 10, 10),  // HighContrast
+        _ => Hex1bColor.FromRgb(15, 20, 28)
+    };
+
     /// <summary>Modern borderless style — borders use space chars to become invisible.</summary>
     private static Hex1bTheme WithModernBorders(Hex1bTheme theme) => theme
         .Set(BorderTheme.TopLeftCorner, " ")
