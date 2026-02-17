@@ -66,3 +66,15 @@ Our Definition of Done says "tests pass" but we weren't enforcing "tests pass *i
 2. **CI must be green before any issue is closed.** I will enforce this in reviews.
 3. **I will check CI status after every merge**, not assume it passes because local tests passed.
 4. **Branch protection:** Recommend to LondoSpark that we enable required status checks on develop/main so CI failures block merges.
+
+### 2026-02-17 — Architecture Review Ceremony: SampleData, Monadic Types, Navigation
+
+- **SampleData audit complete:** 7 screens reference SampleData with 26 total references. Worst offender: MetricsScreen (9 refs including hardcoded `SprintHistory` with no service backing). CharterScreen and charter rendering bypass `DataBridge.LoadCharterContentAsync()` entirely.
+- **Decision: SampleData → test project.** Replace `state.X ?? SampleData.X` with `state.X ?? []` plus empty-state UI widgets. No fake data in prod binary.
+- **Decision: LanguageExt for monadic types.** `DataBridge` returns `Either<AppError, T>`, screens use `.Match()`. Chose LanguageExt over OneOf (no LINQ) and roll-our-own (maintenance burden). `AppError` is abstract record hierarchy.
+- **Decision: Dashboard panel focus.** Tab cycles panels, Enter drills in, Escape backs out. New `DashboardFocusedPanel` on AppState. Risk: Tab may conflict with Hex1b TabPanel.
+- **Decision: Settings modal overlay.** SettingsScreen becomes overlay, not screen replacement. Theme preview applies live. T key preserved for quick cycling. Prepare for 5+ additional themes.
+- **Pattern established: Empty-state widgets.** Every screen must handle null/empty data gracefully with a centered dim message instead of crashing or showing fake data.
+- **Pattern established: `Either<AppError, T>` at service boundaries.** Services don't throw. Screens use `.Match()`. No try/catch in rendering pipeline.
+- **Observation: AppLayout.BindKeys() is 120+ lines.** Consider splitting per-screen binding methods after dashboard navigation lands.
+- **Decisions written to inbox:** `solaire-arch-review-sampledata-isolation.md`, `solaire-arch-review-monadic-types.md`, `solaire-arch-review-dashboard-navigation.md`, `solaire-arch-review-theme-menu.md`

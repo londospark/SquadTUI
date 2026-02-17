@@ -65,6 +65,29 @@
 
 📌 Team update (2026-02-16): Siegmeyer completed Phase 1 UI modernization adding emoji icons to all screens (🏠 🧑‍💼 📋 🔧 📊 📈), status badges, and task indicators. Full theme system, responsive layouts, TabPanel, VScroll, and markdown rendering deferred pending Hex1b API docs — decided by Siegmeyer
 
+### 2026-02-19: Manual Testing Audit + Comprehensive Test Plan
+
+**What was done:**
+- Full audit of all 10 screen files in `src/SquadTUI/Screens/` for SampleData references, UI inconsistencies, and edge cases.
+- Counted 180 tests across Unit/Integration/E2E categories via `dotnet test --list-tests`.
+- Identified 2 CRITICAL SampleData leaks (CharterScreen and MetricsScreen always use hardcoded sample data with no real data path), 2 HIGH severity leaks (RosterScreen and MemberDetailScreen charter always from SampleData), and silent fallback patterns in all other screens.
+- Found HelpScreen documents `?` key for toggling help but no `?` key binding exists — only F1 works.
+- Found MemberDetailScreen shows member name twice (header + status line).
+- Created comprehensive test plan covering 10 test areas with ~70+ specific test cases.
+- Identified 9 untested production code files (DataBridge charter loading, SettingsService persistence, MigrationService, MarkdownRenderer.ExtractHeadings, etc.).
+- Documented 8 user stories from tester's perspective.
+
+**Key findings:**
+1. `CharterScreen`, `RosterScreen`, `MemberDetailScreen` all call `SampleData.GetCharterFor()` — always returns hardcoded Sonic-universe text. `DataBridge.LoadCharterContentAsync()` exists but is never wired to any screen.
+2. `MetricsScreen` uses `SampleData.SprintHistory` directly (not through AppState) — no service provides real sprint data. All velocity/completion/trend metrics are fabricated.
+3. `state.IsLoading` and `state.ErrorMessage` are set in `Program.cs` but never read by any screen — no loading indicator, no error display.
+4. `MemberDetailScreen` defaults `SelectedMemberName` to `"Sonic"` when null — a SampleData character name.
+5. `SkillsScreen.GetConfidenceLevel()` returns hardcoded progress bars for 5 known SampleData skills only.
+
+**Deliverables:**
+- `.ai-team/decisions/inbox/patches-sampledata-audit.md` — Full file-by-file SampleData reference audit with severity classifications
+- `.ai-team/decisions/inbox/patches-test-plan.md` — Comprehensive test plan with 10 sections covering high-risk areas, leak detection, responsive layouts, tab navigation, markdown rendering, migration, settings persistence, and future monadic types
+
 ### 2026-02-17: Responsive Layout and Theme Switching E2E Tests
 
 **What was added:**
