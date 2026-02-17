@@ -13,12 +13,13 @@ public class ServiceProvider
     public ISkillService Skills { get; }
     public IOrchestrationLogService OrchestrationLog { get; }
 
-    private ServiceProvider(string aiTeamRootPath)
+    private ServiceProvider(string teamRootPath)
     {
-        Team = new TeamService(aiTeamRootPath);
-        Decisions = new DecisionService(aiTeamRootPath);
-        Skills = new SkillService(aiTeamRootPath);
-        OrchestrationLog = new OrchestrationLogService(aiTeamRootPath);
+        var squadDir = SquadPathResolver.Resolve(teamRootPath);
+        Team = new TeamService(squadDir);
+        Decisions = new DecisionService(squadDir);
+        Skills = new SkillService(squadDir);
+        OrchestrationLog = new OrchestrationLogService(squadDir);
         SquadData = new SquadDataProvider(Team, OrchestrationLog, Decisions, Skills);
     }
 
@@ -30,14 +31,23 @@ public class ServiceProvider
             {
                 lock (_lock)
                 {
-                    _instance ??= new ServiceProvider(DiscoverAiTeamPath());
+                    _instance ??= new ServiceProvider(DiscoverProjectRoot());
                 }
             }
             return _instance;
         }
     }
 
-    private static string DiscoverAiTeamPath()
+    /// <summary>Reset the singleton (used after migration to re-resolve paths).</summary>
+    public static void Reset()
+    {
+        lock (_lock)
+        {
+            _instance = null;
+        }
+    }
+
+    private static string DiscoverProjectRoot()
     {
         // First, try git root
         try
@@ -70,12 +80,11 @@ public class ServiceProvider
             // Git command failed, fall through to directory search
         }
 
-        // Fallback: walk up from current directory looking for .ai-team
+        // Fallback: walk up from current directory looking for .squad/ or .ai-team/
         var current = Directory.GetCurrentDirectory();
         while (current != null)
         {
-            var aiTeamPath = Path.Combine(current, ".ai-team");
-            if (Directory.Exists(aiTeamPath))
+            if (SquadPathResolver.HasSquadDirectory(current))
                 return current;
 
             var parent = Directory.GetParent(current);

@@ -23,8 +23,9 @@ public static class MemberDetailScreen
         var R = PanelRenderer.Reset;
         var B = PanelRenderer.Bold;
         var D = PanelRenderer.Dim;
+        var panelBg = ThemeManager.GetPanelBgColor(state.SelectedThemeIndex);
 
-        return v.VStack(inner =>
+        return new BackgroundPanelWidget(panelBg, v.VStack(inner =>
         {
             var widgets = new List<Hex1bWidget>
             {
@@ -73,7 +74,7 @@ public static class MemberDetailScreen
             widgets.Add(inner.Text($"  {D}Esc Back to Roster    E Edit Charter{R}"));
 
             return widgets.ToArray();
-        }).Fill();
+        }).Fill());
     }
 
     private static string GetStatusBadge(Models.MemberStatus status) => status switch

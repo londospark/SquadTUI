@@ -26,19 +26,21 @@ public static class RosterScreen
         var logs = state.LogEntries ?? SampleData.LogEntries;
         var recentLogs = logs.Where(l => l.Participants.Contains(selected.Name)).Take(3).ToList();
         var hBg = ThemeManager.GetPanelHeaderBg(state.SelectedThemeIndex);
+        var panelBg = ThemeManager.GetPanelBgColor(state.SelectedThemeIndex);
+        var detailBg = ThemeManager.GetPanelDetailBgColor(state.SelectedThemeIndex);
 
         return v.HStack(h =>
         [
-            h.VStack(left =>
+            new BackgroundPanelWidget(panelBg, h.VStack(left =>
             [
                 left.Text($"  {hBg}{B}{acc}👥 Team Roster{R}"),
                 left.Text($"  {sec}{new string('━', 30)}{R}"),
                 left.List(listItems)
                     .OnSelectionChanged(e => { state.RosterSelectedIndex = e.SelectedIndex; })
                     .Fill()
-            ]).FillWidth(2).FillHeight(),
+            ]).FillWidth(2).FillHeight()),
 
-            h.VStack(detail =>
+            new BackgroundPanelWidget(detailBg, h.VStack(detail =>
             {
                 var widgets = new List<Hex1bWidget>
                 {
@@ -82,7 +84,7 @@ public static class RosterScreen
                 }
 
                 return widgets.ToArray();
-            }).FillWidth(3).FillHeight(),
+            }).FillWidth(3).FillHeight()),
         ]).Fill();
     }
 

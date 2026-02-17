@@ -199,3 +199,29 @@ The user has stated NO BORDERS multiple times. Yet `┌─┐│└─┘` box-d
 - Per-member task breakdown showing individual ✅/🔄/⏳ counts.
 - BarChart section with descriptive subtitle.
 - Used `▌` section indicators consistent with NoSquadScreen redesign.
+
+### Sprint 10 — BackgroundPanelWidget Panel Backgrounds
+
+**Problem:** Panel backgrounds were done via raw ANSI `\x1b[48;2;r;g;bm` escape codes embedded in `Text()` content. This only colored the text portion of each line, not the full panel area — panels had no visible background differentiation against the app's base theme color.
+
+**Solution:** Hex1b's native `BackgroundPanelWidget(Hex1bColor Color, Hex1bWidget Child)` fills its entire bounds with a background color before rendering the child widget. Wrapping each panel's VStack in a BackgroundPanelWidget gives proper full-area panel shading.
+
+**Implementation:**
+- `ThemeManager.GetPanelBgColor(int index)` — returns `Hex1bColor` for primary panels (list panes). Slightly lighter than the theme's base BackgroundColor.
+- `ThemeManager.GetPanelDetailBgColor(int index)` — returns `Hex1bColor` for detail/secondary panels.
+- `ThemeManager.GetPanelAltBgColor(int index)` — returns `Hex1bColor` for tertiary panels (used in 3-column layouts like Dashboard and Metrics).
+- All 11 screen files wrap their panel VStacks in `new BackgroundPanelWidget(color, vstack)`.
+- Existing `GetPanelHeaderBg()`/`GetPanelDetailBg()` ANSI string methods kept intact — still used for inline section header text formatting (`{hBg}`).
+
+**Color values per theme** (panel / detail / alt):
+- Ocean: `(18,23,32)` / `(22,28,38)` / `(15,20,28)` — base bg is `(13,17,23)`
+- Heist: `(26,23,44)` / `(32,28,52)` / `(22,20,38)` — base bg is `(20,18,36)`
+- Sunset: `(35,23,30)` / `(42,28,36)` / `(30,20,26)` — base bg is `(28,18,22)`
+- HighContrast: `(14,14,14)` / `(20,20,20)` / `(10,10,10)` — base bg is black
+
+**API notes:**
+- `BackgroundPanelWidget` is in `Hex1b.Widgets` namespace.
+- Constructor: `new BackgroundPanelWidget(Hex1bColor color, Hex1bWidget child)`.
+- It's a passthrough widget — all layout, focus, and input behavior is delegated unchanged to the child.
+- `Hex1bColor.FromRgb(r, g, b)` creates RGB colors.
+- Pattern: `new BackgroundPanelWidget(bg, h.VStack(left => [...]).FillWidth(1).FillHeight())` — the VStack with sizing is the child.

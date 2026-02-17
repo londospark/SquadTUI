@@ -20,6 +20,8 @@ public class TeamServiceTests : IDisposable
             Directory.Delete(_tempDir, true);
     }
 
+    private string SquadDir => Path.Combine(_tempDir, ".ai-team");
+
     private void WriteTeamFile(string content)
     {
         File.WriteAllText(Path.Combine(_tempDir, ".ai-team", "team.md"), content);
@@ -47,7 +49,7 @@ public class TeamServiceTests : IDisposable
             | Rusty | Backend Dev | path | 🔄 Working |
             """);
 
-        var svc = new TeamService(_tempDir);
+        var svc = new TeamService(SquadDir);
         var roster = await svc.GetRosterAsync();
 
         roster.Members.Should().HaveCount(3);
@@ -67,7 +69,7 @@ public class TeamServiceTests : IDisposable
             | Linus | Frontend Dev | path | Active |
             """);
 
-        var svc = new TeamService(_tempDir);
+        var svc = new TeamService(SquadDir);
         var roster = await svc.GetRosterAsync();
 
         roster.Members!.Select(m => m.Name).Should().Contain(["Danny", "Linus"]);
@@ -86,7 +88,7 @@ public class TeamServiceTests : IDisposable
             | Danny | Lead | path | Active |
             """);
 
-        var svc = new TeamService(_tempDir);
+        var svc = new TeamService(SquadDir);
         var roster = await svc.GetRosterAsync();
 
         roster.Members!.First().Role.Should().Be("Lead");
@@ -107,7 +109,7 @@ public class TeamServiceTests : IDisposable
             | Rusty | Dev | path | 🔄 Working |
             """);
 
-        var svc = new TeamService(_tempDir);
+        var svc = new TeamService(SquadDir);
         var roster = await svc.GetRosterAsync();
 
         var members = roster.Members!;
@@ -135,7 +137,7 @@ public class TeamServiceTests : IDisposable
             | Danny | Lead | path | Active |
             """);
 
-        var svc = new TeamService(_tempDir);
+        var svc = new TeamService(SquadDir);
         var roster = await svc.GetRosterAsync();
 
         roster.Members.Should().HaveCount(2);
@@ -146,7 +148,7 @@ public class TeamServiceTests : IDisposable
     [Fact]
     public async Task HandleMissingTeamMd_ReturnsEmptyRoster()
     {
-        var svc = new TeamService(_tempDir);
+        var svc = new TeamService(SquadDir);
         var roster = await svc.GetRosterAsync();
 
         roster.Members.Should().BeNull();
@@ -166,7 +168,7 @@ public class TeamServiceTests : IDisposable
             | Danny | Lead | path | Active |
             """);
 
-        var svc = new TeamService(_tempDir);
+        var svc = new TeamService(SquadDir);
         var member = await svc.GetMemberAsync("danny");
 
         member.Should().NotBeNull();
@@ -186,7 +188,7 @@ public class TeamServiceTests : IDisposable
             | Danny | Lead | path | Active |
             """);
 
-        var svc = new TeamService(_tempDir);
+        var svc = new TeamService(SquadDir);
         var member = await svc.GetMemberAsync("Unknown");
 
         member.Should().BeNull();
@@ -209,7 +211,7 @@ public class TeamServiceTests : IDisposable
             - **Description:** A terminal user interface for managing AI squads
             """);
 
-        var svc = new TeamService(_tempDir);
+        var svc = new TeamService(SquadDir);
         var roster = await svc.GetRosterAsync();
 
         roster.Description.Should().Be("A terminal user interface for managing AI squads");
@@ -229,7 +231,7 @@ public class TeamServiceTests : IDisposable
             """);
         CreateCharterFile("Danny");
 
-        var svc = new TeamService(_tempDir);
+        var svc = new TeamService(SquadDir);
         var roster = await svc.GetRosterAsync();
 
         roster.Members!.First().CharterPath.Should().NotBeNull();
@@ -249,7 +251,7 @@ public class TeamServiceTests : IDisposable
             | Danny | Lead | path | Active |
             """);
 
-        var svc = new TeamService(_tempDir);
+        var svc = new TeamService(SquadDir);
         var roster = await svc.GetRosterAsync();
 
         roster.Members!.First().CharterPath.Should().BeNull();

@@ -25,10 +25,12 @@ public static class SkillsScreen
         var confidence = GetConfidenceLevel(selected.Name);
 
         var hBg = ThemeManager.GetPanelHeaderBg(state.SelectedThemeIndex);
+        var panelBg = ThemeManager.GetPanelBgColor(state.SelectedThemeIndex);
+        var detailBg = ThemeManager.GetPanelDetailBgColor(state.SelectedThemeIndex);
 
         return v.HStack(h =>
         [
-            h.VStack(left =>
+            new BackgroundPanelWidget(panelBg, h.VStack(left =>
             [
                 left.Text($"  {hBg}{B}{acc} 🔧  Installed Skills {R}"),
                 left.Text($"  {D}Available capabilities for your squad{R}"),
@@ -38,9 +40,9 @@ public static class SkillsScreen
                 left.List(listItems)
                     .OnSelectionChanged(e => { state.SkillSelectedIndex = e.SelectedIndex; })
                     .Fill()
-            ]).FillWidth(1).FillHeight(),
+            ]).FillWidth(1).FillHeight()),
 
-            h.VStack(detail =>
+            new BackgroundPanelWidget(detailBg, h.VStack(detail =>
             {
                 var widgets = new List<Hex1bWidget>
                 {
@@ -73,7 +75,7 @@ public static class SkillsScreen
                 widgets.Add(detail.Text($"    {D}and can be invoked during task execution.{R}"));
 
                 return widgets.ToArray();
-            }).FillWidth(2).FillHeight(),
+            }).FillWidth(2).FillHeight()),
         ]).Fill();
     }
 

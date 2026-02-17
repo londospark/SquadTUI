@@ -19,6 +19,8 @@ public class SkillServiceTests : IDisposable
             Directory.Delete(_tempDir, true);
     }
 
+    private string SquadDir => Path.Combine(_tempDir, ".ai-team");
+
     private void WriteSkillFile(string slug, string content)
     {
         var dir = Path.Combine(_tempDir, ".ai-team", "skills", slug);
@@ -42,7 +44,7 @@ public class SkillServiceTests : IDisposable
             Body content here.
             """);
 
-        var svc = new SkillService(_tempDir);
+        var svc = new SkillService(SquadDir);
         var skills = await svc.GetSkillsAsync();
 
         var skill = skills.First();
@@ -62,7 +64,7 @@ public class SkillServiceTests : IDisposable
             This is a skill without frontmatter.
             """);
 
-        var svc = new SkillService(_tempDir);
+        var svc = new SkillService(SquadDir);
         var skills = await svc.GetSkillsAsync();
 
         var skill = skills.First();
@@ -94,7 +96,7 @@ public class SkillServiceTests : IDisposable
         Directory.CreateDirectory(dir);
         File.WriteAllText(Path.Combine(dir, "README.md"), "Not a SKILL.md");
 
-        var svc = new SkillService(_tempDir);
+        var svc = new SkillService(SquadDir);
         var skills = await svc.GetSkillsAsync();
 
         skills.Should().BeEmpty();
@@ -103,7 +105,7 @@ public class SkillServiceTests : IDisposable
     [Fact]
     public async Task GetSkillAsync_ReturnsNullForUnknownSlug()
     {
-        var svc = new SkillService(_tempDir);
+        var svc = new SkillService(SquadDir);
         var skill = await svc.GetSkillAsync("nonexistent");
 
         skill.Should().BeNull();
@@ -121,7 +123,7 @@ public class SkillServiceTests : IDisposable
             Body.
             """);
 
-        var svc = new SkillService(_tempDir);
+        var svc = new SkillService(SquadDir);
         var skill = await svc.GetSkillAsync("code-review");
 
         skill.Should().NotBeNull();
@@ -144,7 +146,7 @@ public class SkillServiceTests : IDisposable
             Body content line 2.
             """);
 
-        var svc = new SkillService(_tempDir);
+        var svc = new SkillService(SquadDir);
         var skills = await svc.GetSkillsAsync();
 
         skills.First().Content.Should().Contain("Body content line 1.");
@@ -158,7 +160,7 @@ public class SkillServiceTests : IDisposable
             Just some content without a heading.
             """);
 
-        var svc = new SkillService(_tempDir);
+        var svc = new SkillService(SquadDir);
         var skills = await svc.GetSkillsAsync();
 
         skills.First().Name.Should().Be("fallback-name");
@@ -181,7 +183,7 @@ public class SkillServiceTests : IDisposable
             Content B.
             """);
 
-        var svc = new SkillService(_tempDir);
+        var svc = new SkillService(SquadDir);
         var skills = await svc.GetSkillsAsync();
 
         skills.Should().HaveCount(2);

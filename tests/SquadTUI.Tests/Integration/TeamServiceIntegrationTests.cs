@@ -7,7 +7,7 @@ namespace SquadTUI.Tests.Integration;
 public class TeamServiceIntegrationTests
 {
     private static string GetFixturesPath() =>
-        Path.Combine(AppContext.BaseDirectory, "Fixtures");
+        Path.Combine(AppContext.BaseDirectory, "Fixtures", ".ai-team");
 
     [Fact]
     public async Task FullParse_FixtureTeamMd_AllMembersWithCorrectFields()

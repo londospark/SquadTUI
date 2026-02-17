@@ -124,11 +124,11 @@ public class NoSquadGuardTests
             await sequence.ApplyAsync(terminal);
             await Task.Delay(300);
 
-            // Verify .ai-team structure was created
-            Directory.Exists(Path.Combine(tempDir, ".ai-team")).Should().BeTrue();
-            Directory.Exists(Path.Combine(tempDir, ".ai-team", "agents")).Should().BeTrue();
-            File.Exists(Path.Combine(tempDir, ".ai-team", "team.md")).Should().BeTrue();
-            File.Exists(Path.Combine(tempDir, ".ai-team", "decisions.md")).Should().BeTrue();
+            // Verify .squad structure was created (new directory name)
+            Directory.Exists(Path.Combine(tempDir, ".squad")).Should().BeTrue();
+            Directory.Exists(Path.Combine(tempDir, ".squad", "agents")).Should().BeTrue();
+            File.Exists(Path.Combine(tempDir, ".squad", "team.md")).Should().BeTrue();
+            File.Exists(Path.Combine(tempDir, ".squad", "decisions.md")).Should().BeTrue();
 
             cts.Cancel();
             try { await runTask; } catch (OperationCanceledException) { }

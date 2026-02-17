@@ -19,6 +19,8 @@ public class OrchestrationLogServiceTests : IDisposable
             Directory.Delete(_tempDir, true);
     }
 
+    private string SquadDir => Path.Combine(_tempDir, ".ai-team");
+
     private void WriteLogFile(string fileName, string content)
     {
         File.WriteAllText(Path.Combine(_tempDir, ".ai-team", "log", fileName), content);
@@ -35,7 +37,7 @@ public class OrchestrationLogServiceTests : IDisposable
             - Danny
             """);
 
-        var svc = new OrchestrationLogService(_tempDir);
+        var svc = new OrchestrationLogService(SquadDir);
         var entries = await svc.GetEntriesAsync();
 
         var entry = entries.First();
@@ -56,7 +58,7 @@ public class OrchestrationLogServiceTests : IDisposable
             - Rusty
             """);
 
-        var svc = new OrchestrationLogService(_tempDir);
+        var svc = new OrchestrationLogService(SquadDir);
         var entries = await svc.GetEntriesAsync();
 
         entries.First().Participants.Should().HaveCount(3);
@@ -75,7 +77,7 @@ public class OrchestrationLogServiceTests : IDisposable
             - Target .NET 10
             """);
 
-        var svc = new OrchestrationLogService(_tempDir);
+        var svc = new OrchestrationLogService(SquadDir);
         var entries = await svc.GetEntriesAsync();
 
         entries.First().Decisions.Should().HaveCount(2);
@@ -94,7 +96,7 @@ public class OrchestrationLogServiceTests : IDisposable
             - Team roster created
             """);
 
-        var svc = new OrchestrationLogService(_tempDir);
+        var svc = new OrchestrationLogService(SquadDir);
         var entries = await svc.GetEntriesAsync();
 
         entries.First().Outcomes.Should().HaveCount(2);
@@ -104,7 +106,7 @@ public class OrchestrationLogServiceTests : IDisposable
     [Fact]
     public async Task HandleEmptyLogDirectory_ReturnsEmptyList()
     {
-        var svc = new OrchestrationLogService(_tempDir);
+        var svc = new OrchestrationLogService(SquadDir);
         var entries = await svc.GetEntriesAsync();
 
         entries.Should().BeEmpty();
@@ -140,7 +142,7 @@ public class OrchestrationLogServiceTests : IDisposable
             # Middle Session
             """);
 
-        var svc = new OrchestrationLogService(_tempDir);
+        var svc = new OrchestrationLogService(SquadDir);
         var entries = await svc.GetEntriesAsync();
 
         entries.Should().HaveCount(3);
@@ -159,7 +161,7 @@ public class OrchestrationLogServiceTests : IDisposable
             # Planning
             """);
 
-        var svc = new OrchestrationLogService(_tempDir);
+        var svc = new OrchestrationLogService(SquadDir);
         var entries = await svc.GetEntriesByDateAsync("2026-02-16");
 
         entries.Should().ContainSingle();
@@ -177,7 +179,7 @@ public class OrchestrationLogServiceTests : IDisposable
             - Danny
             """);
 
-        var svc = new OrchestrationLogService(_tempDir);
+        var svc = new OrchestrationLogService(SquadDir);
         var entries = await svc.GetEntriesAsync();
 
         entries.First().Summary.Should().Be("Project Kickoff Session");
@@ -192,7 +194,7 @@ public class OrchestrationLogServiceTests : IDisposable
             Content.
             """);
 
-        var svc = new OrchestrationLogService(_tempDir);
+        var svc = new OrchestrationLogService(SquadDir);
         var entries = await svc.GetEntriesAsync();
 
         entries.First().Topic.Should().Be("sprint planning session");

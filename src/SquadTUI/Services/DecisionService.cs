@@ -2,10 +2,10 @@ using SquadTUI.Models;
 
 namespace SquadTUI.Services;
 
-public class DecisionService(string teamRootPath) : IDecisionService
+public class DecisionService(string squadDirPath) : IDecisionService
 {
-    private readonly string _decisionsFilePath = Path.Combine(teamRootPath, ".ai-team", "decisions.md");
-    private readonly string _inboxPath = Path.Combine(teamRootPath, ".ai-team", "decisions", "inbox");
+    private readonly string _decisionsFilePath = Path.Combine(squadDirPath, "decisions.md");
+    private readonly string _inboxPath = Path.Combine(squadDirPath, "decisions", "inbox");
 
     public async Task<IReadOnlyList<DecisionEntry>> GetDecisionsAsync(CancellationToken ct = default)
     {

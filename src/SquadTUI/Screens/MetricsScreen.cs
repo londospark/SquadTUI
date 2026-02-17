@@ -18,6 +18,9 @@ public static class MetricsScreen
         var B = PanelRenderer.Bold;
         var D = PanelRenderer.Dim;
         var hBg = ThemeManager.GetPanelHeaderBg(state.SelectedThemeIndex);
+        var panelBg = ThemeManager.GetPanelBgColor(state.SelectedThemeIndex);
+        var detailBg = ThemeManager.GetPanelDetailBgColor(state.SelectedThemeIndex);
+        var altBg = ThemeManager.GetPanelAltBgColor(state.SelectedThemeIndex);
 
         var done = tasks.Count(t => t.Status == Models.SquadTaskStatus.Done);
         var active = tasks.Count(t => t.Status == Models.SquadTaskStatus.InProgress);
@@ -53,7 +56,7 @@ public static class MetricsScreen
                 outer.HStack(h =>
                 [
                     // Left: Completion overview
-                    h.VStack(left =>
+                    new BackgroundPanelWidget(panelBg, h.VStack(left =>
                     [
                         left.Text($"  {B}{acc}▌{R} {B}{acc}Sprint Progress{R}"),
                         left.Text(""),
@@ -75,19 +78,19 @@ public static class MetricsScreen
                         left.Text($"  {B}{done}{R} {D}tasks completed per sprint cycle{R}"),
                         left.Text($"  {D}Measures how many tasks the team finishes{R}"),
                         left.Text($"  {D}in each sprint iteration.{R}"),
-                    ]).FillWidth(1).FillHeight(),
+                    ]).FillWidth(1).FillHeight()),
 
                     // Center: Chart
-                    h.VStack(mid =>
+                    new BackgroundPanelWidget(detailBg, h.VStack(mid =>
                     [
                         mid.Text($"  {B}{acc}▌{R} {B}{acc}📊 Tasks by Member{R}"),
                         mid.Text($"  {D}Completed + in-progress tasks per team member{R}"),
                         mid.Text(""),
                         mid.BarChart(chartData).Fill(),
-                    ]).FillWidth(2).FillHeight(),
+                    ]).FillWidth(2).FillHeight()),
 
                     // Right: Per-member detail
-                    h.VStack(right =>
+                    new BackgroundPanelWidget(altBg, h.VStack(right =>
                     {
                         var w = new List<Hex1bWidget>
                         {
@@ -106,7 +109,7 @@ public static class MetricsScreen
                         w.Add(right.Text($"  {sec}{new string('━', 28)}{R}"));
                         w.Add(right.Text($"  {D}Team size:{R}  {B}{members.Count}{R} {D}members{R}"));
                         return w.ToArray();
-                    }).FillWidth(1).FillHeight(),
+                    }).FillWidth(1).FillHeight()),
                 ]).Fill(),
             ])),
 
@@ -119,7 +122,7 @@ public static class MetricsScreen
 
                 outer.HStack(h =>
                 [
-                    h.VStack(left =>
+                    new BackgroundPanelWidget(panelBg, h.VStack(left =>
                     {
                         var w = new List<Hex1bWidget>
                         {
@@ -146,20 +149,20 @@ public static class MetricsScreen
                             w.Add(left.Text($"  {D}{m.Name}: ✅ {mDone}  🔄 {mActive}{R}"));
                         }
                         return w.ToArray();
-                    }).FillWidth(1).FillHeight(),
+                    }).FillWidth(1).FillHeight()),
 
-                    h.VStack(right =>
+                    new BackgroundPanelWidget(detailBg, h.VStack(right =>
                     [
                         right.Text($"  {B}{acc}▌{R} {B}{acc}📊 Tasks by Member{R}"),
                         right.Text($"  {D}Completed + active tasks per member{R}"),
                         right.Text(""),
                         right.BarChart(chartData).Fill(),
-                    ]).FillWidth(1).FillHeight(),
+                    ]).FillWidth(1).FillHeight()),
                 ]).Fill(),
             ])),
 
             // Narrow layout: single column
-            r.Otherwise(r => r.VStack(col =>
+            r.Otherwise(r => new BackgroundPanelWidget(panelBg, r.VStack(col =>
             {
                 var w = new List<Hex1bWidget>
                 {
@@ -181,7 +184,7 @@ public static class MetricsScreen
                     w.Add(col.Text($"  {D}{m.Name}: ✅ {mDone}  🔄 {mActive}{R}"));
                 }
                 return w.ToArray();
-            })),
+            }))),
         ]).Fill();
     }
 }

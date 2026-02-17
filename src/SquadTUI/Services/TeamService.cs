@@ -2,10 +2,10 @@ using SquadTUI.Models;
 
 namespace SquadTUI.Services;
 
-public class TeamService(string teamRootPath) : ITeamService
+public class TeamService(string squadDirPath) : ITeamService
 {
-    private readonly string _aiTeamPath = Path.Combine(teamRootPath, ".ai-team");
-    private readonly string _teamFilePath = Path.Combine(teamRootPath, ".ai-team", "team.md");
+    private readonly string _aiTeamPath = squadDirPath;
+    private readonly string _teamFilePath = Path.Combine(squadDirPath, "team.md");
 
     public async Task<TeamRoster> GetRosterAsync(CancellationToken ct = default)
     {

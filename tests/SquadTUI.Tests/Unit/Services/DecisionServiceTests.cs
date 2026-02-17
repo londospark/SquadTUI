@@ -19,6 +19,8 @@ public class DecisionServiceTests : IDisposable
             Directory.Delete(_tempDir, true);
     }
 
+    private string SquadDir => Path.Combine(_tempDir, ".ai-team");
+
     private void WriteDecisionsFile(string content)
     {
         File.WriteAllText(Path.Combine(_tempDir, ".ai-team", "decisions.md"), content);
@@ -59,7 +61,7 @@ public class DecisionServiceTests : IDisposable
             Unit and integration tests.
             """);
 
-        var svc = new DecisionService(_tempDir);
+        var svc = new DecisionService(SquadDir);
         var decisions = await svc.GetDecisionsAsync();
 
         decisions.Should().HaveCount(3);
@@ -79,7 +81,7 @@ public class DecisionServiceTests : IDisposable
             Use Hex1b for TUI.
             """);
 
-        var svc = new DecisionService(_tempDir);
+        var svc = new DecisionService(SquadDir);
         var decisions = await svc.GetDecisionsAsync();
 
         var d = decisions.First();
@@ -99,7 +101,7 @@ public class DecisionServiceTests : IDisposable
             Just a decision with no metadata.
             """);
 
-        var svc = new DecisionService(_tempDir);
+        var svc = new DecisionService(SquadDir);
         var decisions = await svc.GetDecisionsAsync();
 
         var d = decisions.First();
@@ -122,7 +124,7 @@ public class DecisionServiceTests : IDisposable
             This is the content of the decision.
             """);
 
-        var svc = new DecisionService(_tempDir);
+        var svc = new DecisionService(SquadDir);
         var decisions = await svc.GetDecisionsAsync();
 
         decisions.First().Content.Should().Contain("This is the content of the decision.");
@@ -147,7 +149,7 @@ public class DecisionServiceTests : IDisposable
             Content B.
             """);
 
-        var svc = new DecisionService(_tempDir);
+        var svc = new DecisionService(SquadDir);
         var decisions = await svc.GetDecisionsAsync();
 
         decisions.Should().HaveCount(2);
@@ -162,7 +164,7 @@ public class DecisionServiceTests : IDisposable
             > Shared decision log.
             """);
 
-        var svc = new DecisionService(_tempDir);
+        var svc = new DecisionService(SquadDir);
         var decisions = await svc.GetDecisionsAsync();
 
         decisions.Should().BeEmpty();
@@ -171,7 +173,7 @@ public class DecisionServiceTests : IDisposable
     [Fact]
     public async Task HandleMissingDecisionsMd_ReturnsEmpty()
     {
-        var svc = new DecisionService(_tempDir);
+        var svc = new DecisionService(SquadDir);
         var decisions = await svc.GetDecisionsAsync();
 
         decisions.Should().BeEmpty();
@@ -180,7 +182,7 @@ public class DecisionServiceTests : IDisposable
     [Fact]
     public async Task HandleMissingInboxDirectory_ReturnsEmpty()
     {
-        var svc = new DecisionService(_tempDir);
+        var svc = new DecisionService(SquadDir);
         var decisions = await svc.GetDecisionsAsync();
 
         decisions.Should().BeEmpty();
@@ -197,7 +199,7 @@ public class DecisionServiceTests : IDisposable
             Content without date field.
             """);
 
-        var svc = new DecisionService(_tempDir);
+        var svc = new DecisionService(SquadDir);
         var decisions = await svc.GetDecisionsAsync();
 
         decisions.First().Date.Should().Be("2026-02-16");
@@ -217,7 +219,7 @@ public class DecisionServiceTests : IDisposable
             Content here.
             """);
 
-        var svc = new DecisionService(_tempDir);
+        var svc = new DecisionService(SquadDir);
         var decisions = await svc.GetDecisionsAsync();
 
         var d = decisions.First();
@@ -236,7 +238,7 @@ public class DecisionServiceTests : IDisposable
             Content.
             """);
 
-        var svc = new DecisionService(_tempDir);
+        var svc = new DecisionService(SquadDir);
         var decisions = await svc.GetDecisionsAsync();
 
         decisions.First().FilePath.Should().NotBeNull();

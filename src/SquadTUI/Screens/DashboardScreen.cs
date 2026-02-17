@@ -25,6 +25,9 @@ public static class DashboardScreen
         var B = PanelRenderer.Bold;
         var D = PanelRenderer.Dim;
         var hBg = ThemeManager.GetPanelHeaderBg(state.SelectedThemeIndex);
+        var panelBg = ThemeManager.GetPanelBgColor(state.SelectedThemeIndex);
+        var detailBg = ThemeManager.GetPanelDetailBgColor(state.SelectedThemeIndex);
+        var altBg = ThemeManager.GetPanelAltBgColor(state.SelectedThemeIndex);
 
         return v.Responsive(r =>
         [
@@ -38,7 +41,7 @@ public static class DashboardScreen
                 outer.HStack(h =>
                 [
                     // Left: Team roster with status + task
-                    h.VStack(left =>
+                    new BackgroundPanelWidget(panelBg, h.VStack(left =>
                     {
                         var w = new List<Hex1bWidget>
                         {
@@ -54,10 +57,10 @@ public static class DashboardScreen
                         w.Add(left.Text(""));
                         w.Add(left.Text($"  {D}👥 {members.Count} members  ·  ✅ {activeCount} active{R}"));
                         return w.ToArray();
-                    }).FillWidth(1).FillHeight(),
+                    }).FillWidth(1).FillHeight()),
 
                     // Center: Activity + tasks + progress
-                    h.VStack(mid =>
+                    new BackgroundPanelWidget(detailBg, h.VStack(mid =>
                     {
                         var w = new List<Hex1bWidget>
                         {
@@ -84,10 +87,10 @@ public static class DashboardScreen
                             w.Add(mid.Text($"  {D}{l.Date}{R}  {l.Topic}  {D}({string.Join(", ", l.Participants.Take(2))}){R}"));
 
                         return w.ToArray();
-                    }).FillWidth(2).FillHeight(),
+                    }).FillWidth(2).FillHeight()),
 
                     // Right: Decisions + velocity
-                    h.VStack(right =>
+                    new BackgroundPanelWidget(altBg, h.VStack(right =>
                     {
                         var w = new List<Hex1bWidget>
                         {
@@ -106,7 +109,7 @@ public static class DashboardScreen
                         w.Add(right.Text($"  {D}Backlog:{R}    {B}{pendingTasks}{R} {D}pending{R}"));
 
                         return w.ToArray();
-                    }).FillWidth(1).FillHeight(),
+                    }).FillWidth(1).FillHeight()),
                 ]).Fill()
             ])),
 
@@ -119,7 +122,7 @@ public static class DashboardScreen
 
                 outer.HStack(h =>
                 [
-                    h.VStack(left =>
+                    new BackgroundPanelWidget(panelBg, h.VStack(left =>
                     {
                         var w = new List<Hex1bWidget>
                         {
@@ -136,9 +139,9 @@ public static class DashboardScreen
                         foreach (var l in logEntries.Take(3))
                             w.Add(left.Text($"  {D}{l.Date}{R}  {l.Topic}"));
                         return w.ToArray();
-                    }).FillWidth(2).FillHeight(),
+                    }).FillWidth(2).FillHeight()),
 
-                    h.VStack(right =>
+                    new BackgroundPanelWidget(detailBg, h.VStack(right =>
                     {
                         var w = new List<Hex1bWidget>
                         {
@@ -153,12 +156,12 @@ public static class DashboardScreen
                         w.Add(right.Text($"  {D}Velocity:{R}  {B}{completedTasks}{R} {D}tasks/sprint{R}"));
                         w.Add(right.Text($"  {D}Pending:{R}   {B}{pendingTasks}{R}"));
                         return w.ToArray();
-                    }).FillWidth(1).FillHeight(),
+                    }).FillWidth(1).FillHeight()),
                 ]).Fill()
             ])),
 
             // Narrow layout: single column
-            r.Otherwise(r => r.VStack(col =>
+            r.Otherwise(r => new BackgroundPanelWidget(panelBg, r.VStack(col =>
             {
                 var w = new List<Hex1bWidget>
                 {
@@ -175,7 +178,7 @@ public static class DashboardScreen
                 foreach (var d in decisions.Take(2))
                     w.Add(col.Text($"  {D}{d.Date}{R}  {d.Title}  {D}({d.Author}){R}"));
                 return w.ToArray();
-            })),
+            }))),
         ]).Fill();
     }
 
