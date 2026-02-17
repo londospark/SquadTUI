@@ -23,6 +23,21 @@ public class ServiceProvider
         SquadData = new SquadDataProvider(Team, OrchestrationLog, Decisions, Skills);
     }
 
+    /// <summary>Test-only constructor for dependency injection.</summary>
+    internal ServiceProvider(
+        ISquadDataProvider squadData,
+        ITeamService team,
+        IDecisionService decisions,
+        ISkillService skills,
+        IOrchestrationLogService orchestrationLog)
+    {
+        SquadData = squadData;
+        Team = team;
+        Decisions = decisions;
+        Skills = skills;
+        OrchestrationLog = orchestrationLog;
+    }
+
     public static ServiceProvider Instance
     {
         get
