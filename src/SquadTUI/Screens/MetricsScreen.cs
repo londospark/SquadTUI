@@ -10,6 +10,13 @@ public static class MetricsScreen
 {
     public static Hex1bWidget Render(WidgetContext<VStackWidget> v, AppState state, Hex1bApp app)
     {
+        // Handle pending refresh from file watcher
+        if (state.HasPendingRefresh)
+        {
+            state.HasPendingRefresh = false;
+            state.LastRefreshTime = DateTime.Now;
+        }
+
         var tasks = SampleData.Tasks;
         var members = state.Members ?? SampleData.Members;
         var acc = ThemeManager.GetAccentCode(state.SelectedThemeIndex);
@@ -185,6 +192,6 @@ public static class MetricsScreen
                 }
                 return w.ToArray();
             }))),
-        ]).Fill();
+        ]).Fill().RedrawAfter(3000);
     }
 }

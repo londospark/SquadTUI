@@ -46,7 +46,18 @@ _ = Task.Run(async () =>
     }
 });
 
-await using var terminal = Hex1bTerminal.CreateBuilder()
+// Start file watcher for live dashboard updates
+using var fileWatcher = new FileWatcherService();
+if (state.SquadRootPath != null)
+{
+    fileWatcher.OnFilesChanged += () =>
+    {
+        state.HasPendingRefresh = true;
+    };
+    fileWatcher.Start(state.SquadRootPath);
+}
+
+await using var terminal= Hex1bTerminal.CreateBuilder()
     .WithHex1bApp((app, options) =>
     {
         options.Theme = ThemeManager.GetTheme(state.SelectedThemeIndex);

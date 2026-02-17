@@ -106,6 +106,28 @@ public class AppStateTests
     }
 
     [Fact]
+    public void IsLiveEnabled_DefaultsToTrue()
+    {
+        var state = new AppState();
+        state.IsLiveEnabled.Should().BeTrue();
+    }
+
+    [Fact]
+    public void HasPendingRefresh_DefaultsToFalse()
+    {
+        var state = new AppState();
+        state.HasPendingRefresh.Should().BeFalse();
+    }
+
+    [Fact]
+    public void LastRefreshTime_DefaultsToNow()
+    {
+        var before = DateTime.Now;
+        var state = new AppState();
+        state.LastRefreshTime.Should().BeOnOrAfter(before);
+    }
+
+    [Fact]
     public void AllSelectedIndices_DefaultToZero()
     {
         var state = new AppState();
