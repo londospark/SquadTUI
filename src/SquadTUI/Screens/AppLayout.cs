@@ -265,6 +265,16 @@ public static class AppLayout
             if (state.CurrentScreen == Screen.Dashboard)
                 state.DashboardFocusedPanel = (state.DashboardFocusedPanel + 3) % 4;
         }, "Prev Panel");
+        keys.Key(Hex1bKey.RightArrow).Action(() =>
+        {
+            if (state.CurrentScreen == Screen.Dashboard)
+                state.DashboardFocusedPanel = (state.DashboardFocusedPanel + 1) % 4;
+        }, "Next Panel");
+        keys.Key(Hex1bKey.LeftArrow).Action(() =>
+        {
+            if (state.CurrentScreen == Screen.Dashboard)
+                state.DashboardFocusedPanel = (state.DashboardFocusedPanel + 3) % 4;
+        }, "Prev Panel");
         keys.Key(Hex1bKey.Enter).Action(() =>
         {
             if (state.CurrentScreen == Screen.Dashboard)
