@@ -47,6 +47,19 @@ if (state.SquadRootPath != null)
     fileWatcher.OnFilesChanged += () =>
     {
         state.HasPendingRefresh = true;
+        // Re-fetch data from services when files change
+        _ = Task.Run(async () =>
+        {
+            var membersTask = bridge.LoadRosterDataAsync();
+            var tasksTask = bridge.LoadTasksFromRosterAsync();
+            var decisionsTask = bridge.LoadDecisionsDataAsync();
+            var logsTask = bridge.LoadLogDataAsync();
+            await Task.WhenAll(membersTask, tasksTask, decisionsTask, logsTask);
+            state.Members = await membersTask;
+            state.Tasks = await tasksTask;
+            state.Decisions = await decisionsTask;
+            state.LogEntries = await logsTask;
+        });
     };
     fileWatcher.Start(state.SquadRootPath);
 }

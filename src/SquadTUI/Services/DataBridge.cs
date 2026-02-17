@@ -37,11 +37,21 @@ public class DataBridge
         {
             var roster = await _services.Team.GetRosterAsync(ct);
             var members = roster.Members ?? [];
+            var currentTasks = await _services.Team.GetCurrentTasksAsync(ct);
             var tasks = new List<SquadTask>();
             var idx = 1;
             foreach (var m in members)
             {
-                if (!string.IsNullOrEmpty(m.CurrentTask))
+                var taskTitle = m.CurrentTask;
+
+                // Try to get task from agent history/inbox if not set on member
+                if (string.IsNullOrEmpty(taskTitle) &&
+                    currentTasks.TryGetValue(m.Name, out var fromHistory))
+                {
+                    taskTitle = fromHistory;
+                }
+
+                if (!string.IsNullOrEmpty(taskTitle))
                 {
                     var status = m.Status switch
                     {
@@ -50,7 +60,7 @@ public class DataBridge
                         MemberStatus.Idle => SquadTaskStatus.Pending,
                         _ => SquadTaskStatus.Pending
                     };
-                    tasks.Add(new SquadTask($"task-{idx}", m.CurrentTask, null, status, m.Name));
+                    tasks.Add(new SquadTask($"task-{idx}", taskTitle, null, status, m.Name));
                 }
                 idx++;
             }
@@ -111,6 +121,32 @@ public class DataBridge
         catch
         {
             return None;
+        }
+    }
+
+    public async Task<Either<AppError, Unit>> AddMemberAsync(string name, string role, CancellationToken ct = default)
+    {
+        try
+        {
+            await _services.Team.AddMemberAsync(name, role, ct);
+            return Right<AppError, Unit>(Unit.Default);
+        }
+        catch (Exception ex)
+        {
+            return Left<AppError, Unit>(new ServiceError("AddMember", ex.Message));
+        }
+    }
+
+    public async Task<Either<AppError, Unit>> RemoveMemberAsync(string name, CancellationToken ct = default)
+    {
+        try
+        {
+            await _services.Team.RemoveMemberAsync(name, ct);
+            return Right<AppError, Unit>(Unit.Default);
+        }
+        catch (Exception ex)
+        {
+            return Left<AppError, Unit>(new ServiceError("RemoveMember", ex.Message));
         }
     }
 }

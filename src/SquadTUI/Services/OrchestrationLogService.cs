@@ -2,16 +2,24 @@ using SquadTUI.Models;
 
 namespace SquadTUI.Services;
 
-public class OrchestrationLogService(string squadDirPath) : IOrchestrationLogService
+public class OrchestrationLogService : IOrchestrationLogService
 {
-    private readonly string _orchestrationLogPath = Path.Combine(squadDirPath, "orchestration-log");
-    private readonly string _logPath = Path.Combine(squadDirPath, "log");
+    private readonly IFileLocationService _fileLocations;
+
+    public OrchestrationLogService(IFileLocationService fileLocations)
+    {
+        _fileLocations = fileLocations;
+    }
+
+    /// <summary>Legacy constructor for backward compatibility (tests).</summary>
+    public OrchestrationLogService(string squadDirPath)
+        : this(FileLocationService.FromSquadDirectory(squadDirPath)) { }
 
     public async Task<IReadOnlyList<OrchestrationLogEntry>> GetEntriesAsync(CancellationToken ct = default)
     {
         var entries = new List<OrchestrationLogEntry>();
-        entries.AddRange(await ParseLogDirectory(_orchestrationLogPath, ct));
-        entries.AddRange(await ParseLogDirectory(_logPath, ct));
+        entries.AddRange(await ParseLogDirectory(_fileLocations.GetOrchestrationLogDirectory(), ct));
+        entries.AddRange(await ParseLogDirectory(_fileLocations.GetLogDirectory(), ct));
         return entries.OrderByDescending(e => e.Timestamp).ToList();
     }
 

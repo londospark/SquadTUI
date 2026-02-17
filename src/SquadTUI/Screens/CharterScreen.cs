@@ -3,6 +3,7 @@ using Hex1b.Widgets;
 using SquadTUI.Models;
 using SquadTUI.Rendering;
 using SquadTUI.Themes;
+using static SquadTUI.Rendering.IconHelper;
 
 namespace SquadTUI.Screens;
 
@@ -20,15 +21,18 @@ public static class CharterScreen
         var B = PanelRenderer.Bold;
         var D = PanelRenderer.Dim;
         var panelBg = ThemeManager.GetPanelBgColor(state.SelectedThemeIndex);
+        var em = state.Settings.ShowEmoji;
 
         return new BackgroundPanelWidget(panelBg, v.VStack(inner =>
         [
-            inner.Text($"  {B}{acc}📜 Charter — {memberName}{R}"),
+            inner.Text($"  {B}{acc}{Icon("📜", "▪", em)} Charter — {memberName}{R}"),
             inner.Text($"  {D}{sec}{new string('━', 44)}{R}"),
+            inner.Text(""),
             inner.VStack(scroll =>
             [
                 ..MarkdownRenderer.Render(scroll, charter),
             ]).Fill(),
+            inner.Text(""),
             inner.Text($"  {D}Esc Back{R}"),
         ]).Fill());
     }

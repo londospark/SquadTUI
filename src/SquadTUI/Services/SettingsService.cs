@@ -5,17 +5,18 @@ namespace SquadTUI.Services;
 
 public class SettingsService
 {
-    private static readonly string ConfigDir = Path.Combine(
+    private static readonly string DefaultConfigDir = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "squadtui");
-    private static readonly string ConfigPath = Path.Combine(ConfigDir, "settings.json");
+    private static readonly string DefaultConfigPath = Path.Combine(DefaultConfigDir, "settings.json");
 
-    public static AppSettings Load()
+    public static AppSettings Load(IFileLocationService? fileLocations = null)
     {
+        var configPath = fileLocations?.GetSettingsFilePath() ?? DefaultConfigPath;
         try
         {
-            if (File.Exists(ConfigPath))
+            if (File.Exists(configPath))
             {
-                var json = File.ReadAllText(ConfigPath);
+                var json = File.ReadAllText(configPath);
                 return JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
             }
         }
@@ -23,13 +24,15 @@ public class SettingsService
         return new AppSettings();
     }
 
-    public static void Save(AppSettings settings)
+    public static void Save(AppSettings settings, IFileLocationService? fileLocations = null)
     {
+        var configDir = fileLocations?.GetSettingsDirectory() ?? DefaultConfigDir;
+        var configPath = fileLocations?.GetSettingsFilePath() ?? DefaultConfigPath;
         try
         {
-            Directory.CreateDirectory(ConfigDir);
+            Directory.CreateDirectory(configDir);
             var json = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(ConfigPath, json);
+            File.WriteAllText(configPath, json);
         }
         catch { }
     }

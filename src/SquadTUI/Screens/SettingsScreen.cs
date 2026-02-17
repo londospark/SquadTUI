@@ -3,6 +3,7 @@ using Hex1b.Widgets;
 using SquadTUI.Rendering;
 using SquadTUI.Services;
 using SquadTUI.Themes;
+using static SquadTUI.Rendering.IconHelper;
 
 namespace SquadTUI.Screens;
 
@@ -26,6 +27,7 @@ public static class SettingsScreen
         var R = PanelRenderer.Reset;
         var B = PanelRenderer.Bold;
         var D = PanelRenderer.Dim;
+        var em = settings.ShowEmoji;
 
         var selectedIdx = Math.Clamp(state.SettingsSelectedIndex, 0, SettingLabels.Length - 1);
         var panelBg = ThemeManager.GetPanelBgColor(ti);
@@ -33,18 +35,18 @@ public static class SettingsScreen
 
         var listItems = new List<string>
         {
-            $"  🎨 Theme            {FormatThemeValue(settings.ThemeName)}",
-            $"  ⌨️  Vim Keybindings  {FormatToggle(settings.VimBindings)}",
-            $"  🖱️  Mouse Support    {FormatToggle(settings.MouseEnabled)}",
-            $"  😀 Emoji Display    {FormatToggle(settings.ShowEmoji)}",
-            $"  📝 Markdown Render  {FormatToggle(settings.MarkdownRendering)}"
+            $"  {Icon("🎨", "◆", em)} Theme            {FormatThemeValue(settings.ThemeName)}",
+            $"  {Icon("⌨️", "◆", em)}  Vim Keybindings  {FormatToggle(settings.VimBindings)}",
+            $"  {Icon("🖱️", "◆", em)}  Mouse Support    {FormatToggle(settings.MouseEnabled)}",
+            $"  {Icon("😀", "◆", em)} Emoji Display    {FormatToggle(settings.ShowEmoji)}",
+            $"  {Icon("📝", "▪", em)} Markdown Render  {FormatToggle(settings.MarkdownRendering)}"
         } as IReadOnlyList<string>;
 
         return v.HStack(h =>
         [
             new BackgroundPanelWidget(panelBg, h.VStack(left =>
             [
-                left.Text($"  {B}{acc}⚙️  Settings{R}"),
+                left.Text($"  {B}{acc}{Icon("⚙️", "◆", em)}  Settings{R}"),
                 left.Text($"  {sec}{new string('━', 30)}{R}"),
                 left.Text(""),
                 left.List(listItems)
@@ -58,16 +60,17 @@ public static class SettingsScreen
 
             new BackgroundPanelWidget(detailBg, h.VStack(detail =>
             {
-                var (label, description, currentValue) = GetSettingDetail(selectedIdx, settings);
+                var (label, description, currentValue) = GetSettingDetail(selectedIdx, settings, em);
                 var widgets = new List<Hex1bWidget>
                 {
-                    detail.Text($"  {B}{acc}📋 Setting Details{R}"),
+                    detail.Text($"  {B}{acc}{Icon("📋", "▪", em)} Setting Details{R}"),
                     detail.Text($"  {sec}{new string('━', 36)}{R}"),
                     detail.Text(""),
                     detail.Text($"  {B}{acc}{label}{R}"),
                     detail.Text($"  {D}{description}{R}"),
                     detail.Text(""),
                     detail.Text($"  {sec}{new string('━', 36)}{R}"),
+                    detail.Text(""),
                     detail.Text($"  {D}Current:{R}  {B}{currentValue}{R}"),
                     detail.Text(""),
                     detail.Text($"  {D}Press Enter to change{R}"),
@@ -84,21 +87,21 @@ public static class SettingsScreen
     private static string FormatThemeValue(string themeName) =>
         $"\x1b[1m{themeName}\x1b[0m";
 
-    private static (string Label, string Description, string Value) GetSettingDetail(int index, Models.AppSettings settings) => index switch
+    private static (string Label, string Description, string Value) GetSettingDetail(int index, Models.AppSettings settings, bool em) => index switch
     {
-        0 => ("🎨 Theme",
+        0 => ($"{Icon("🎨", "◆", em)} Theme",
               "Visual theme for the application. Cycles through Ocean, Heist, Sunset, and HighContrast.",
               settings.ThemeName),
-        1 => ("⌨️  Vim Keybindings",
+        1 => ($"{Icon("⌨️", "◆", em)}  Vim Keybindings",
               "Enable j/k navigation and other vim-style keys.",
               settings.VimBindings ? "Enabled" : "Disabled"),
-        2 => ("🖱️  Mouse Support",
+        2 => ($"{Icon("🖱️", "◆", em)}  Mouse Support",
               "Enable mouse click and scroll interactions.",
               settings.MouseEnabled ? "Enabled" : "Disabled"),
-        3 => ("😀 Emoji Display",
+        3 => ($"{Icon("😀", "◆", em)} Emoji Display",
               "Show emoji icons throughout the interface.",
               settings.ShowEmoji ? "Enabled" : "Disabled"),
-        4 => ("📝 Markdown Rendering",
+        4 => ($"{Icon("📝", "▪", em)} Markdown Rendering",
               "Render markdown formatting in charter and log views.",
               settings.MarkdownRendering ? "Enabled" : "Disabled"),
         _ => ("", "", "")

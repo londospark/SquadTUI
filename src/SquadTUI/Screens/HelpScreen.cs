@@ -3,6 +3,7 @@ using Hex1b.Input;
 using Hex1b.Widgets;
 using SquadTUI.Rendering;
 using SquadTUI.Themes;
+using static SquadTUI.Rendering.IconHelper;
 
 namespace SquadTUI.Screens;
 
@@ -15,6 +16,7 @@ public static class HelpScreen
         var D = PanelRenderer.Dim;
         var R = PanelRenderer.Reset;
         var B = PanelRenderer.Bold;
+        var em = state.Settings.ShowEmoji;
 
         var hBg = ThemeManager.GetPanelHeaderBg(state.SelectedThemeIndex);
         var panelBg = ThemeManager.GetPanelBgColor(state.SelectedThemeIndex);
@@ -25,7 +27,7 @@ public static class HelpScreen
             // Wide: two-column help layout
             r.WhenMinWidth(100, r => r.VStack(outer =>
             [
-                outer.Text($"  {hBg}{B}{acc} ❓  Help & Keybindings {R}"),
+                outer.Text($"  {hBg}{B}{acc} {Icon("❓", "?", em)}  Help & Keybindings {R}"),
                 outer.Text($"  {D}Quick reference for all keyboard shortcuts{R}"),
                 outer.Text(""),
                 outer.Text($"  {sec}{new string('━', 44)}{R}"),
@@ -78,7 +80,7 @@ public static class HelpScreen
             // Narrow: single column
             r.Otherwise(r => new BackgroundPanelWidget(panelBg, r.VStack(stack =>
             [
-                stack.Text($"  {hBg}{B}{acc} ❓  Help & Keybindings {R}"),
+                stack.Text($"  {hBg}{B}{acc} {Icon("❓", "?", em)}  Help & Keybindings {R}"),
                 stack.Text($"  {D}Quick reference for all keyboard shortcuts{R}"),
                 stack.Text(""),
                 stack.Text($"  {sec}{new string('━', 32)}{R}"),

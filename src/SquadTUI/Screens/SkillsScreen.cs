@@ -3,6 +3,7 @@ using Hex1b.Widgets;
 using SquadTUI.Models;
 using SquadTUI.Rendering;
 using SquadTUI.Themes;
+using static SquadTUI.Rendering.IconHelper;
 
 namespace SquadTUI.Screens;
 
@@ -20,7 +21,8 @@ public static class SkillsScreen
                 empty.Text($"  {D0}No skills found. Ensure your .squad/ directory contains skill definitions.{R0}"),
             ]).Fill();
         }
-        var listItems = skills.Select(s => $"  🔧 {s.Name} — {s.Description}").ToList() as IReadOnlyList<string>;
+        var em = state.Settings.ShowEmoji;
+        var listItems = skills.Select(s => $"  {Icon("🔧", "◇", em)} {s.Name} — {s.Description}").ToList() as IReadOnlyList<string>;
 
         var selectedIdx = Math.Clamp(state.SkillSelectedIndex, 0, skills.Count - 1);
         var selected = skills[selectedIdx];
@@ -42,7 +44,7 @@ public static class SkillsScreen
         [
             new BackgroundPanelWidget(panelBg, h.VStack(left =>
             [
-                left.Text($"  {hBg}{B}{acc} 🔧  Installed Skills {R}"),
+                left.Text($"  {hBg}{B}{acc} {Icon("🔧", "◇", em)}  Installed Skills {R}"),
                 left.Text($"  {D}Available capabilities for your squad{R}"),
                 left.Text(""),
                 left.Text($"  {sec}{new string('━', 30)}{R}"),
@@ -57,7 +59,7 @@ public static class SkillsScreen
                 var widgets = new List<Hex1bWidget>
                 {
                     detail.Text(""),
-                    detail.Text($"  {hBg}{B}{acc} 🔧  {selected.Name} {R}"),
+                    detail.Text($"  {hBg}{B}{acc} {Icon("🔧", "◇", em)}  {selected.Name} {R}"),
                     detail.Text(""),
                     detail.Text($"  {sec}{new string('━', 36)}{R}"),
                     detail.Text(""),
@@ -66,7 +68,7 @@ public static class SkillsScreen
                     detail.Text(""),
                     detail.Text($"  {sec}{new string('━', 36)}{R}"),
                     detail.Text(""),
-                    detail.Text($"  {hBg}{B}{acc}👥 Related Members{R}"),
+                    detail.Text($"  {hBg}{B}{acc}{Icon("👥", "◆", em)} Related Members{R}"),
                     detail.Text(""),
                 };
 
@@ -79,7 +81,7 @@ public static class SkillsScreen
                 widgets.Add(detail.Text(""));
                 widgets.Add(detail.Text($"  {sec}{new string('━', 36)}{R}"));
                 widgets.Add(detail.Text(""));
-                widgets.Add(detail.Text($"  {hBg}{B}{acc}📊 Usage{R}"));
+                widgets.Add(detail.Text($"  {hBg}{B}{acc}{Icon("📊", "▪", em)} Usage{R}"));
                 widgets.Add(detail.Text(""));
                 widgets.Add(detail.Text($"    {D}This skill is available to all squad members{R}"));
                 widgets.Add(detail.Text($"    {D}and can be invoked during task execution.{R}"));

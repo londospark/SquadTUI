@@ -51,9 +51,10 @@ public static class SquadDetector
     /// <summary>Check if the required squad structure exists (supports both .squad/ and .ai-team/).</summary>
     public static bool HasValidSquad(string rootPath)
     {
-        var squadDir = SquadPathResolver.Resolve(rootPath);
+        var fileLocations = new FileLocationService(rootPath);
+        var squadDir = fileLocations.SquadDirectory;
         return Directory.Exists(squadDir) &&
-               (File.Exists(Path.Combine(squadDir, "team.md")) ||
-                Directory.Exists(Path.Combine(squadDir, "agents")));
+               (File.Exists(fileLocations.GetRosterPath()) ||
+                Directory.Exists(fileLocations.GetAgentsDirectory()));
     }
 }
