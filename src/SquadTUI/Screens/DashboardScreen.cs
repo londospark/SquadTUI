@@ -9,6 +9,13 @@ public static class DashboardScreen
 {
     public static Hex1bWidget Render(WidgetContext<VStackWidget> v, AppState state, Hex1bApp app)
     {
+        // Handle pending refresh from file watcher
+        if (state.HasPendingRefresh)
+        {
+            state.HasPendingRefresh = false;
+            state.LastRefreshTime = DateTime.Now;
+        }
+
         var members = state.Members ?? SampleData.Members;
         var tasks = state.Tasks ?? SampleData.Tasks;
         var activeCount = members.Count(m => m.Status == Models.MemberStatus.Active);
@@ -29,12 +36,15 @@ public static class DashboardScreen
         var detailBg = ThemeManager.GetPanelDetailBgColor(state.SelectedThemeIndex);
         var altBg = ThemeManager.GetPanelAltBgColor(state.SelectedThemeIndex);
 
+        var liveText = state.IsLiveEnabled ? $"\x1b[32m● LIVE\x1b[0m" : "";
+        var refreshText = $"{D}Updated: {state.LastRefreshTime:HH:mm:ss}{R}";
+
         return v.Responsive(r =>
         [
             // Wide layout (≥120 cols): rich 3-column dashboard
             r.WhenMinWidth(120, r => r.VStack(outer =>
             [
-                outer.Text($"  {B}{acc}☀️  SquadTUI Dashboard{R}"),
+                outer.Text($"  {B}{acc}⚡  SquadTUI Dashboard{R}  {liveText}  {refreshText}"),
                 outer.Text($"  {D}{sec}Your AI squad at a glance{R}"),
                 outer.Text(""),
 
@@ -116,7 +126,7 @@ public static class DashboardScreen
             // Medium layout (≥80 cols): 2-column
             r.WhenMinWidth(80, r => r.VStack(outer =>
             [
-                outer.Text($"  {B}{acc}☀️  SquadTUI Dashboard{R}"),
+                outer.Text($"  {B}{acc}⚡  SquadTUI Dashboard{R}  {liveText}  {refreshText}"),
                 outer.Text($"  {D}{sec}Your AI squad at a glance{R}"),
                 outer.Text(""),
 
@@ -165,7 +175,7 @@ public static class DashboardScreen
             {
                 var w = new List<Hex1bWidget>
                 {
-                    col.Text($"  {hBg}{B}{acc}☀️  SquadTUI{R}"),
+                    col.Text($"  {hBg}{B}{acc}⚡  SquadTUI{R}  {liveText}"),
                     col.Text($"  {sec}{new string('━', 24)}{R}"),
                     col.Text($"  {D}👥 Members:{R} {B}{members.Count}{R}  {D}Tasks:{R} {B}{tasks.Count}{R}"),
                     col.Text(""),
@@ -179,7 +189,7 @@ public static class DashboardScreen
                     w.Add(col.Text($"  {D}{d.Date}{R}  {d.Title}  {D}({d.Author}){R}"));
                 return w.ToArray();
             }))),
-        ]).Fill();
+        ]).Fill().RedrawAfter(3000);
     }
 
     private static string GetStatusBadge(Models.MemberStatus status) => status switch

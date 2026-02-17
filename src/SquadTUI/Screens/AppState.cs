@@ -46,6 +46,11 @@ public class AppState
     public bool ShowHelp { get; set; } = false;
     public bool ShowBurndown { get; set; } = false;
 
+    // Live dashboard
+    public bool IsLiveEnabled { get; set; } = true;
+    public DateTime LastRefreshTime { get; set; } = DateTime.Now;
+    public bool HasPendingRefresh { get; set; }
+
     // Squad detection
     public bool SquadDetected { get; set; } = true;
     public string? SquadRootPath { get; set; }
