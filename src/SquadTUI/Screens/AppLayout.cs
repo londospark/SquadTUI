@@ -5,6 +5,7 @@ using SquadTUI.Models;
 using SquadTUI.Rendering;
 using SquadTUI.Services;
 using SquadTUI.Themes;
+using static SquadTUI.Rendering.IconHelper;
 
 namespace SquadTUI.Screens;
 
@@ -14,15 +15,44 @@ namespace SquadTUI.Screens;
 /// </summary>
 public static class AppLayout
 {
-    private static readonly (string Label, string Icon, Screen Screen)[] TabScreens =
+    private static (string Label, string Emoji, string Ascii, Screen Screen)[] GetTabScreens() =>
     [
-        ("Dashboard", "🏠", Screen.Dashboard),
-        ("Roster", "👥", Screen.Roster),
-        ("Decisions", "📋", Screen.Decisions),
-        ("Skills", "🔧", Screen.Skills),
-        ("Log", "📊", Screen.ActivityLog),
-        ("Metrics", "📈", Screen.Metrics),
+        ("  Dashboard  ", "🏠", "▸", Screen.Dashboard),
+        ("  Roster  ", "👥", "◆", Screen.Roster),
+        ("  Decisions  ", "📋", "▪", Screen.Decisions),
+        ("  Skills  ", "🔧", "◇", Screen.Skills),
+        ("  Log  ", "📊", "▪", Screen.ActivityLog),
+        ("  Metrics  ", "📈", "▪", Screen.Metrics),
     ];
+
+    /// <summary>Renders a contextual status bar footer with screen-specific keybindings.</summary>
+    public static Hex1bWidget RenderFooter(WidgetContext<VStackWidget> v, AppState state)
+    {
+        var D = PanelRenderer.Dim;
+        var R = PanelRenderer.Reset;
+
+        var keys = state.CurrentScreen switch
+        {
+            Screen.Dashboard => $"  {D}Tab: Next Panel  Enter: Drill In  T: Theme  S: Settings  Q: Quit  F1: Help{R}",
+            Screen.Roster => $"  {D}j/k: Navigate  Enter: Detail  T: Theme  S: Settings  Q: Quit  F1: Help{R}",
+            Screen.MemberDetail => $"  {D}E: Edit Charter  Esc: Back  T: Theme  S: Settings  Q: Quit  F1: Help{R}",
+            Screen.Decisions => $"  {D}j/k: Navigate  Esc: Back  T: Theme  S: Settings  Q: Quit  F1: Help{R}",
+            Screen.Skills => $"  {D}j/k: Navigate  Esc: Back  T: Theme  S: Settings  Q: Quit  F1: Help{R}",
+            Screen.ActivityLog => $"  {D}j/k: Navigate  Esc: Back  T: Theme  S: Settings  Q: Quit  F1: Help{R}",
+            Screen.Metrics => $"  {D}V: Toggle Burndown  Esc: Back  T: Theme  S: Settings  Q: Quit  F1: Help{R}",
+            Screen.Charter => $"  {D}Esc: Back  T: Theme  Q: Quit  F1: Help{R}",
+            Screen.Settings => $"  {D}j/k: Navigate  Enter: Toggle  Esc: Back  Q: Quit  F1: Help{R}",
+            Screen.Help => $"  {D}F1/Esc: Dismiss  Q: Quit{R}",
+            Screen.NoSquad => $"  {D}C: Create Squad  Q: Quit  F1: Help{R}",
+            _ => $"  {D}T: Theme  S: Settings  Q: Quit  F1: Help{R}",
+        };
+
+        return v.VStack(footer =>
+        [
+            footer.Text(""),
+            footer.Text(keys),
+        ]);
+    }
 
     public static Hex1bWidget Build(
         RootContext ctx,
@@ -30,6 +60,9 @@ public static class AppLayout
         Hex1bApp app,
         Hex1bAppOptions options)
     {
+        var em = state.Settings.ShowEmoji;
+        var TabScreens = GetTabScreens();
+
         // Theme settings modal overlay — renders instead of normal content
         if (state.ShowSettingsOverlay)
         {
@@ -41,7 +74,8 @@ public static class AppLayout
         {
             return ctx.VStack(v =>
             [
-                NoSquadScreen.Render(v, state, app)
+                NoSquadScreen.Render(v, state, app),
+                RenderFooter(v, state)
             ]).WithInputBindings(keys => BindKeys(keys, state, app, options));
         }
 
@@ -50,7 +84,7 @@ public static class AppLayout
         {
             return ctx.VStack(v =>
             [
-                v.Text($"\x1b[93m ⚠  Your squad uses .ai-team/ which is being renamed to .squad/ in v0.5.0. Press M to migrate.\x1b[0m"),
+                v.Text($"\x1b[93m {Icon("⚠", "!", em)}  Your squad uses .ai-team/ which is being renamed to .squad/ in v0.5.0. Press M to migrate.\x1b[0m"),
                 v.TabPanel(tp =>
                     TabScreens.Select(tab =>
                         tp.Tab(tab.Label, t =>
@@ -65,7 +99,7 @@ public static class AppLayout
                                 Screen.Metrics => MetricsScreen.Render(t, state, app),
                                 _ => t.Text("")
                             }
-                        ]).WithIcon(tab.Icon).Selected(state.CurrentScreen == tab.Screen)
+                        ]).WithIcon(Icon(tab.Emoji, tab.Ascii, em)).Selected(state.CurrentScreen == tab.Screen)
                     )
                 )
                 .OnSelectionChanged(e =>
@@ -73,7 +107,8 @@ public static class AppLayout
                     state.CurrentScreen = TabScreens[e.SelectedIndex].Screen;
                 })
                 .Compact()
-                .Fill()
+                .Fill(),
+                RenderFooter(v, state)
             ]).WithInputBindings(keys => BindKeys(keys, state, app, options));
         }
 
@@ -84,7 +119,7 @@ public static class AppLayout
             [
                 v.TabPanel(tp =>
                     TabScreens.Select(tab =>
-                        tp.Tab(tab.Label, _ => []).WithIcon(tab.Icon).Selected(false)
+                        tp.Tab(tab.Label, _ => []).WithIcon(Icon(tab.Emoji, tab.Ascii, em)).Selected(false)
                     )
                 )
                 .OnSelectionChanged(e =>
@@ -100,7 +135,8 @@ public static class AppLayout
                     Screen.Help => HelpScreen.Render(v, state, app),
                     Screen.Settings => SettingsScreen.Render(v, state, app, options),
                     _ => v.Text("")
-                })
+                }),
+                RenderFooter(v, state)
             ]).WithInputBindings(keys => BindKeys(keys, state, app, options));
         }
 
@@ -121,7 +157,7 @@ public static class AppLayout
                             Screen.Metrics => MetricsScreen.Render(t, state, app),
                             _ => t.Text("")
                         }
-                    ]).WithIcon(tab.Icon).Selected(state.CurrentScreen == tab.Screen)
+                    ]).WithIcon(Icon(tab.Emoji, tab.Ascii, em)).Selected(state.CurrentScreen == tab.Screen)
                 )
             )
             .OnSelectionChanged(e =>
@@ -129,7 +165,8 @@ public static class AppLayout
                 state.CurrentScreen = TabScreens[e.SelectedIndex].Screen;
             })
             .Compact()
-            .Fill()
+            .Fill(),
+            RenderFooter(v, state)
         ]).WithInputBindings(keys => BindKeys(keys, state, app, options));
     }
 
@@ -146,6 +183,7 @@ public static class AppLayout
         var B = PanelRenderer.Bold;
         var D = PanelRenderer.Dim;
         var panelBg = ThemeManager.GetPanelBgColor(ti);
+        var em = state.Settings.ShowEmoji;
 
         var themeItems = ThemeManager.ThemeNames
             .Select((name, idx) => idx == ti ? $"  ► {name}" : $"    {name}")
@@ -157,7 +195,7 @@ public static class AppLayout
             v.Text(""),
             new BackgroundPanelWidget(panelBg, v.VStack(modal =>
             [
-                modal.Text($"  {B}{acc}🎨 Theme Selection{R}"),
+                modal.Text($"  {B}{acc}{Icon("🎨", "◆", em)} Theme Selection{R}"),
                 modal.Text($"  {sec}{new string('━', 36)}{R}"),
                 modal.Text(""),
                 modal.List(themeItems)
@@ -304,11 +342,10 @@ public static class AppLayout
             if (state.CurrentScreen == Screen.NoSquad)
             {
                 var root = Directory.GetCurrentDirectory();
-                var squadDir = Path.Combine(root, SquadPathResolver.NewDirectoryName);
-                var agentsDir = Path.Combine(squadDir, "agents");
-                Directory.CreateDirectory(agentsDir);
-                File.WriteAllText(Path.Combine(squadDir, "team.md"), "# Team Roster\n\n*Created by SquadTUI*\n");
-                File.WriteAllText(Path.Combine(squadDir, "decisions.md"), "# Decisions\n\n*No decisions yet.*\n");
+                var fileLocations = new FileLocationService(root);
+                Directory.CreateDirectory(fileLocations.GetAgentsDirectory());
+                File.WriteAllText(fileLocations.GetRosterPath(), "# Team Roster\n\n*Created by SquadTUI*\n");
+                File.WriteAllText(fileLocations.GetDecisionsFilePath(), "# Decisions\n\n*No decisions yet.*\n");
                 state.SquadDetected = true;
                 state.SquadRootPath = root;
                 state.CurrentScreen = Screen.Dashboard;

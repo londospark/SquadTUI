@@ -2,17 +2,26 @@ using SquadTUI.Models;
 
 namespace SquadTUI.Services;
 
-public class TeamService(string squadDirPath) : ITeamService
+public class TeamService : ITeamService
 {
-    private readonly string _aiTeamPath = squadDirPath;
-    private readonly string _teamFilePath = Path.Combine(squadDirPath, "team.md");
+    private readonly IFileLocationService _fileLocations;
+
+    public TeamService(IFileLocationService fileLocations)
+    {
+        _fileLocations = fileLocations;
+    }
+
+    /// <summary>Legacy constructor for backward compatibility (tests).</summary>
+    public TeamService(string squadDirPath)
+        : this(FileLocationService.FromSquadDirectory(squadDirPath)) { }
 
     public async Task<TeamRoster> GetRosterAsync(CancellationToken ct = default)
     {
-        if (!File.Exists(_teamFilePath))
+        var teamFilePath = _fileLocations.GetRosterPath();
+        if (!File.Exists(teamFilePath))
             return new TeamRoster("SquadTUI");
 
-        var content = await File.ReadAllTextAsync(_teamFilePath, ct);
+        var content = await File.ReadAllTextAsync(teamFilePath, ct);
         var lines = content.Split('\n');
 
         var projectName = "SquadTUI";
@@ -143,7 +152,7 @@ public class TeamService(string squadDirPath) : ITeamService
 
     private string? GetCharterPath(string memberName)
     {
-        var charterFile = Path.Combine(_aiTeamPath, "agents", memberName.ToLowerInvariant(), "charter.md");
+        var charterFile = _fileLocations.GetCharterPath(memberName);
         return File.Exists(charterFile) ? charterFile : null;
     }
 

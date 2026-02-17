@@ -12,14 +12,15 @@ public class ServiceProvider
     public IDecisionService Decisions { get; }
     public ISkillService Skills { get; }
     public IOrchestrationLogService OrchestrationLog { get; }
+    public IFileLocationService FileLocations { get; }
 
     private ServiceProvider(string teamRootPath)
     {
-        var squadDir = SquadPathResolver.Resolve(teamRootPath);
-        Team = new TeamService(squadDir);
-        Decisions = new DecisionService(squadDir);
-        Skills = new SkillService(squadDir);
-        OrchestrationLog = new OrchestrationLogService(squadDir);
+        FileLocations = new FileLocationService(teamRootPath);
+        Team = new TeamService(FileLocations);
+        Decisions = new DecisionService(FileLocations);
+        Skills = new SkillService(FileLocations);
+        OrchestrationLog = new OrchestrationLogService(FileLocations);
         SquadData = new SquadDataProvider(Team, OrchestrationLog, Decisions, Skills);
     }
 
@@ -29,13 +30,15 @@ public class ServiceProvider
         ITeamService team,
         IDecisionService decisions,
         ISkillService skills,
-        IOrchestrationLogService orchestrationLog)
+        IOrchestrationLogService orchestrationLog,
+        IFileLocationService? fileLocations = null)
     {
         SquadData = squadData;
         Team = team;
         Decisions = decisions;
         Skills = skills;
         OrchestrationLog = orchestrationLog;
+        FileLocations = fileLocations ?? new FileLocationService(Directory.GetCurrentDirectory());
     }
 
     public static ServiceProvider Instance

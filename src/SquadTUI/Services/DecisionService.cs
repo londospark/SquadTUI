@@ -2,26 +2,36 @@ using SquadTUI.Models;
 
 namespace SquadTUI.Services;
 
-public class DecisionService(string squadDirPath) : IDecisionService
+public class DecisionService : IDecisionService
 {
-    private readonly string _decisionsFilePath = Path.Combine(squadDirPath, "decisions.md");
-    private readonly string _inboxPath = Path.Combine(squadDirPath, "decisions", "inbox");
+    private readonly IFileLocationService _fileLocations;
+
+    public DecisionService(IFileLocationService fileLocations)
+    {
+        _fileLocations = fileLocations;
+    }
+
+    /// <summary>Legacy constructor for backward compatibility (tests).</summary>
+    public DecisionService(string squadDirPath)
+        : this(FileLocationService.FromSquadDirectory(squadDirPath)) { }
 
     public async Task<IReadOnlyList<DecisionEntry>> GetDecisionsAsync(CancellationToken ct = default)
     {
         var decisions = new List<DecisionEntry>();
+        var decisionsFilePath = _fileLocations.GetDecisionsFilePath();
+        var inboxPath = _fileLocations.GetDecisionsInboxPath();
 
         // Parse decisions.md
-        if (File.Exists(_decisionsFilePath))
+        if (File.Exists(decisionsFilePath))
         {
-            var content = await File.ReadAllTextAsync(_decisionsFilePath, ct);
-            decisions.AddRange(ParseDecisionsMarkdown(content, _decisionsFilePath));
+            var content = await File.ReadAllTextAsync(decisionsFilePath, ct);
+            decisions.AddRange(ParseDecisionsMarkdown(content, decisionsFilePath));
         }
 
         // Parse inbox files
-        if (Directory.Exists(_inboxPath))
+        if (Directory.Exists(inboxPath))
         {
-            foreach (var file in Directory.EnumerateFiles(_inboxPath, "*.md"))
+            foreach (var file in Directory.EnumerateFiles(inboxPath, "*.md"))
             {
                 var content = await File.ReadAllTextAsync(file, ct);
                 decisions.AddRange(ParseInboxDecision(content, file));

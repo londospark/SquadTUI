@@ -18,6 +18,18 @@ public class FileWatcherService : IDisposable
         if (_watcher != null) return;
 
         var squadDir = SquadPathResolver.Resolve(squadRootPath);
+        StartWatching(squadDir);
+    }
+
+    public void Start(IFileLocationService fileLocations)
+    {
+        if (_watcher != null) return;
+
+        StartWatching(fileLocations.SquadDirectory);
+    }
+
+    private void StartWatching(string squadDir)
+    {
         if (!Directory.Exists(squadDir)) return;
 
         _watcher = new FileSystemWatcher(squadDir)

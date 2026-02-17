@@ -2,17 +2,27 @@ using SquadTUI.Models;
 
 namespace SquadTUI.Services;
 
-public class SkillService(string squadDirPath) : ISkillService
+public class SkillService : ISkillService
 {
-    private readonly string _skillsPath = Path.Combine(squadDirPath, "skills");
+    private readonly IFileLocationService _fileLocations;
+
+    public SkillService(IFileLocationService fileLocations)
+    {
+        _fileLocations = fileLocations;
+    }
+
+    /// <summary>Legacy constructor for backward compatibility (tests).</summary>
+    public SkillService(string squadDirPath)
+        : this(FileLocationService.FromSquadDirectory(squadDirPath)) { }
 
     public async Task<IReadOnlyList<Skill>> GetSkillsAsync(CancellationToken ct = default)
     {
         var skills = new List<Skill>();
-        if (!Directory.Exists(_skillsPath))
+        var skillsPath = _fileLocations.GetSkillsDirectory();
+        if (!Directory.Exists(skillsPath))
             return skills;
 
-        foreach (var dir in Directory.EnumerateDirectories(_skillsPath))
+        foreach (var dir in Directory.EnumerateDirectories(skillsPath))
         {
             var skillFile = Path.Combine(dir, "SKILL.md");
             if (!File.Exists(skillFile))
@@ -30,7 +40,7 @@ public class SkillService(string squadDirPath) : ISkillService
 
     public async Task<Skill?> GetSkillAsync(string slug, CancellationToken ct = default)
     {
-        var skillFile = Path.Combine(_skillsPath, slug, "SKILL.md");
+        var skillFile = _fileLocations.GetSkillFilePath(slug);
         if (!File.Exists(skillFile))
             return null;
 
