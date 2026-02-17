@@ -1,5 +1,6 @@
 using Hex1b;
 using Hex1b.Widgets;
+using SquadTUI.Models;
 using SquadTUI.Rendering;
 using SquadTUI.Themes;
 
@@ -9,7 +10,7 @@ public static class RosterScreen
 {
     public static Hex1bWidget Render(WidgetContext<VStackWidget> v, AppState state, Hex1bApp app)
     {
-        var members = state.Members ?? [];
+        var members = state.Members.GetOrEmpty();
         if (members.Count == 0)
         {
             var D0 = PanelRenderer.Dim;
@@ -29,11 +30,11 @@ public static class RosterScreen
         var B = PanelRenderer.Bold;
         var D = PanelRenderer.Dim;
 
-        var charter = state.CharterContent ?? "No charter loaded";
+        var charter = state.CharterContent.Match(Some: s => s, None: () => "No charter loaded");
         var charterExcerpt = charter.Split('\n').Where(l => !string.IsNullOrWhiteSpace(l) && !l.StartsWith('#')).Take(3);
-        var allTasks = state.Tasks ?? [];
+        var allTasks = state.Tasks.GetOrEmpty();
         var memberTasks = allTasks.Where(t => t.Assignee == selected.Name).ToList();
-        var logs = state.LogEntries ?? [];
+        var logs = state.LogEntries.GetOrEmpty();
         var recentLogs = logs.Where(l => l.Participants.Contains(selected.Name)).Take(3).ToList();
         var hBg = ThemeManager.GetPanelHeaderBg(state.SelectedThemeIndex);
         var panelBg = ThemeManager.GetPanelBgColor(state.SelectedThemeIndex);

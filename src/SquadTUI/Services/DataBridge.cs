@@ -1,3 +1,5 @@
+using LanguageExt;
+using static LanguageExt.Prelude;
 using SquadTUI.Models;
 
 namespace SquadTUI.Services;
@@ -16,57 +18,99 @@ public class DataBridge
         return await _services.SquadData.GetDashboardAsync(ct);
     }
 
-    public async Task<IReadOnlyList<SquadMember>> LoadRosterDataAsync(CancellationToken ct = default)
+    public async Task<Either<AppError, IReadOnlyList<SquadMember>>> LoadRosterDataAsync(CancellationToken ct = default)
     {
-        var roster = await _services.Team.GetRosterAsync(ct);
-        return roster.Members ?? [];
-    }
-
-    public async Task<IReadOnlyList<SquadTask>> LoadTasksFromRosterAsync(CancellationToken ct = default)
-    {
-        var roster = await _services.Team.GetRosterAsync(ct);
-        var members = roster.Members ?? [];
-        var tasks = new List<SquadTask>();
-        var idx = 1;
-        foreach (var m in members)
+        try
         {
-            if (!string.IsNullOrEmpty(m.CurrentTask))
-            {
-                var status = m.Status switch
-                {
-                    MemberStatus.Working => SquadTaskStatus.InProgress,
-                    MemberStatus.Active => SquadTaskStatus.InProgress,
-                    MemberStatus.Idle => SquadTaskStatus.Pending,
-                    _ => SquadTaskStatus.Pending
-                };
-                tasks.Add(new SquadTask($"task-{idx}", m.CurrentTask, null, status, m.Name));
-            }
-            idx++;
+            var roster = await _services.Team.GetRosterAsync(ct);
+            return Right<AppError, IReadOnlyList<SquadMember>>(roster.Members ?? []);
         }
-        return tasks;
+        catch (Exception ex)
+        {
+            return Left<AppError, IReadOnlyList<SquadMember>>(new ServiceError("Roster", ex.Message));
+        }
     }
 
-    public async Task<IReadOnlyList<DecisionEntry>> LoadDecisionsDataAsync(CancellationToken ct = default)
+    public async Task<Either<AppError, IReadOnlyList<SquadTask>>> LoadTasksFromRosterAsync(CancellationToken ct = default)
     {
-        return await _services.Decisions.GetDecisionsAsync(ct);
+        try
+        {
+            var roster = await _services.Team.GetRosterAsync(ct);
+            var members = roster.Members ?? [];
+            var tasks = new List<SquadTask>();
+            var idx = 1;
+            foreach (var m in members)
+            {
+                if (!string.IsNullOrEmpty(m.CurrentTask))
+                {
+                    var status = m.Status switch
+                    {
+                        MemberStatus.Working => SquadTaskStatus.InProgress,
+                        MemberStatus.Active => SquadTaskStatus.InProgress,
+                        MemberStatus.Idle => SquadTaskStatus.Pending,
+                        _ => SquadTaskStatus.Pending
+                    };
+                    tasks.Add(new SquadTask($"task-{idx}", m.CurrentTask, null, status, m.Name));
+                }
+                idx++;
+            }
+            return Right<AppError, IReadOnlyList<SquadTask>>(tasks);
+        }
+        catch (Exception ex)
+        {
+            return Left<AppError, IReadOnlyList<SquadTask>>(new ServiceError("Tasks", ex.Message));
+        }
     }
 
-    public async Task<IReadOnlyList<Skill>> LoadSkillsDataAsync(CancellationToken ct = default)
+    public async Task<Either<AppError, IReadOnlyList<DecisionEntry>>> LoadDecisionsDataAsync(CancellationToken ct = default)
     {
-        return await _services.Skills.GetSkillsAsync(ct);
+        try
+        {
+            return Right<AppError, IReadOnlyList<DecisionEntry>>(await _services.Decisions.GetDecisionsAsync(ct));
+        }
+        catch (Exception ex)
+        {
+            return Left<AppError, IReadOnlyList<DecisionEntry>>(new ServiceError("Decisions", ex.Message));
+        }
     }
 
-    public async Task<IReadOnlyList<OrchestrationLogEntry>> LoadLogDataAsync(CancellationToken ct = default)
+    public async Task<Either<AppError, IReadOnlyList<Skill>>> LoadSkillsDataAsync(CancellationToken ct = default)
     {
-        return await _services.OrchestrationLog.GetEntriesAsync(ct);
+        try
+        {
+            return Right<AppError, IReadOnlyList<Skill>>(await _services.Skills.GetSkillsAsync(ct));
+        }
+        catch (Exception ex)
+        {
+            return Left<AppError, IReadOnlyList<Skill>>(new ServiceError("Skills", ex.Message));
+        }
     }
 
-    public async Task<string?> LoadCharterContentAsync(string memberName, CancellationToken ct = default)
+    public async Task<Either<AppError, IReadOnlyList<OrchestrationLogEntry>>> LoadLogDataAsync(CancellationToken ct = default)
     {
-        var member = await _services.Team.GetMemberAsync(memberName, ct);
-        if (member?.CharterPath == null || !File.Exists(member.CharterPath))
-            return null;
+        try
+        {
+            return Right<AppError, IReadOnlyList<OrchestrationLogEntry>>(await _services.OrchestrationLog.GetEntriesAsync(ct));
+        }
+        catch (Exception ex)
+        {
+            return Left<AppError, IReadOnlyList<OrchestrationLogEntry>>(new ServiceError("Log", ex.Message));
+        }
+    }
 
-        return await File.ReadAllTextAsync(member.CharterPath, ct);
+    public async Task<Option<string>> LoadCharterContentAsync(string memberName, CancellationToken ct = default)
+    {
+        try
+        {
+            var member = await _services.Team.GetMemberAsync(memberName, ct);
+            if (member?.CharterPath == null || !File.Exists(member.CharterPath))
+                return None;
+
+            return Some(await File.ReadAllTextAsync(member.CharterPath, ct));
+        }
+        catch
+        {
+            return None;
+        }
     }
 }

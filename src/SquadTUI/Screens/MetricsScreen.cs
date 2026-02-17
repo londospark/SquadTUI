@@ -1,6 +1,7 @@
 using Hex1b;
 using Hex1b.Charts;
 using Hex1b.Widgets;
+using SquadTUI.Models;
 using SquadTUI.Rendering;
 using SquadTUI.Themes;
 
@@ -17,9 +18,9 @@ public static class MetricsScreen
             state.LastRefreshTime = DateTime.Now;
         }
 
-        var sprints = state.SprintHistory ?? [];
-        var tasks = state.Tasks ?? [];
-        var members = state.Members ?? [];
+        var sprints = state.SprintHistory.GetOrEmpty();
+        var tasks = state.Tasks.GetOrEmpty();
+        var members = state.Members.GetOrEmpty();
         if (sprints.Count == 0 && tasks.Count == 0)
         {
             var D0 = PanelRenderer.Dim;

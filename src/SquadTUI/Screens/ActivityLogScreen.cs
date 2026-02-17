@@ -1,5 +1,6 @@
 using Hex1b;
 using Hex1b.Widgets;
+using SquadTUI.Models;
 using SquadTUI.Rendering;
 using SquadTUI.Themes;
 
@@ -9,7 +10,7 @@ public static class ActivityLogScreen
 {
     public static Hex1bWidget Render(WidgetContext<VStackWidget> v, AppState state, Hex1bApp app)
     {
-        var logs = state.LogEntries ?? [];
+        var logs = state.LogEntries.GetOrEmpty();
         if (logs.Count == 0)
         {
             var D0 = PanelRenderer.Dim;

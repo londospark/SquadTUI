@@ -1,5 +1,6 @@
 using Hex1b;
 using Hex1b.Widgets;
+using SquadTUI.Models;
 using SquadTUI.Rendering;
 using SquadTUI.Themes;
 
@@ -9,7 +10,7 @@ public static class SkillsScreen
 {
     public static Hex1bWidget Render(WidgetContext<VStackWidget> v, AppState state, Hex1bApp app)
     {
-        var skills = state.Skills ?? [];
+        var skills = state.Skills.GetOrEmpty();
         if (skills.Count == 0)
         {
             var D0 = PanelRenderer.Dim;
@@ -29,7 +30,7 @@ public static class SkillsScreen
         var B = PanelRenderer.Bold;
         var D = PanelRenderer.Dim;
 
-        var members = state.Members ?? [];
+        var members = state.Members.GetOrEmpty();
         var relatedMembers = GetRelatedMembers(selected.Name, members);
         var confidence = GetConfidenceLevel(selected.Name);
 
