@@ -34,7 +34,7 @@ public static class AppLayout
         var keys = state.CurrentScreen switch
         {
             Screen.Dashboard => $"  {D}Tab: Next Panel  Enter: Drill In  T: Theme  S: Settings  Q: Quit  F1: Help{R}",
-            Screen.Roster => $"  {D}j/k: Navigate  Enter: Detail  T: Theme  S: Settings  Q: Quit  F1: Help{R}",
+            Screen.Roster => $"  {D}j/k: Navigate  Enter: Detail  A: Add  D: Remove  T: Theme  S: Settings  Q: Quit  F1: Help{R}",
             Screen.MemberDetail => $"  {D}E: Edit Charter  Esc: Back  T: Theme  S: Settings  Q: Quit  F1: Help{R}",
             Screen.Decisions => $"  {D}j/k: Navigate  Esc: Back  T: Theme  S: Settings  Q: Quit  F1: Help{R}",
             Screen.Skills => $"  {D}j/k: Navigate  Esc: Back  T: Theme  S: Settings  Q: Quit  F1: Help{R}",
@@ -282,7 +282,11 @@ public static class AppLayout
         }, "Settings");
         keys.Key(Hex1bKey.Escape).Action(() =>
         {
-            if (state.CurrentScreen == Screen.MemberDetail)
+            if (state.ConfirmingRemove)
+            {
+                state.ConfirmingRemove = false;
+            }
+            else if (state.CurrentScreen == Screen.MemberDetail)
                 state.CurrentScreen = Screen.Roster;
             else if (state.CurrentScreen == Screen.Charter)
                 state.CurrentScreen = Screen.MemberDetail;
@@ -297,6 +301,57 @@ public static class AppLayout
             if (state.CurrentScreen == Screen.MemberDetail)
                 state.CurrentScreen = Screen.Charter;
         }, "Edit Charter");
+        keys.Key(Hex1bKey.A).Action(() =>
+        {
+            if (state.CurrentScreen == Screen.Roster && !state.ConfirmingRemove)
+            {
+                var members = state.Members.GetOrEmpty();
+                var newName = $"Member{members.Count + 1}";
+                var newRole = "Team Member";
+                state.AddMemberMessage = $"Adding {newName}...";
+                var bridge = new DataBridge(ServiceProvider.Instance);
+                _ = Task.Run(async () =>
+                {
+                    await bridge.AddMemberAsync(newName, newRole);
+                    state.Members = await bridge.LoadRosterDataAsync();
+                    state.Tasks = await bridge.LoadTasksFromRosterAsync();
+                    state.AddMemberMessage = null;
+                });
+            }
+        }, "Add Member");
+        keys.Key(Hex1bKey.D).Action(() =>
+        {
+            if (state.CurrentScreen == Screen.Roster && !state.ConfirmingRemove)
+            {
+                state.ConfirmingRemove = true;
+            }
+        }, "Remove Member");
+        keys.Key(Hex1bKey.Y).Action(() =>
+        {
+            if (state.ConfirmingRemove && state.CurrentScreen == Screen.Roster)
+            {
+                var members = state.Members.GetOrEmpty();
+                if (members.Count > 0)
+                {
+                    var selectedIdx = Math.Clamp(state.RosterSelectedIndex, 0, members.Count - 1);
+                    var memberName = members[selectedIdx].Name;
+                    state.ConfirmingRemove = false;
+                    var bridge = new DataBridge(ServiceProvider.Instance);
+                    _ = Task.Run(async () =>
+                    {
+                        await bridge.RemoveMemberAsync(memberName);
+                        state.Members = await bridge.LoadRosterDataAsync();
+                        state.Tasks = await bridge.LoadTasksFromRosterAsync();
+                        state.RosterSelectedIndex = Math.Max(0, state.RosterSelectedIndex - 1);
+                    });
+                }
+            }
+        }, "Confirm Remove");
+        keys.Key(Hex1bKey.N).Action(() =>
+        {
+            if (state.ConfirmingRemove)
+                state.ConfirmingRemove = false;
+        }, "Cancel Remove");
         keys.Key(Hex1bKey.J).Action(() =>
         {
             if (state.CurrentScreen == Screen.Roster)

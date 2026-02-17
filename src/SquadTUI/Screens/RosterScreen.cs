@@ -63,7 +63,7 @@ public static class RosterScreen
                     detail.Text(""),
                     detail.Text($"  {D}Role:{R}      {B}{selected.Role}{R}"),
                     detail.Text($"  {D}Status:{R}    {GetStatusBadge(selected.Status, em)} {selected.Status}{R}"),
-                    detail.Text($"  {D}Task:{R}      {selected.CurrentTask ?? $"{D}None{R}"}{R}"),
+                    detail.Text($"  {D}Task:{R}      {(memberTasks.Count > 0 ? memberTasks[0].Title : selected.CurrentTask ?? $"{D}None{R}")}{R}"),
                 };
 
                 // Tasks section
@@ -101,6 +101,22 @@ public static class RosterScreen
                     widgets.Add(detail.Text(""));
                     foreach (var l in recentLogs)
                         widgets.Add(detail.Text($"  {D}{l.Date}{R}  {l.Topic}  {D}{l.Summary}{R}"));
+                }
+
+                // Confirmation/status messages
+                if (state.ConfirmingRemove)
+                {
+                    widgets.Add(detail.Text(""));
+                    widgets.Add(detail.Text($"  {sec}{new string('━', 36)}{R}"));
+                    widgets.Add(detail.Text(""));
+                    widgets.Add(detail.Text($"  {B}\x1b[93mRemove {selected.Name}? (Y/N){R}"));
+                }
+                else if (state.AddMemberMessage != null)
+                {
+                    widgets.Add(detail.Text(""));
+                    widgets.Add(detail.Text($"  {sec}{new string('━', 36)}{R}"));
+                    widgets.Add(detail.Text(""));
+                    widgets.Add(detail.Text($"  {D}{state.AddMemberMessage}{R}"));
                 }
 
                 return widgets.ToArray();

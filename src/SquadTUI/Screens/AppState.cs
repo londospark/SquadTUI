@@ -61,6 +61,10 @@ public class AppState
     public DateTime LastRefreshTime { get; set; } = DateTime.Now;
     public bool HasPendingRefresh { get; set; }
 
+    // Add/Remove member flow
+    public bool ConfirmingRemove { get; set; }
+    public string? AddMemberMessage { get; set; }
+
     // Squad detection
     public bool SquadDetected { get; set; } = true;
     public string? SquadRootPath { get; set; }

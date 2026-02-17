@@ -21,6 +21,12 @@ public interface IFileLocationService
     /// <summary>Path to a specific agent's charter file: agents/{name}/charter.md</summary>
     string GetCharterPath(string agentName);
 
+    /// <summary>Path to a specific agent's history file: agents/{name}/history.md</summary>
+    string GetHistoryPath(string agentName);
+
+    /// <summary>Path to a specific agent's directory: agents/{name}/</summary>
+    string GetAgentDirectory(string agentName);
+
     /// <summary>Path to decisions.md file.</summary>
     string GetDecisionsFilePath();
 

@@ -41,6 +41,12 @@ public class FileLocationService : IFileLocationService
     public string GetCharterPath(string agentName) =>
         Path.Combine(SquadDirectory, "agents", agentName.ToLowerInvariant(), "charter.md");
 
+    public string GetHistoryPath(string agentName) =>
+        Path.Combine(SquadDirectory, "agents", agentName.ToLowerInvariant(), "history.md");
+
+    public string GetAgentDirectory(string agentName) =>
+        Path.Combine(SquadDirectory, "agents", agentName.ToLowerInvariant());
+
     public string GetDecisionsFilePath() =>
         Path.Combine(SquadDirectory, "decisions.md");
 
