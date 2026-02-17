@@ -3,6 +3,7 @@ using Hex1b.Widgets;
 using SquadTUI.Models;
 using SquadTUI.Rendering;
 using SquadTUI.Themes;
+using static SquadTUI.Rendering.IconHelper;
 
 namespace SquadTUI.Screens;
 
@@ -20,7 +21,8 @@ public static class DecisionsScreen
                 empty.Text($"  {D0}No decisions found. Ensure your .squad/ directory contains decision files.{R0}"),
             ]).Fill();
         }
-        var listItems = decisions.Select(d => $"  📋 {d.Date}  {d.Title}").ToList() as IReadOnlyList<string>;
+        var em = state.Settings.ShowEmoji;
+        var listItems = decisions.Select(d => $"  {Icon("📋", "▪", em)} {d.Date}  {d.Title}").ToList() as IReadOnlyList<string>;
 
         var selectedIdx = Math.Clamp(state.DecisionSelectedIndex, 0, decisions.Count - 1);
         var selected = decisions[selectedIdx];
@@ -37,7 +39,7 @@ public static class DecisionsScreen
         [
             new BackgroundPanelWidget(panelBg, h.VStack(left =>
             [
-                left.Text($"  {hBg}{B}{acc} 📋  Decisions {R}"),
+                left.Text($"  {hBg}{B}{acc} {Icon("📋", "▪", em)}  Decisions {R}"),
                 left.Text($"  {D}Team decisions and architectural choices{R}"),
                 left.Text(""),
                 left.Text($"  {sec}{new string('━', 30)}{R}"),
@@ -50,12 +52,12 @@ public static class DecisionsScreen
             new BackgroundPanelWidget(detailBg, h.VStack(detail =>
             [
                 detail.Text(""),
-                detail.Text($"  {hBg}{B}{acc} 📋  {selected.Title} {R}"),
+                detail.Text($"  {hBg}{B}{acc} {Icon("📋", "▪", em)}  {selected.Title} {R}"),
                 detail.Text(""),
                 detail.Text($"  {sec}{new string('━', 36)}{R}"),
                 detail.Text(""),
                 detail.Text($"    {D}Date:{R}      {B}{selected.Date}{R}"),
-                detail.Text($"    {D}Author:{R}    👤 {B}{selected.Author}{R}"),
+                detail.Text($"    {D}Author:{R}    {Icon("👤", "◆", em)} {B}{selected.Author}{R}"),
                 detail.Text(""),
                 detail.Text($"  {sec}{new string('━', 36)}{R}"),
                 detail.Text(""),

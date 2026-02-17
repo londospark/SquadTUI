@@ -3,6 +3,7 @@ using Hex1b.Widgets;
 using SquadTUI.Models;
 using SquadTUI.Rendering;
 using SquadTUI.Themes;
+using static SquadTUI.Rendering.IconHelper;
 
 namespace SquadTUI.Screens;
 
@@ -35,6 +36,7 @@ public static class MemberDetailScreen
         var B = PanelRenderer.Bold;
         var D = PanelRenderer.Dim;
         var panelBg = ThemeManager.GetPanelBgColor(state.SelectedThemeIndex);
+        var em = state.Settings.ShowEmoji;
 
         return new BackgroundPanelWidget(panelBg, v.VStack(inner =>
         {
@@ -42,9 +44,10 @@ public static class MemberDetailScreen
             {
                 inner.VStack(header =>
                 [
-                    header.Text($"  {B}{acc}👤 {member.Name}{R}"),
+                    header.Text($"  {B}{acc}{Icon("👤", "◆", em)} {member.Name}{R}"),
                     header.Text($"  {D}{sec}{new string('━', 44)}{R}"),
-                    header.Text($"  {GetStatusBadge(member.Status)} {B}{member.Name}{R}  {D}—{R}  {member.Role}{R}"),
+                    header.Text(""),
+                    header.Text($"  {GetStatusBadge(member.Status, em)} {B}{member.Name}{R}  {D}—{R}  {member.Role}{R}"),
                     header.Text($"  {D}Status:{R} {member.Status}    {D}Current Task:{R} {member.CurrentTask ?? $"{D}None{R}"}{R}"),
                 ]),
 
@@ -52,12 +55,15 @@ public static class MemberDetailScreen
                 {
                     var tw = new List<Hex1bWidget>
                     {
+                        taskSection.Text(""),
                         taskSection.Text($"  {D}{sec}{new string('━', 44)}{R}"),
-                        taskSection.Text($"  {B}{acc}📋 Tasks{R}"),
+                        taskSection.Text(""),
+                        taskSection.Text($"  {B}{acc}{Icon("📋", "▪", em)} Tasks{R}"),
+                        taskSection.Text(""),
                     };
                     if (memberTasks.Count > 0)
                         foreach (var t in memberTasks)
-                            tw.Add(taskSection.Text($"  {GetTaskBadge(t.Status)} {B}{t.Title}{R}  {D}{t.Description}{R}"));
+                            tw.Add(taskSection.Text($"  {GetTaskBadge(t.Status, em)} {B}{t.Title}{R}  {D}{t.Description}{R}"));
                     else
                         tw.Add(taskSection.Text($"  {D}No tasks assigned{R}"));
                     return tw.ToArray();
@@ -65,8 +71,11 @@ public static class MemberDetailScreen
 
                 inner.VStack(charterSection =>
                 [
+                    charterSection.Text(""),
                     charterSection.Text($"  {D}{sec}{new string('━', 44)}{R}"),
-                    charterSection.Text($"  {B}{acc}📜 Charter{R}"),
+                    charterSection.Text(""),
+                    charterSection.Text($"  {B}{acc}{Icon("📜", "▪", em)} Charter{R}"),
+                    charterSection.Text(""),
                     ..MarkdownRenderer.Render(charterSection, charter)
                 ]),
             };
@@ -75,8 +84,11 @@ public static class MemberDetailScreen
             {
                 widgets.Add(inner.VStack(logSection =>
                 [
+                    logSection.Text(""),
                     logSection.Text($"  {D}{sec}{new string('━', 44)}{R}"),
-                    logSection.Text($"  {B}{acc}📊 Recent Activity{R}"),
+                    logSection.Text(""),
+                    logSection.Text($"  {B}{acc}{Icon("📊", "▪", em)} Recent Activity{R}"),
+                    logSection.Text(""),
                     ..recentLogs.Select(l => logSection.Text($"  {D}{l.Date}{R}  {l.Topic}  {D}{l.Summary}{R}"))
                 ]));
             }
@@ -88,21 +100,21 @@ public static class MemberDetailScreen
         }).Fill());
     }
 
-    private static string GetStatusBadge(Models.MemberStatus status) => status switch
+    private static string GetStatusBadge(Models.MemberStatus status, bool showEmoji) => status switch
     {
-        Models.MemberStatus.Active => "✅",
-        Models.MemberStatus.Idle => "🟡",
-        Models.MemberStatus.Working => "🔵",
-        Models.MemberStatus.Offline => "⚫",
-        _ => "⚪"
+        Models.MemberStatus.Active => Icon("✅", "[+]", showEmoji),
+        Models.MemberStatus.Idle => Icon("🟡", "[~]", showEmoji),
+        Models.MemberStatus.Working => Icon("🔵", "[>]", showEmoji),
+        Models.MemberStatus.Offline => Icon("⚫", "[-]", showEmoji),
+        _ => Icon("⚪", "[ ]", showEmoji)
     };
 
-    private static string GetTaskBadge(Models.SquadTaskStatus status) => status switch
+    private static string GetTaskBadge(Models.SquadTaskStatus status, bool showEmoji) => status switch
     {
-        Models.SquadTaskStatus.InProgress => "🔄",
-        Models.SquadTaskStatus.Done => "✅",
-        Models.SquadTaskStatus.Pending => "⏳",
-        Models.SquadTaskStatus.Blocked => "🚫",
-        _ => "⚪"
+        Models.SquadTaskStatus.InProgress => Icon("🔄", ">", showEmoji),
+        Models.SquadTaskStatus.Done => Icon("✅", "+", showEmoji),
+        Models.SquadTaskStatus.Pending => Icon("⏳", "~", showEmoji),
+        Models.SquadTaskStatus.Blocked => Icon("🚫", "-", showEmoji),
+        _ => Icon("⚪", "[ ]", showEmoji)
     };
 }

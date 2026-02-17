@@ -4,6 +4,7 @@ using Hex1b.Widgets;
 using SquadTUI.Models;
 using SquadTUI.Rendering;
 using SquadTUI.Themes;
+using static SquadTUI.Rendering.IconHelper;
 
 namespace SquadTUI.Screens;
 
@@ -30,6 +31,7 @@ public static class MetricsScreen
                 empty.Text($"  {D0}No sprint data available. Ensure your .squad/ directory contains task and log data.{R0}"),
             ]).Fill();
         }
+        var em = state.Settings.ShowEmoji;
         var acc = ThemeManager.GetAccentCode(state.SelectedThemeIndex);
         var sec = ThemeManager.GetSecondaryAccent(state.SelectedThemeIndex);
         var R = PanelRenderer.Reset;
@@ -75,7 +77,7 @@ public static class MetricsScreen
             // Wide layout (≥120 cols): 3-column
             r.WhenMinWidth(120, r => r.VStack(outer =>
             [
-                outer.Text($"  {hBg}{B}{acc}📈 Sprint Metrics — {modeLabel}{R}  {D}(press V to toggle){R}"),
+                outer.Text($"  {hBg}{B}{acc}{Icon("📈", "▪", em)} Sprint Metrics — {modeLabel}{R}  {D}(press V to toggle){R}"),
                 outer.Text($"  {D}{sec}Performance overview across {sprints.Count} sprint cycles{R}"),
                 outer.Text(""),
 
@@ -100,7 +102,7 @@ public static class MetricsScreen
                     // Center: Velocity or Burndown chart
                     new BackgroundPanelWidget(detailBg, h.VStack(mid =>
                     [
-                        mid.Text($"  {B}{acc}▌{R} {B}{acc}📊 {chartTitle}{R}"),
+                        mid.Text($"  {B}{acc}▌{R} {B}{acc}{Icon("📊", "▪", em)} {chartTitle}{R}"),
                         mid.Text($"  {D}{chartSubtitle}{R}"),
                         mid.Text(""),
                         mid.BarChart(chartData).Fill(),
@@ -111,7 +113,7 @@ public static class MetricsScreen
                     {
                         var w = new List<Hex1bWidget>
                         {
-                            right.Text($"  {B}{acc}▌{R} {B}{acc}👥 Member Contributions{R}"),
+                            right.Text($"  {B}{acc}▌{R} {B}{acc}{Icon("👥", "◆", em)} Member Contributions{R}"),
                             right.Text(""),
                         };
                         foreach (var s in sprints)
@@ -119,7 +121,7 @@ public static class MetricsScreen
                             w.Add(right.Text($"  {B}{s.SprintName}{R}  {D}({s.CompletionRate}% done){R}"));
                             foreach (var c in s.Contributions.Where(c => c.TasksCompleted > 0))
                             {
-                                w.Add(right.Text($"    {D}{c.MemberName}: ✅ {c.TasksCompleted}/{c.TasksAssigned}{R}"));
+                                w.Add(right.Text($"    {D}{c.MemberName}: {Icon("✅", "+", em)} {c.TasksCompleted}/{c.TasksAssigned}{R}"));
                             }
                             w.Add(right.Text(""));
                         }
@@ -133,7 +135,7 @@ public static class MetricsScreen
             // Medium layout (≥80 cols): 2-column
             r.WhenMinWidth(80, r => r.VStack(outer =>
             [
-                outer.Text($"  {hBg}{B}{acc}📈 Sprint Metrics — {modeLabel}{R}  {D}(press V to toggle){R}"),
+                outer.Text($"  {hBg}{B}{acc}{Icon("📈", "▪", em)} Sprint Metrics — {modeLabel}{R}  {D}(press V to toggle){R}"),
                 outer.Text($"  {D}{sec}Performance overview across {sprints.Count} sprint cycles{R}"),
                 outer.Text(""),
 
@@ -158,7 +160,7 @@ public static class MetricsScreen
                     // Right: Velocity/Burndown chart
                     new BackgroundPanelWidget(detailBg, h.VStack(right =>
                     [
-                        right.Text($"  {B}{acc}▌{R} {B}{acc}📊 {chartTitle}{R}"),
+                        right.Text($"  {B}{acc}▌{R} {B}{acc}{Icon("📊", "▪", em)} {chartTitle}{R}"),
                         right.Text($"  {D}{chartSubtitle}{R}"),
                         right.Text(""),
                         right.BarChart(chartData).Fill(),
@@ -171,13 +173,13 @@ public static class MetricsScreen
             {
                 var w = new List<Hex1bWidget>
                 {
-                    col.Text($"  {hBg}{B}{acc}📈 Sprint Metrics{R}"),
+                    col.Text($"  {hBg}{B}{acc}{Icon("📈", "▪", em)} Sprint Metrics{R}"),
                     col.Text($"  {D}{modeLabel} (V to toggle){R}"),
                     col.Text(""),
                     col.Text($"  {D}Completion:{R} {B}{overallCompletionRate}%{R}  {D}Velocity:{R} {B}{averageVelocity}{R}"),
                     col.Text($"  {D}Trend:{R} {trendArrow} {B}{Math.Abs(velocityTrend)}{R}{D} tasks{R}"),
                     col.Text(""),
-                    col.Text($"  \x1b[32m✅ {done}{R}  \x1b[33m🔄 {active}{R}  {D}⏳ {pending}{R}  \x1b[31m🚫 {blocked}{R}"),
+                    col.Text($"  \x1b[32m{Icon("✅", "+", em)} {done}{R}  \x1b[33m{Icon("🔄", ">", em)} {active}{R}  {D}{Icon("⏳", "~", em)} {pending}{R}  \x1b[31m{Icon("🚫", "-", em)} {blocked}{R}"),
                     col.Text(""),
                     col.BreakdownChart(statusData)
                         .ShowPercentages(true)

@@ -3,6 +3,7 @@ using Hex1b.Widgets;
 using SquadTUI.Models;
 using SquadTUI.Rendering;
 using SquadTUI.Themes;
+using static SquadTUI.Rendering.IconHelper;
 
 namespace SquadTUI.Screens;
 
@@ -20,7 +21,8 @@ public static class ActivityLogScreen
                 empty.Text($"  {D0}No activity log entries found. Ensure your .squad/ directory contains log files.{R0}"),
             ]).Fill();
         }
-        var listItems = logs.Select(l => $"  📅 {l.Date}  {l.Topic}").ToList() as IReadOnlyList<string>;
+        var em = state.Settings.ShowEmoji;
+        var listItems = logs.Select(l => $"  {Icon("📅", "▪", em)} {l.Date}  {l.Topic}").ToList() as IReadOnlyList<string>;
 
         var selectedIdx = Math.Clamp(state.LogSelectedIndex, 0, logs.Count - 1);
         var selected = logs[selectedIdx];
@@ -38,7 +40,7 @@ public static class ActivityLogScreen
         [
             new BackgroundPanelWidget(panelBg, h.VStack(left =>
             [
-                left.Text($"  {hBg}{B}{acc} 📊  Activity Log {R}"),
+                left.Text($"  {hBg}{B}{acc} {Icon("📊", "▪", em)}  Activity Log {R}"),
                 left.Text($"  {D}Chronological record of squad interactions{R}"),
                 left.Text(""),
                 left.Text($"  {sec}{new string('━', 30)}{R}"),
@@ -53,7 +55,7 @@ public static class ActivityLogScreen
                 var widgets = new List<Hex1bWidget>
                 {
                     detail.Text(""),
-                    detail.Text($"  {hBg}{B}{acc} 📅  {selected.Topic} {R}"),
+                    detail.Text($"  {hBg}{B}{acc} {Icon("📅", "▪", em)}  {selected.Topic} {R}"),
                     detail.Text(""),
                     detail.Text($"  {sec}{new string('━', 36)}{R}"),
                     detail.Text(""),

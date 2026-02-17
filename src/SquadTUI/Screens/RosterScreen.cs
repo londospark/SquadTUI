@@ -3,6 +3,7 @@ using Hex1b.Widgets;
 using SquadTUI.Models;
 using SquadTUI.Rendering;
 using SquadTUI.Themes;
+using static SquadTUI.Rendering.IconHelper;
 
 namespace SquadTUI.Screens;
 
@@ -20,7 +21,8 @@ public static class RosterScreen
                 empty.Text($"  {D0}No members found. Ensure your .squad/ directory contains a roster.{R0}"),
             ]).Fill();
         }
-        var listItems = members.Select(m => $"  {GetStatusBadge(m.Status)} {m.Name} — {m.Role}").ToList() as IReadOnlyList<string>;
+        var em = state.Settings.ShowEmoji;
+        var listItems = members.Select(m => $"  {GetStatusBadge(m.Status, em)} {m.Name} — {m.Role}").ToList() as IReadOnlyList<string>;
 
         var selectedIdx = Math.Clamp(state.RosterSelectedIndex, 0, members.Count - 1);
         var selected = members[selectedIdx];
@@ -44,8 +46,9 @@ public static class RosterScreen
         [
             new BackgroundPanelWidget(panelBg, h.VStack(left =>
             [
-                left.Text($"  {hBg}{B}{acc}👥 Team Roster{R}"),
+                left.Text($"  {hBg}{B}{acc}{Icon("👥", "◆", em)} Team Roster{R}"),
                 left.Text($"  {sec}{new string('━', 30)}{R}"),
+                left.Text(""),
                 left.List(listItems)
                     .OnSelectionChanged(e => { state.RosterSelectedIndex = e.SelectedIndex; })
                     .Fill()
@@ -55,22 +58,24 @@ public static class RosterScreen
             {
                 var widgets = new List<Hex1bWidget>
                 {
-                    detail.Text($"  {hBg}{B}{acc}👤 {selected.Name}{R}"),
+                    detail.Text($"  {hBg}{B}{acc}{Icon("👤", "◆", em)} {selected.Name}{R}"),
                     detail.Text($"  {sec}{new string('━', 36)}{R}"),
                     detail.Text(""),
                     detail.Text($"  {D}Role:{R}      {B}{selected.Role}{R}"),
-                    detail.Text($"  {D}Status:{R}    {GetStatusBadge(selected.Status)} {selected.Status}{R}"),
+                    detail.Text($"  {D}Status:{R}    {GetStatusBadge(selected.Status, em)} {selected.Status}{R}"),
                     detail.Text($"  {D}Task:{R}      {selected.CurrentTask ?? $"{D}None{R}"}{R}"),
                 };
 
                 // Tasks section
                 widgets.Add(detail.Text(""));
                 widgets.Add(detail.Text($"  {sec}{new string('━', 36)}{R}"));
-                widgets.Add(detail.Text($"  {hBg}{B}{acc}📋 Tasks{R}"));
+                widgets.Add(detail.Text(""));
+                widgets.Add(detail.Text($"  {hBg}{B}{acc}{Icon("📋", "▪", em)} Tasks{R}"));
+                widgets.Add(detail.Text(""));
                 if (memberTasks.Count > 0)
                 {
                     foreach (var t in memberTasks)
-                        widgets.Add(detail.Text($"  {GetTaskBadge(t.Status)} {t.Title}  {D}{t.Description}{R}"));
+                        widgets.Add(detail.Text($"  {GetTaskBadge(t.Status, em)} {t.Title}  {D}{t.Description}{R}"));
                 }
                 else
                 {
@@ -80,7 +85,9 @@ public static class RosterScreen
                 // Charter excerpt
                 widgets.Add(detail.Text(""));
                 widgets.Add(detail.Text($"  {sec}{new string('━', 36)}{R}"));
-                widgets.Add(detail.Text($"  {hBg}{B}{acc}📜 Charter{R}"));
+                widgets.Add(detail.Text(""));
+                widgets.Add(detail.Text($"  {hBg}{B}{acc}{Icon("📜", "▪", em)} Charter{R}"));
+                widgets.Add(detail.Text(""));
                 foreach (var line in charterExcerpt)
                     widgets.Add(detail.Text($"  {D}{line.Trim()}{R}"));
 
@@ -89,7 +96,9 @@ public static class RosterScreen
                 {
                     widgets.Add(detail.Text(""));
                     widgets.Add(detail.Text($"  {sec}{new string('━', 36)}{R}"));
-                    widgets.Add(detail.Text($"  {hBg}{B}{acc}📊 Recent Activity{R}"));
+                    widgets.Add(detail.Text(""));
+                    widgets.Add(detail.Text($"  {hBg}{B}{acc}{Icon("📊", "▪", em)} Recent Activity{R}"));
+                    widgets.Add(detail.Text(""));
                     foreach (var l in recentLogs)
                         widgets.Add(detail.Text($"  {D}{l.Date}{R}  {l.Topic}  {D}{l.Summary}{R}"));
                 }
@@ -99,21 +108,21 @@ public static class RosterScreen
         ]).Fill();
     }
 
-    private static string GetStatusBadge(Models.MemberStatus status) => status switch
+    private static string GetStatusBadge(Models.MemberStatus status, bool showEmoji) => status switch
     {
-        Models.MemberStatus.Active => "✅",
-        Models.MemberStatus.Idle => "🟡",
-        Models.MemberStatus.Working => "🔵",
-        Models.MemberStatus.Offline => "⚫",
-        _ => "⚪"
+        Models.MemberStatus.Active => Icon("✅", "[+]", showEmoji),
+        Models.MemberStatus.Idle => Icon("🟡", "[~]", showEmoji),
+        Models.MemberStatus.Working => Icon("🔵", "[>]", showEmoji),
+        Models.MemberStatus.Offline => Icon("⚫", "[-]", showEmoji),
+        _ => Icon("⚪", "[ ]", showEmoji)
     };
 
-    private static string GetTaskBadge(Models.SquadTaskStatus status) => status switch
+    private static string GetTaskBadge(Models.SquadTaskStatus status, bool showEmoji) => status switch
     {
-        Models.SquadTaskStatus.InProgress => "🔄",
-        Models.SquadTaskStatus.Done => "✅",
-        Models.SquadTaskStatus.Pending => "⏳",
-        Models.SquadTaskStatus.Blocked => "🚫",
-        _ => "⚪"
+        Models.SquadTaskStatus.InProgress => Icon("🔄", ">", showEmoji),
+        Models.SquadTaskStatus.Done => Icon("✅", "+", showEmoji),
+        Models.SquadTaskStatus.Pending => Icon("⏳", "~", showEmoji),
+        Models.SquadTaskStatus.Blocked => Icon("🚫", "-", showEmoji),
+        _ => Icon("⚪", "[ ]", showEmoji)
     };
 }

@@ -147,6 +147,38 @@ public static class ThemeManager
         _ => Hex1bColor.FromRgb(15, 20, 28)
     };
 
+    /// <summary>Returns the accent color as an ANSI background code for themed highlights.</summary>
+    public static string GetHighlightBg(int index) => (index % ThemeNames.Length) switch
+    {
+        0 => "\x1b[48;2;088;196;220m", // Bright cyan
+        1 => "\x1b[48;2;255;199;095m", // Warm gold
+        2 => "\x1b[48;2;255;121;198m", // Hot pink
+        3 => "\x1b[48;2;255;255;255m", // BrightWhite
+        4 => "\x1b[48;2;072;199;110m", // Emerald green
+        5 => "\x1b[48;2;255;050;200m", // Neon pink
+        6 => "\x1b[48;2;100;160;255m", // Ice blue
+        7 => "\x1b[48;2;255;160;050m", // Amber
+        8 => "\x1b[48;2;000;100;180m", // Cool blue
+        9 => "\x1b[48;2;080;255;080m", // Phosphor green
+        _ => "\x1b[48;2;088;196;220m"
+    };
+
+    /// <summary>Returns a contrasting foreground ANSI code for use on the highlight background.</summary>
+    public static string GetHighlightFg(int index) => (index % ThemeNames.Length) switch
+    {
+        0 => "\x1b[38;2;013;017;023m", // Dark navy
+        1 => "\x1b[38;2;020;018;036m", // Dark indigo
+        2 => "\x1b[38;2;028;018;022m", // Dark charcoal
+        3 => "\x1b[38;2;000;000;000m", // Black
+        4 => "\x1b[38;2;014;024;018m", // Dark forest
+        5 => "\x1b[38;2;022;012;030m", // Dark purple
+        6 => "\x1b[38;2;012;015;028m", // Dark midnight
+        7 => "\x1b[38;2;030;022;016m", // Dark ember
+        8 => "\x1b[38;2;230;235;240m", // Light arctic
+        9 => "\x1b[38;2;010;014;008m", // Dark retro
+        _ => "\x1b[38;2;013;017;023m"
+    };
+
     /// <summary>Modern borderless style — borders use space chars to become invisible.</summary>
     private static Hex1bTheme WithModernBorders(Hex1bTheme theme) => theme
         .Set(BorderTheme.TopLeftCorner, " ")

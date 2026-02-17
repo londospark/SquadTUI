@@ -2,6 +2,7 @@ using Hex1b;
 using Hex1b.Widgets;
 using SquadTUI.Rendering;
 using SquadTUI.Themes;
+using static SquadTUI.Rendering.IconHelper;
 
 namespace SquadTUI.Screens;
 
@@ -15,6 +16,9 @@ public static class NoSquadScreen
         var B = PanelRenderer.Bold;
         var D = PanelRenderer.Dim;
         var panelBg = ThemeManager.GetPanelBgColor(state.SelectedThemeIndex);
+        var hlBg = ThemeManager.GetHighlightBg(state.SelectedThemeIndex);
+        var hlFg = ThemeManager.GetHighlightFg(state.SelectedThemeIndex);
+        var em = state.Settings.ShowEmoji;
 
         return v.HStack(outer =>
         [
@@ -23,8 +27,8 @@ public static class NoSquadScreen
             [
                 center.Text("").Fill(),
 
-                // Title with reverse-video highlight bar
-                center.Text($"    \x1b[7m{acc}  ☀️  Welcome to SquadTUI  {R}"),
+                // Title with themed highlight bar
+                center.Text($"    {hlBg}{hlFg}  {Icon("☀️", "▸", em)}  Welcome to SquadTUI  {R}"),
                 center.Text(""),
                 center.Text(""),
 
@@ -47,7 +51,7 @@ public static class NoSquadScreen
                 center.Text(""),
 
                 // Warning
-                center.Text($"    \x1b[93m⚠  No squad detected in this directory.{R}"),
+                center.Text($"    \x1b[93m{Icon("⚠", "!", em)}  No squad detected in this directory.{R}"),
                 center.Text(""),
                 center.Text(""),
 
