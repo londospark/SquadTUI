@@ -61,27 +61,77 @@ git push origin feature/my-awesome-feature
 
 ### 2. Creating a Release
 
+We have two approaches for creating releases:
+
+#### Option A: Automated Script (Recommended)
+
+```bash
+# Use the automated release script to handle the full git flow
+.\scripts\release.ps1 -Version "0.4.0"
+```
+
+This script automatically:
+1. Creates the release branch from develop
+2. Strips `.ai-team/` from tracking (for main guard compliance)
+3. Merges release into main with `--no-ff`
+4. Creates and pushes the release tag
+5. Merges release back into develop
+6. **Restores `.ai-team/`** on develop (critical step!)
+7. Cleans up the release branch
+
+#### Option B: Manual Process
+
+If you prefer to handle the release manually:
+
 ```bash
 # Start from develop
 git checkout develop
 git pull origin develop
 
 # Create release branch
-git checkout -b release/v0.3.0
+git checkout -b release/v0.4.0
 
 # Update version in src/SquadTUI/SquadTUI.csproj
 # Update CHANGELOG.md if present
 
 # Commit version bump
 git add .
-git commit -m "chore: bump version to 0.3.0"
+git commit -m "chore: bump version to 0.4.0"
+
+# Remove .ai-team/ from tracking (required for main guard)
+git rm --cached -r .ai-team/
+git commit -m "chore: remove .ai-team from release branch"
 
 # Push release branch (triggers automated release workflow)
-git push origin release/v0.3.0
+git push origin release/v0.4.0
 
 # After CI passes, merge to main via PR
+git checkout main
+git merge --no-ff release/v0.4.0
+git push origin main
+
 # Then merge back to develop via PR
+git checkout develop
+git merge --no-ff release/v0.4.0
+
+# ⚠️ CRITICAL: Restore .ai-team/ immediately after merging back
+git checkout HEAD~1 -- .ai-team/
+git add .ai-team/
+git commit -m "chore: restore .ai-team after release backmerge"
+git push origin develop
+
+# Clean up
+git branch -d release/v0.4.0
+git push origin --delete release/v0.4.0
 ```
+
+#### ℹ️ Why `.ai-team/` Handling is Necessary
+
+- `.ai-team/` contains runtime team state and must NOT exist on `main` or `preview` branches
+- The `squad-main-guard.yml` workflow enforces this by blocking PRs that include `.ai-team/`
+- During release, we use `git rm --cached` to remove tracking without deleting local files
+- After merging the release branch back into develop, we must **immediately restore** `.ai-team/` from the pre-merge state
+- The automated script handles this restoration automatically; the manual process requires explicit action
 
 ### 3. Hotfix Process
 
