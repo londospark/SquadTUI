@@ -100,7 +100,7 @@ public class StackNavigationTests
 
         var snapshot = terminal.CreateSnapshot();
         Assert.NotNull(snapshot);
-        Assert.True(snapshot.ContainsText("Dashboard"));
+        Assert.True(snapshot.ContainsText("SquadTUI"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
