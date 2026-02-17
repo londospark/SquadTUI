@@ -8,7 +8,7 @@ namespace SquadTUI.Tests.E2E;
 public class ThemeModalTests
 {
     [Fact]
-    public async Task PressS_OpensThemeModal()
+    public async Task PressS_OpensSettingsModal()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -22,14 +22,14 @@ public class ThemeModalTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Theme Selection"));
+        Assert.True(snapshot.ContainsText("Settings"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
     }
 
     [Fact]
-    public async Task ThemeModal_ShowsThemeList()
+    public async Task SettingsModal_ShowsSettingsList()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -44,15 +44,15 @@ public class ThemeModalTests
 
         var snapshot = terminal.CreateSnapshot();
         Assert.True(snapshot.ContainsText("Ocean"));
-        Assert.True(snapshot.ContainsText("Heist"));
-        Assert.True(snapshot.ContainsText("Sunset"));
+        Assert.True(snapshot.ContainsText("Vim Keybindings"));
+        Assert.True(snapshot.ContainsText("Emoji Display"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
     }
 
     [Fact]
-    public async Task ThemeModal_EscapeClosesModal()
+    public async Task SettingsModal_EscapeClosesModal()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -68,7 +68,7 @@ public class ThemeModalTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        Assert.False(snapshot.ContainsText("Theme Selection"));
+        Assert.False(snapshot.ContainsText("Vim Keybindings"));
         Assert.True(snapshot.ContainsText("Dashboard"));
 
         cts.Cancel();
@@ -76,7 +76,7 @@ public class ThemeModalTests
     }
 
     [Fact]
-    public async Task ThemeModal_ShowsNavigationHints()
+    public async Task SettingsModal_ShowsNavigationHints()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -91,15 +91,15 @@ public class ThemeModalTests
 
         var snapshot = terminal.CreateSnapshot();
         Assert.True(snapshot.ContainsText("Navigate"));
-        Assert.True(snapshot.ContainsText("Confirm"));
-        Assert.True(snapshot.ContainsText("Cancel"));
+        Assert.True(snapshot.ContainsText("Toggle"));
+        Assert.True(snapshot.ContainsText("Close"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
     }
 
     [Fact]
-    public async Task ThemeModal_EnterConfirmsAndCloses()
+    public async Task SettingsModal_EnterTogglesAndStaysOpen()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -115,8 +115,8 @@ public class ThemeModalTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        Assert.False(snapshot.ContainsText("Theme Selection"));
-        Assert.True(snapshot.ContainsText("Dashboard"));
+        // Settings modal stays open after toggling
+        Assert.True(snapshot.ContainsText("Settings"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

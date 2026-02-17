@@ -8,7 +8,7 @@ namespace SquadTUI.Tests.E2E;
 public class SettingsNavigationTests
 {
     [Fact]
-    public async Task PressS_OpensThemeModal()
+    public async Task PressS_OpensSettingsModal()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -22,14 +22,14 @@ public class SettingsNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Theme Selection"));
+        Assert.True(snapshot.ContainsText("Settings"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
     }
 
     [Fact]
-    public async Task EscapeFromThemeModal_ReturnsToDashboard()
+    public async Task EscapeFromSettingsModal_ReturnsToDashboard()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -52,7 +52,7 @@ public class SettingsNavigationTests
     }
 
     [Fact]
-    public async Task ThemeModal_ShowsThemeOption()
+    public async Task SettingsModal_ShowsThemeOption()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -73,7 +73,7 @@ public class SettingsNavigationTests
     }
 
     [Fact]
-    public async Task ThemeModal_ShowsAllThemeNames()
+    public async Task SettingsModal_ShowsAllSettings()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -87,14 +87,14 @@ public class SettingsNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Heist"));
+        Assert.True(snapshot.ContainsText("Vim Keybindings"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
     }
 
     [Fact]
-    public async Task ThemeModal_ShowsNavigationHints()
+    public async Task SettingsModal_ShowsNavigationHints()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -115,7 +115,7 @@ public class SettingsNavigationTests
     }
 
     [Fact]
-    public async Task ThemeModal_ShowsConfirmCancel()
+    public async Task SettingsModal_ShowsToggleClose()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -129,15 +129,15 @@ public class SettingsNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Confirm"));
-        Assert.True(snapshot.ContainsText("Cancel"));
+        Assert.True(snapshot.ContainsText("Toggle"));
+        Assert.True(snapshot.ContainsText("Close"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
     }
 
     [Fact]
-    public async Task ThemeModal_At80Cols_ShowsThemeContent()
+    public async Task SettingsModal_At80Cols_ShowsContent()
     {
         await using var terminal = TestAppBuilder.Build(width: 80, height: 30);
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -151,7 +151,7 @@ public class SettingsNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Theme Selection"));
+        Assert.True(snapshot.ContainsText("Settings"));
         Assert.True(snapshot.ContainsText("Ocean"));
 
         cts.Cancel();
@@ -159,7 +159,7 @@ public class SettingsNavigationTests
     }
 
     [Fact]
-    public async Task ThemeModal_At60Cols_ShowsThemeContent()
+    public async Task SettingsModal_At60Cols_ShowsContent()
     {
         await using var terminal = TestAppBuilder.Build(width: 60, height: 30);
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -173,7 +173,7 @@ public class SettingsNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Theme Selection"));
+        Assert.True(snapshot.ContainsText("Settings"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
