@@ -1,10 +1,9 @@
 using LanguageExt;
 using static LanguageExt.Prelude;
-using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 using SquadTUI.Models;
 using SquadTUI.Screens;
 using SquadTUI.Services;
+using SquadTUI.Tests.Stubs;
 using SquadTUI.Themes;
 
 namespace SquadTUI.Tests;
@@ -19,23 +18,12 @@ public class IntegrationTests
     [Fact]
     public async Task DataBridge_AllLoads_ReturnLeft_WhenAllServicesThrow()
     {
-        var teamService = Substitute.For<ITeamService>();
-        teamService.GetRosterAsync(Arg.Any<CancellationToken>())
-            .ThrowsAsync(new Exception("team fail"));
+        var teamService = new StubTeamService { RosterException = new Exception("team fail") };
+        var decisionService = new StubDecisionService { Exception = new Exception("decision fail") };
+        var skillService = new StubSkillService { Exception = new Exception("skill fail") };
+        var logService = new StubOrchestrationLogService { Exception = new Exception("log fail") };
 
-        var decisionService = Substitute.For<IDecisionService>();
-        decisionService.GetDecisionsAsync(Arg.Any<CancellationToken>())
-            .ThrowsAsync(new Exception("decision fail"));
-
-        var skillService = Substitute.For<ISkillService>();
-        skillService.GetSkillsAsync(Arg.Any<CancellationToken>())
-            .ThrowsAsync(new Exception("skill fail"));
-
-        var logService = Substitute.For<IOrchestrationLogService>();
-        logService.GetEntriesAsync(Arg.Any<CancellationToken>())
-            .ThrowsAsync(new Exception("log fail"));
-
-        var sp = CreateServiceProvider(teamService, decisionService, skillService, logService);
+        var sp = StubServiceProviderFactory.Create(teamService, decisionService, skillService, logService);
         var bridge = new DataBridge(sp);
 
         var roster = await bridge.LoadRosterDataAsync();
@@ -54,15 +42,13 @@ public class IntegrationTests
     [Fact]
     public async Task DataBridge_PartialFailure_OtherDataStillAvailable()
     {
-        var teamService = Substitute.For<ITeamService>();
-        teamService.GetRosterAsync(Arg.Any<CancellationToken>())
-            .ThrowsAsync(new Exception("team fail"));
+        var teamService = new StubTeamService { RosterException = new Exception("team fail") };
+        var decisionService = new StubDecisionService
+        {
+            Result = new List<DecisionEntry> { new("Decision1", "2026-03-01", "Alice", "Details") }
+        };
 
-        var decisionService = Substitute.For<IDecisionService>();
-        decisionService.GetDecisionsAsync(Arg.Any<CancellationToken>())
-            .Returns(new List<DecisionEntry> { new("Decision1", "2026-03-01", "Alice", "Details") });
-
-        var sp = CreateServiceProvider(teamService: teamService, decisionService: decisionService);
+        var sp = StubServiceProviderFactory.Create(team: teamService, decisions: decisionService);
         var bridge = new DataBridge(sp);
 
         var roster = await bridge.LoadRosterDataAsync();
@@ -76,11 +62,8 @@ public class IntegrationTests
     [Fact]
     public async Task DataBridge_CharterContent_ReturnsNone_WhenMemberNotFound()
     {
-        var teamService = Substitute.For<ITeamService>();
-        teamService.GetMemberAsync("nobody", Arg.Any<CancellationToken>())
-            .Returns((SquadMember?)null);
-
-        var sp = CreateServiceProvider(teamService: teamService);
+        var teamService = new StubTeamService { MemberResult = null };
+        var sp = StubServiceProviderFactory.Create(team: teamService);
         var bridge = new DataBridge(sp);
 
         var result = await bridge.LoadCharterContentAsync("nobody");
@@ -90,11 +73,8 @@ public class IntegrationTests
     [Fact]
     public async Task DataBridge_CharterContent_ReturnsNone_WhenServiceThrows()
     {
-        var teamService = Substitute.For<ITeamService>();
-        teamService.GetMemberAsync("crash", Arg.Any<CancellationToken>())
-            .ThrowsAsync(new Exception("crash"));
-
-        var sp = CreateServiceProvider(teamService: teamService);
+        var teamService = new StubTeamService { MemberException = new Exception("crash") };
+        var sp = StubServiceProviderFactory.Create(team: teamService);
         var bridge = new DataBridge(sp);
 
         var result = await bridge.LoadCharterContentAsync("crash");
@@ -104,11 +84,11 @@ public class IntegrationTests
     [Fact]
     public async Task DataBridge_LoadRoster_EmptyRoster_ReturnsRightEmptyList()
     {
-        var teamService = Substitute.For<ITeamService>();
-        teamService.GetRosterAsync(Arg.Any<CancellationToken>())
-            .Returns(new TeamRoster("Empty", Members: new List<SquadMember>()));
-
-        var sp = CreateServiceProvider(teamService: teamService);
+        var teamService = new StubTeamService
+        {
+            RosterResult = new TeamRoster("Empty", Members: new List<SquadMember>())
+        };
+        var sp = StubServiceProviderFactory.Create(team: teamService);
         var bridge = new DataBridge(sp);
 
         var result = await bridge.LoadRosterDataAsync();
@@ -119,11 +99,11 @@ public class IntegrationTests
     [Fact]
     public async Task DataBridge_LoadRoster_NullMembers_ReturnsRightEmptyList()
     {
-        var teamService = Substitute.For<ITeamService>();
-        teamService.GetRosterAsync(Arg.Any<CancellationToken>())
-            .Returns(new TeamRoster("NullMembers"));
-
-        var sp = CreateServiceProvider(teamService: teamService);
+        var teamService = new StubTeamService
+        {
+            RosterResult = new TeamRoster("NullMembers")
+        };
+        var sp = StubServiceProviderFactory.Create(team: teamService);
         var bridge = new DataBridge(sp);
 
         var result = await bridge.LoadRosterDataAsync();
@@ -286,22 +266,4 @@ public class IntegrationTests
 
     #endregion
 
-    #region Helpers
-
-    private static ServiceProvider CreateServiceProvider(
-        ITeamService? teamService = null,
-        IDecisionService? decisionService = null,
-        ISkillService? skillService = null,
-        IOrchestrationLogService? logService = null)
-    {
-        teamService ??= Substitute.For<ITeamService>();
-        decisionService ??= Substitute.For<IDecisionService>();
-        skillService ??= Substitute.For<ISkillService>();
-        logService ??= Substitute.For<IOrchestrationLogService>();
-
-        var squadData = Substitute.For<ISquadDataProvider>();
-        return new ServiceProvider(squadData, teamService, decisionService, skillService, logService);
-    }
-
-    #endregion
 }

@@ -67,8 +67,8 @@ public class SampleDataLeakTests
     {
         var state = CreateStateWithRealData();
         var assignees = state.Tasks.GetOrEmpty()
-            .Where(t => t.Assignee != null)
-            .Select(t => t.Assignee!)
+            .Where(t => t.Assignee.IsSome)
+            .Select(t => t.Assignee.IfNone(""))
             .ToList();
 
         foreach (var sampleName in SampleDataNames)

@@ -1,10 +1,12 @@
+using LanguageExt;
+
 namespace SquadTUI.Models;
 
 public record Skill(
     string Name,
     string Description,
-    string? Source = null,
-    string? Confidence = null,
-    string? Content = null,
-    string? Slug = null
+    Option<string> Source = default,
+    string Confidence = "medium",
+    Option<string> Content = default,
+    Option<string> Slug = default
 );

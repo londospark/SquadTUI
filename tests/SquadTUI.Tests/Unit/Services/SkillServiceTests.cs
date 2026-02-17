@@ -1,3 +1,5 @@
+using LanguageExt;
+using static LanguageExt.Prelude;
 using SquadTUI.Services;
 
 namespace SquadTUI.Tests.Unit.Services;
@@ -49,9 +51,9 @@ public class SkillServiceTests : IDisposable
         var skill = skills.First();
         Assert.Equal("Test Skill", skill.Name);
         Assert.Equal("A test skill", skill.Description);
-        Assert.Equal("manual", skill.Source);
+        Assert.Equal(Some("manual"), skill.Source);
         Assert.Equal("high", skill.Confidence);
-        Assert.Equal("test-skill", skill.Slug);
+        Assert.Equal(Some("test-skill"), skill.Slug);
     }
 
     [Fact]
@@ -127,7 +129,7 @@ public class SkillServiceTests : IDisposable
 
         Assert.NotNull(skill);
         Assert.Equal("Code Review", skill!.Name);
-        Assert.Equal("code-review", skill.Slug);
+        Assert.Equal(Some("code-review"), skill.Slug);
     }
 
     [Fact]
@@ -148,8 +150,8 @@ public class SkillServiceTests : IDisposable
         var svc = new SkillService(SquadDir);
         var skills = await svc.GetSkillsAsync();
 
-        Assert.Contains("Body content line 1.", skills.First().Content);
-        Assert.Contains("Body content line 2.", skills.First().Content);
+        Assert.Contains("Body content line 1.", skills.First().Content.IfNone(""));
+        Assert.Contains("Body content line 2.", skills.First().Content.IfNone(""));
     }
 
     [Fact]

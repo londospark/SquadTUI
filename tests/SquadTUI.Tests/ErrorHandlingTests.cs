@@ -1,10 +1,9 @@
 using LanguageExt;
 using static LanguageExt.Prelude;
-using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 using SquadTUI.Models;
 using SquadTUI.Screens;
 using SquadTUI.Services;
+using SquadTUI.Tests.Stubs;
 
 namespace SquadTUI.Tests;
 
@@ -147,11 +146,8 @@ public class ErrorHandlingTests
     [Fact]
     public async Task DataBridge_LoadRoster_ReturnsLeft_WhenServiceThrows()
     {
-        var teamService = Substitute.For<ITeamService>();
-        teamService.GetRosterAsync(Arg.Any<CancellationToken>())
-            .ThrowsAsync(new InvalidOperationException("disk error"));
-
-        var sp = CreateServiceProvider(teamService: teamService);
+        var teamService = new StubTeamService { RosterException = new InvalidOperationException("disk error") };
+        var sp = StubServiceProviderFactory.Create(team: teamService);
         var bridge = new DataBridge(sp);
 
         var result = await bridge.LoadRosterDataAsync();
@@ -168,14 +164,14 @@ public class ErrorHandlingTests
     [Fact]
     public async Task DataBridge_LoadRoster_ReturnsRight_OnSuccess()
     {
-        var teamService = Substitute.For<ITeamService>();
-        teamService.GetRosterAsync(Arg.Any<CancellationToken>())
-            .Returns(new TeamRoster("TestProject", Members: new List<SquadMember>
+        var teamService = new StubTeamService
+        {
+            RosterResult = new TeamRoster("TestProject", Members: new List<SquadMember>
             {
                 new("Alice", "Dev", MemberStatus.Active),
-            }));
-
-        var sp = CreateServiceProvider(teamService: teamService);
+            })
+        };
+        var sp = StubServiceProviderFactory.Create(team: teamService);
         var bridge = new DataBridge(sp);
 
         var result = await bridge.LoadRosterDataAsync();
@@ -188,11 +184,8 @@ public class ErrorHandlingTests
     [Fact]
     public async Task DataBridge_LoadDecisions_ReturnsLeft_WhenServiceThrows()
     {
-        var decisionService = Substitute.For<IDecisionService>();
-        decisionService.GetDecisionsAsync(Arg.Any<CancellationToken>())
-            .ThrowsAsync(new IOException("file locked"));
-
-        var sp = CreateServiceProvider(decisionService: decisionService);
+        var decisionService = new StubDecisionService { Exception = new IOException("file locked") };
+        var sp = StubServiceProviderFactory.Create(decisions: decisionService);
         var bridge = new DataBridge(sp);
 
         var result = await bridge.LoadDecisionsDataAsync();
@@ -202,14 +195,11 @@ public class ErrorHandlingTests
     [Fact]
     public async Task DataBridge_LoadDecisions_ReturnsRight_OnSuccess()
     {
-        var decisionService = Substitute.For<IDecisionService>();
-        decisionService.GetDecisionsAsync(Arg.Any<CancellationToken>())
-            .Returns(new List<DecisionEntry>
-            {
-                new("Use REST", "2026-03-01", "Alice", "REST chosen"),
-            });
-
-        var sp = CreateServiceProvider(decisionService: decisionService);
+        var decisionService = new StubDecisionService
+        {
+            Result = new List<DecisionEntry> { new("Use REST", "2026-03-01", "Alice", "REST chosen") }
+        };
+        var sp = StubServiceProviderFactory.Create(decisions: decisionService);
         var bridge = new DataBridge(sp);
 
         var result = await bridge.LoadDecisionsDataAsync();
@@ -220,11 +210,8 @@ public class ErrorHandlingTests
     [Fact]
     public async Task DataBridge_LoadSkills_ReturnsLeft_WhenServiceThrows()
     {
-        var skillService = Substitute.For<ISkillService>();
-        skillService.GetSkillsAsync(Arg.Any<CancellationToken>())
-            .ThrowsAsync(new Exception("parse error"));
-
-        var sp = CreateServiceProvider(skillService: skillService);
+        var skillService = new StubSkillService { Exception = new Exception("parse error") };
+        var sp = StubServiceProviderFactory.Create(skills: skillService);
         var bridge = new DataBridge(sp);
 
         var result = await bridge.LoadSkillsDataAsync();
@@ -234,11 +221,8 @@ public class ErrorHandlingTests
     [Fact]
     public async Task DataBridge_LoadLog_ReturnsLeft_WhenServiceThrows()
     {
-        var logService = Substitute.For<IOrchestrationLogService>();
-        logService.GetEntriesAsync(Arg.Any<CancellationToken>())
-            .ThrowsAsync(new Exception("log error"));
-
-        var sp = CreateServiceProvider(logService: logService);
+        var logService = new StubOrchestrationLogService { Exception = new Exception("log error") };
+        var sp = StubServiceProviderFactory.Create(log: logService);
         var bridge = new DataBridge(sp);
 
         var result = await bridge.LoadLogDataAsync();
@@ -248,11 +232,8 @@ public class ErrorHandlingTests
     [Fact]
     public async Task DataBridge_LoadTasks_ReturnsLeft_WhenServiceThrows()
     {
-        var teamService = Substitute.For<ITeamService>();
-        teamService.GetRosterAsync(Arg.Any<CancellationToken>())
-            .ThrowsAsync(new Exception("roster unavailable"));
-
-        var sp = CreateServiceProvider(teamService: teamService);
+        var teamService = new StubTeamService { RosterException = new Exception("roster unavailable") };
+        var sp = StubServiceProviderFactory.Create(team: teamService);
         var bridge = new DataBridge(sp);
 
         var result = await bridge.LoadTasksFromRosterAsync();
@@ -262,18 +243,19 @@ public class ErrorHandlingTests
     [Fact]
     public async Task DataBridge_LoadTasks_MapsStatusCorrectly()
     {
-        var teamService = Substitute.For<ITeamService>();
-        teamService.GetRosterAsync(Arg.Any<CancellationToken>())
-            .Returns(new TeamRoster("Test", Members: new List<SquadMember>
+        var teamService = new StubTeamService
+        {
+            RosterResult = new TeamRoster("Test", Members: new List<SquadMember>
             {
                 new("A", "Dev", MemberStatus.Working, "task-working"),
                 new("B", "Dev", MemberStatus.Active, "task-active"),
                 new("C", "Dev", MemberStatus.Idle, "task-idle"),
                 new("D", "Dev", MemberStatus.Offline, "task-offline"),
                 new("E", "Dev", MemberStatus.Active), // no current task — should be skipped
-            }));
-
-        var sp = CreateServiceProvider(teamService: teamService);
+            }),
+            CurrentTasksResult = new Dictionary<string, string>()
+        };
+        var sp = StubServiceProviderFactory.Create(team: teamService);
         var bridge = new DataBridge(sp);
 
         var result = await bridge.LoadTasksFromRosterAsync();
@@ -349,22 +331,4 @@ public class ErrorHandlingTests
 
     #endregion
 
-    #region Helpers
-
-    private static ServiceProvider CreateServiceProvider(
-        ITeamService? teamService = null,
-        IDecisionService? decisionService = null,
-        ISkillService? skillService = null,
-        IOrchestrationLogService? logService = null)
-    {
-        teamService ??= Substitute.For<ITeamService>();
-        decisionService ??= Substitute.For<IDecisionService>();
-        skillService ??= Substitute.For<ISkillService>();
-        logService ??= Substitute.For<IOrchestrationLogService>();
-
-        var squadData = Substitute.For<ISquadDataProvider>();
-        return new ServiceProvider(squadData, teamService, decisionService, skillService, logService);
-    }
-
-    #endregion
 }

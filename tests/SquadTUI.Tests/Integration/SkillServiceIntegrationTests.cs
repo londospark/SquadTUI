@@ -1,3 +1,5 @@
+using LanguageExt;
+using static LanguageExt.Prelude;
 using SquadTUI.Services;
 
 namespace SquadTUI.Tests.Integration;
@@ -25,9 +27,9 @@ public class SkillServiceIntegrationTests
         var skill = skills.First();
         Assert.Equal("test-skill", skill.Name);
         Assert.Equal("A skill for testing purposes", skill.Description);
-        Assert.Equal("manual", skill.Source);
+        Assert.Equal(Some("manual"), skill.Source);
         Assert.Equal("high", skill.Confidence);
-        Assert.Equal("test-skill", skill.Slug);
+        Assert.Equal(Some("test-skill"), skill.Slug);
     }
 
     [Fact]
@@ -36,7 +38,7 @@ public class SkillServiceIntegrationTests
         var svc = new SkillService(GetFixturesPath());
         var skills = await svc.GetSkillsAsync();
 
-        Assert.Contains("integration tests", skills.First().Content);
+        Assert.Contains("integration tests", skills.First().Content.IfNone(""));
     }
 
     [Fact]

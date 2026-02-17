@@ -1,3 +1,4 @@
+using LanguageExt;
 using SquadTUI.Models;
 using SquadTUI.Services;
 
@@ -69,8 +70,8 @@ public class TeamServiceIntegrationTests
         var roster = await svc.GetRosterAsync();
 
         var danny = roster.Members!.First(m => m.Name == "Danny");
-        Assert.NotNull(danny.CharterPath);
-        Assert.True(File.Exists(danny.CharterPath));
+        Assert.True(danny.CharterPath.IsSome);
+        danny.CharterPath.IfSome(p => Assert.True(File.Exists(p)));
     }
 
     [Fact]

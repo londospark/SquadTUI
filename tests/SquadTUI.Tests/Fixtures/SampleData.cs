@@ -1,3 +1,5 @@
+using LanguageExt;
+using static LanguageExt.Prelude;
 using SquadTUI.Models;
 
 namespace SquadTUI.Tests.Fixtures;
@@ -6,11 +8,11 @@ public static class SampleData
 {
     public static readonly IReadOnlyList<SquadMember> Members =
     [
-        new("Sonic", "Lead", MemberStatus.Active, "Architecture planning"),
-        new("Tails", "Frontend/TUI Dev", MemberStatus.Active, "Building TUI screens"),
-        new("Knuckles", "Backend Dev", MemberStatus.Active, "Service implementations"),
-        new("Amy", "Tester", MemberStatus.Active, "Writing test suite"),
-        new("Shadow", "UX/Design", MemberStatus.Active, "Navigation design"),
+        new("Sonic", "Lead", MemberStatus.Active, Some("Architecture planning")),
+        new("Tails", "Frontend/TUI Dev", MemberStatus.Active, Some("Building TUI screens")),
+        new("Knuckles", "Backend Dev", MemberStatus.Active, Some("Service implementations")),
+        new("Amy", "Tester", MemberStatus.Active, Some("Writing test suite")),
+        new("Shadow", "UX/Design", MemberStatus.Active, Some("Navigation design")),
         new("Eggman", "Eggman", MemberStatus.Idle),
     ];
 
@@ -56,11 +58,11 @@ public static class SampleData
 
     public static readonly IReadOnlyList<SquadTask> Tasks =
     [
-        new("task-1", "Build TUI screens", "Create all screen components", SquadTaskStatus.InProgress, "Tails"),
-        new("task-2", "Implement services", "Build data provider services", SquadTaskStatus.InProgress, "Knuckles"),
-        new("task-3", "Write test suite", "Automated tests for all components", SquadTaskStatus.Pending, "Amy"),
-        new("task-4", "UX review", "Review navigation flow", SquadTaskStatus.Done, "Shadow"),
-        new("task-5", "Architecture doc", "Document system architecture", SquadTaskStatus.Done, "Sonic"),
+        new("task-1", "Build TUI screens", Some("Create all screen components"), SquadTaskStatus.InProgress, Some("Tails")),
+        new("task-2", "Implement services", Some("Build data provider services"), SquadTaskStatus.InProgress, Some("Knuckles")),
+        new("task-3", "Write test suite", Some("Automated tests for all components"), SquadTaskStatus.Pending, Some("Amy")),
+        new("task-4", "UX review", Some("Review navigation flow"), SquadTaskStatus.Done, Some("Shadow")),
+        new("task-5", "Architecture doc", Some("Document system architecture"), SquadTaskStatus.Done, Some("Sonic")),
     ];
 
     // --- Sprint velocity history (3 sprints, Sonic themed) ---

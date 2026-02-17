@@ -1,11 +1,13 @@
+using LanguageExt;
+
 namespace SquadTUI.Models;
 
 public record SquadTask(
     string Id,
     string Title,
-    string? Description = null,
+    Option<string> Description = default,
     SquadTaskStatus Status = SquadTaskStatus.Pending,
-    string? Assignee = null,
+    Option<string> Assignee = default,
     DateTimeOffset? StartedAt = null,
     DateTimeOffset? CompletedAt = null
 );

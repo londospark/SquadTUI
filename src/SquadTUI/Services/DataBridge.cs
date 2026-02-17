@@ -41,12 +41,10 @@ public class DataBridge
             var idx = 1;
             foreach (var m in members)
             {
-                var taskTitle = m.CurrentTask;
-
-                // Try to get task from agent history/inbox if not set on member
-                var resolvedTitle = taskTitle.Match(
-                    Some: t => t,
-                    None: () => currentTasks.TryGetValue(m.Name, out var fromHistory) ? fromHistory : null);
+                // Resolve task title: prefer member's current task, fall back to history
+                string? resolvedTitle = m.CurrentTask.IsSome
+                    ? (string)m.CurrentTask
+                    : currentTasks.TryGetValue(m.Name, out var fromHistory) ? fromHistory : null;
 
                 if (!string.IsNullOrEmpty(resolvedTitle))
                 {
