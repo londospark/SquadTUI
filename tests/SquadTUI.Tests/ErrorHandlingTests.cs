@@ -1,4 +1,3 @@
-using FluentAssertions;
 using LanguageExt;
 using static LanguageExt.Prelude;
 using NSubstitute;
@@ -20,36 +19,36 @@ public class ErrorHandlingTests
     public void FileNotFoundError_HasCorrectMessage()
     {
         var err = new FileNotFoundError("/path/to/file");
-        err.Message.Should().Contain("/path/to/file");
-        err.Path.Should().Be("/path/to/file");
+        Assert.Contains("/path/to/file", err.Message);
+        Assert.Equal("/path/to/file", err.Path);
     }
 
     [Fact]
     public void ParseError_HasCorrectMessage()
     {
         var err = new ParseError("roster.yaml", "invalid yaml");
-        err.Message.Should().Contain("roster.yaml");
-        err.Message.Should().Contain("invalid yaml");
-        err.File.Should().Be("roster.yaml");
-        err.Details.Should().Be("invalid yaml");
+        Assert.Contains("roster.yaml", err.Message);
+        Assert.Contains("invalid yaml", err.Message);
+        Assert.Equal("roster.yaml", err.File);
+        Assert.Equal("invalid yaml", err.Details);
     }
 
     [Fact]
     public void ServiceError_HasCorrectMessage()
     {
         var err = new ServiceError("TeamService", "connection timeout");
-        err.Message.Should().Contain("TeamService");
-        err.Message.Should().Contain("connection timeout");
-        err.Service.Should().Be("TeamService");
-        err.Details.Should().Be("connection timeout");
+        Assert.Contains("TeamService", err.Message);
+        Assert.Contains("connection timeout", err.Message);
+        Assert.Equal("TeamService", err.Service);
+        Assert.Equal("connection timeout", err.Details);
     }
 
     [Fact]
     public void NoDataError_HasCorrectMessage()
     {
         var err = new NoDataError("members");
-        err.Message.Should().Contain("members");
-        err.DataType.Should().Be("members");
+        Assert.Contains("members", err.Message);
+        Assert.Equal("members", err.DataType);
     }
 
     [Fact]
@@ -63,7 +62,7 @@ public class ErrorHandlingTests
             new NoDataError("t"),
         ];
         foreach (var e in errors)
-            e.Should().BeAssignableTo<AppError>();
+            Assert.IsAssignableFrom<AppError>(e);
     }
 
     #endregion
@@ -81,8 +80,8 @@ public class ErrorHandlingTests
             Right<AppError, IReadOnlyList<SquadMember>>(members);
 
         var result = either.GetOrEmpty();
-        result.Should().HaveCount(1);
-        result[0].Name.Should().Be("Alice");
+        Assert.Equal(1, result.Count);
+        Assert.Equal("Alice", result[0].Name);
     }
 
     [Fact]
@@ -92,7 +91,7 @@ public class ErrorHandlingTests
             Left<AppError, IReadOnlyList<SquadMember>>(new ServiceError("Test", "fail"));
 
         var result = either.GetOrEmpty();
-        result.Should().BeEmpty();
+        Assert.Empty(result);
     }
 
     [Fact]
@@ -101,7 +100,7 @@ public class ErrorHandlingTests
         Either<AppError, IReadOnlyList<DecisionEntry>> either =
             Left<AppError, IReadOnlyList<DecisionEntry>>(new NoDataError("decisions"));
 
-        either.GetOrEmpty().Should().BeEmpty();
+        Assert.Empty(either.GetOrEmpty());
     }
 
     [Fact]
@@ -111,7 +110,7 @@ public class ErrorHandlingTests
         Either<AppError, IReadOnlyList<Skill>> either =
             Right<AppError, IReadOnlyList<Skill>>(skills);
 
-        either.GetOrEmpty().Should().HaveCount(1);
+        Assert.Equal(1, either.GetOrEmpty().Count);
     }
 
     [Fact]
@@ -120,7 +119,7 @@ public class ErrorHandlingTests
         Either<AppError, IReadOnlyList<SquadTask>> either =
             Left<AppError, IReadOnlyList<SquadTask>>(new FileNotFoundError("tasks.yaml"));
 
-        either.GetOrEmpty().Should().BeEmpty();
+        Assert.Empty(either.GetOrEmpty());
     }
 
     [Fact]
@@ -129,7 +128,7 @@ public class ErrorHandlingTests
         Either<AppError, IReadOnlyList<OrchestrationLogEntry>> either =
             Left<AppError, IReadOnlyList<OrchestrationLogEntry>>(new ParseError("log.md", "bad format"));
 
-        either.GetOrEmpty().Should().BeEmpty();
+        Assert.Empty(either.GetOrEmpty());
     }
 
     [Fact]
@@ -138,7 +137,7 @@ public class ErrorHandlingTests
         Either<AppError, IReadOnlyList<SprintMetrics>> either =
             Left<AppError, IReadOnlyList<SprintMetrics>>(new NoDataError("sprints"));
 
-        either.GetOrEmpty().Should().BeEmpty();
+        Assert.Empty(either.GetOrEmpty());
     }
 
     #endregion
@@ -156,13 +155,13 @@ public class ErrorHandlingTests
         var bridge = new DataBridge(sp);
 
         var result = await bridge.LoadRosterDataAsync();
-        result.IsLeft.Should().BeTrue("DataBridge should return Left on service exception");
+        Assert.True(result.IsLeft);
         result.Match(
             Right: _ => throw new Exception("Should be Left"),
             Left: err =>
             {
-                err.Should().BeOfType<ServiceError>();
-                err.Message.Should().Contain("disk error");
+                Assert.IsType<ServiceError>(err);
+                Assert.Contains("disk error", err.Message);
             });
     }
 
@@ -180,10 +179,10 @@ public class ErrorHandlingTests
         var bridge = new DataBridge(sp);
 
         var result = await bridge.LoadRosterDataAsync();
-        result.IsRight.Should().BeTrue();
+        Assert.True(result.IsRight);
         var data = result.GetOrEmpty();
-        data.Should().HaveCount(1);
-        data[0].Name.Should().Be("Alice");
+        Assert.Equal(1, data.Count);
+        Assert.Equal("Alice", data[0].Name);
     }
 
     [Fact]
@@ -197,7 +196,7 @@ public class ErrorHandlingTests
         var bridge = new DataBridge(sp);
 
         var result = await bridge.LoadDecisionsDataAsync();
-        result.IsLeft.Should().BeTrue();
+        Assert.True(result.IsLeft);
     }
 
     [Fact]
@@ -214,8 +213,8 @@ public class ErrorHandlingTests
         var bridge = new DataBridge(sp);
 
         var result = await bridge.LoadDecisionsDataAsync();
-        result.IsRight.Should().BeTrue();
-        result.GetOrEmpty().Should().HaveCount(1);
+        Assert.True(result.IsRight);
+        Assert.Equal(1, result.GetOrEmpty().Count);
     }
 
     [Fact]
@@ -229,7 +228,7 @@ public class ErrorHandlingTests
         var bridge = new DataBridge(sp);
 
         var result = await bridge.LoadSkillsDataAsync();
-        result.IsLeft.Should().BeTrue();
+        Assert.True(result.IsLeft);
     }
 
     [Fact]
@@ -243,7 +242,7 @@ public class ErrorHandlingTests
         var bridge = new DataBridge(sp);
 
         var result = await bridge.LoadLogDataAsync();
-        result.IsLeft.Should().BeTrue();
+        Assert.True(result.IsLeft);
     }
 
     [Fact]
@@ -257,7 +256,7 @@ public class ErrorHandlingTests
         var bridge = new DataBridge(sp);
 
         var result = await bridge.LoadTasksFromRosterAsync();
-        result.IsLeft.Should().BeTrue();
+        Assert.True(result.IsLeft);
     }
 
     [Fact]
@@ -278,14 +277,14 @@ public class ErrorHandlingTests
         var bridge = new DataBridge(sp);
 
         var result = await bridge.LoadTasksFromRosterAsync();
-        result.IsRight.Should().BeTrue();
+        Assert.True(result.IsRight);
         var tasks = result.GetOrEmpty();
-        tasks.Should().HaveCount(4, "member E has no CurrentTask and should be skipped");
+        Assert.Equal(4, tasks.Count);
 
-        tasks[0].Status.Should().Be(SquadTaskStatus.InProgress, "Working → InProgress");
-        tasks[1].Status.Should().Be(SquadTaskStatus.InProgress, "Active → InProgress");
-        tasks[2].Status.Should().Be(SquadTaskStatus.Pending, "Idle → Pending");
-        tasks[3].Status.Should().Be(SquadTaskStatus.Pending, "Offline → Pending");
+        Assert.Equal(SquadTaskStatus.InProgress, tasks[0].Status);
+        Assert.Equal(SquadTaskStatus.InProgress, tasks[1].Status);
+        Assert.Equal(SquadTaskStatus.Pending, tasks[2].Status);
+        Assert.Equal(SquadTaskStatus.Pending, tasks[3].Status);
     }
 
     #endregion
@@ -299,7 +298,7 @@ public class ErrorHandlingTests
         {
             Members = Left<AppError, IReadOnlyList<SquadMember>>(new ServiceError("Roster", "fail")),
         };
-        state.Members.GetOrEmpty().Should().BeEmpty();
+        Assert.Empty(state.Members.GetOrEmpty());
     }
 
     [Fact]
@@ -309,7 +308,7 @@ public class ErrorHandlingTests
         {
             Decisions = Left<AppError, IReadOnlyList<DecisionEntry>>(new NoDataError("decisions")),
         };
-        state.Decisions.GetOrEmpty().Should().BeEmpty();
+        Assert.Empty(state.Decisions.GetOrEmpty());
     }
 
     [Fact]
@@ -319,33 +318,33 @@ public class ErrorHandlingTests
         {
             Tasks = Left<AppError, IReadOnlyList<SquadTask>>(new FileNotFoundError("tasks.yaml")),
         };
-        state.Tasks.GetOrEmpty().Should().BeEmpty();
+        Assert.Empty(state.Tasks.GetOrEmpty());
     }
 
     [Fact]
     public void AppState_DefaultState_AllEithersAreRightEmpty()
     {
         var state = new AppState();
-        state.Members.IsRight.Should().BeTrue();
-        state.Decisions.IsRight.Should().BeTrue();
-        state.Skills.IsRight.Should().BeTrue();
-        state.LogEntries.IsRight.Should().BeTrue();
-        state.Tasks.IsRight.Should().BeTrue();
-        state.SprintHistory.IsRight.Should().BeTrue();
+        Assert.True(state.Members.IsRight);
+        Assert.True(state.Decisions.IsRight);
+        Assert.True(state.Skills.IsRight);
+        Assert.True(state.LogEntries.IsRight);
+        Assert.True(state.Tasks.IsRight);
+        Assert.True(state.SprintHistory.IsRight);
 
-        state.Members.GetOrEmpty().Should().BeEmpty();
-        state.Decisions.GetOrEmpty().Should().BeEmpty();
-        state.Skills.GetOrEmpty().Should().BeEmpty();
-        state.LogEntries.GetOrEmpty().Should().BeEmpty();
-        state.Tasks.GetOrEmpty().Should().BeEmpty();
-        state.SprintHistory.GetOrEmpty().Should().BeEmpty();
+        Assert.Empty(state.Members.GetOrEmpty());
+        Assert.Empty(state.Decisions.GetOrEmpty());
+        Assert.Empty(state.Skills.GetOrEmpty());
+        Assert.Empty(state.LogEntries.GetOrEmpty());
+        Assert.Empty(state.Tasks.GetOrEmpty());
+        Assert.Empty(state.SprintHistory.GetOrEmpty());
     }
 
     [Fact]
     public void AppState_CharterContent_DefaultsToNone()
     {
         var state = new AppState();
-        state.CharterContent.IsNone.Should().BeTrue();
+        Assert.True(state.CharterContent.IsNone);
     }
 
     #endregion

@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Hex1b;
 using Hex1b.Automation;
 using Hex1b.Input;
@@ -18,7 +17,7 @@ public class NoSquadScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Welcome to SquadTUI").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Welcome to SquadTUI"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -33,7 +32,7 @@ public class NoSquadScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("No squad detected").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("No squad detected"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -52,7 +51,7 @@ public class NoSquadScreenTests
         var hasNpx = snapshot.ContainsText("npx");
         var hasSquad = snapshot.ContainsText("squad");
         var hasAiTeam = snapshot.ContainsText(".ai-team");
-        (hasNpx || hasSquad || hasAiTeam).Should().BeTrue(
+        Assert.True(hasNpx || hasSquad || hasAiTeam,
             "NoSquad screen should contain setup instructions mentioning npx, squad, or .ai-team");
 
         cts.Cancel();
@@ -68,7 +67,7 @@ public class NoSquadScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Create").Should().BeTrue(
+        Assert.True(snapshot.ContainsText("Create"),
             "NoSquad screen should show the C key instruction for creating squad structure");
 
         cts.Cancel();
@@ -87,7 +86,7 @@ public class NoSquadScreenTests
         var snapshot = terminal.CreateSnapshot();
         // The key bindings line renders: "C  Create basic squad structure        Q  Quit"
         // Check for the Q key instruction being present
-        snapshot.ContainsText("Quit").Should().BeTrue(
+        Assert.True(snapshot.ContainsText("Quit"),
             "NoSquad screen should show the Q key instruction");
 
         cts.Cancel();
@@ -107,7 +106,7 @@ public class NoSquadScreenTests
         // "Dashboard" in the tab bar would indicate NavBar is showing.
         // However, "Welcome to SquadTUI" confirms we're on NoSquad.
         // We check that pressing 1-6 doesn't navigate away as a resilient assertion.
-        snapshot.ContainsText("Welcome to SquadTUI").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Welcome to SquadTUI"));
 
         // Press D1 — should NOT show Dashboard content (should stay on NoSquad)
         var sequence = new Hex1bTerminalInputSequenceBuilder()
@@ -117,7 +116,7 @@ public class NoSquadScreenTests
         await Task.Delay(200);
 
         var snapshot2 = terminal.CreateSnapshot();
-        snapshot2.ContainsText("Welcome to SquadTUI").Should().BeTrue(
+        Assert.True(snapshot2.ContainsText("Welcome to SquadTUI"),
             "NavBar navigation should not work on NoSquad screen");
 
         cts.Cancel();

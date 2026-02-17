@@ -1,4 +1,3 @@
-using FluentAssertions;
 using SquadTUI.Rendering;
 using SquadTUI.Themes;
 
@@ -9,13 +8,13 @@ public class PanelRendererTests
     [Fact]
     public void Reset_ContainsAnsiResetCode()
     {
-        PanelRenderer.Reset.Should().Contain("\x1b[0m");
+        Assert.Contains("\x1b[0m", PanelRenderer.Reset);
     }
 
     [Fact]
     public void Bold_ContainsAnsiBoldCode()
     {
-        PanelRenderer.Bold.Should().Contain("\x1b[1m");
+        Assert.Contains("\x1b[1m", PanelRenderer.Bold);
     }
 
     [Theory]
@@ -26,6 +25,6 @@ public class PanelRendererTests
     public void GetPanelColors_ReturnsValidColorsForAllThemes(int themeIndex)
     {
         var colors = ThemeManager.GetPanelColors(themeIndex);
-        colors.Accent.Should().NotBeNullOrEmpty();
+        Assert.False(string.IsNullOrEmpty(colors.Accent));
     }
 }

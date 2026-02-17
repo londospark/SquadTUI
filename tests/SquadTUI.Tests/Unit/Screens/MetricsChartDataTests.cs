@@ -1,4 +1,3 @@
-using FluentAssertions;
 using SquadTUI.Screens;
 using SquadTUI.Tests.Fixtures;
 
@@ -10,7 +9,7 @@ public class MetricsChartDataTests
     public void ShowBurndown_DefaultsToFalse()
     {
         var state = new AppState();
-        state.ShowBurndown.Should().BeFalse();
+        Assert.False(state.ShowBurndown);
     }
 
     [Fact]
@@ -18,15 +17,15 @@ public class MetricsChartDataTests
     {
         var state = new AppState();
         state.ShowBurndown = true;
-        state.ShowBurndown.Should().BeTrue();
+        Assert.True(state.ShowBurndown);
         state.ShowBurndown = false;
-        state.ShowBurndown.Should().BeFalse();
+        Assert.False(state.ShowBurndown);
     }
 
     [Fact]
     public void SprintHistory_HasData()
     {
-        SampleData.SprintHistory.Should().HaveCountGreaterThanOrEqualTo(1);
+        Assert.True(SampleData.SprintHistory.Count() >= 1);
     }
 
     [Fact]
@@ -34,8 +33,8 @@ public class MetricsChartDataTests
     {
         foreach (var sprint in SampleData.SprintHistory)
         {
-            sprint.PlannedTasks.Should().BeGreaterThanOrEqualTo(0);
-            sprint.CompletedTasks.Should().BeGreaterThanOrEqualTo(0);
+            Assert.True(sprint.PlannedTasks >= 0);
+            Assert.True(sprint.CompletedTasks >= 0);
         }
     }
 
@@ -44,21 +43,21 @@ public class MetricsChartDataTests
     {
         foreach (var sprint in SampleData.SprintHistory)
         {
-            sprint.Contributions.Should().HaveCountGreaterThanOrEqualTo(1);
+            Assert.True(sprint.Contributions.Count() >= 1);
         }
     }
 
     [Fact]
     public void OverallCompletionRate_InValidRange()
     {
-        SampleData.OverallCompletionRate.Should().BeGreaterThanOrEqualTo(0);
-        SampleData.OverallCompletionRate.Should().BeLessThanOrEqualTo(100);
+        Assert.True(SampleData.OverallCompletionRate >= 0);
+        Assert.True(SampleData.OverallCompletionRate <= 100);
     }
 
     [Fact]
     public void AverageVelocity_IsPositive()
     {
-        SampleData.AverageVelocity.Should().BeGreaterThanOrEqualTo(0);
+        Assert.True(SampleData.AverageVelocity >= 0);
     }
 
     [Fact]
@@ -66,8 +65,8 @@ public class MetricsChartDataTests
     {
         foreach (var sprint in SampleData.SprintHistory)
         {
-            sprint.CompletionRate.Should().BeGreaterThanOrEqualTo(0);
-            sprint.CompletionRate.Should().BeLessThanOrEqualTo(100);
+            Assert.True(sprint.CompletionRate >= 0);
+            Assert.True(sprint.CompletionRate <= 100);
         }
     }
 
@@ -76,7 +75,7 @@ public class MetricsChartDataTests
     {
         foreach (var sprint in SampleData.SprintHistory)
         {
-            sprint.CarriedOver.Should().BeGreaterThanOrEqualTo(0);
+            Assert.True(sprint.CarriedOver >= 0);
         }
     }
 }

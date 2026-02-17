@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Hex1b;
 using Hex1b.Automation;
 using Hex1b.Input;
@@ -17,9 +16,9 @@ public class TabStyleTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
-        snapshot.ContainsText("Roster").Should().BeTrue();
-        snapshot.ContainsText("Decisions").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Dashboard"));
+        Assert.True(snapshot.ContainsText("Roster"));
+        Assert.True(snapshot.ContainsText("Decisions"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -35,7 +34,7 @@ public class TabStyleTests
 
         var snapshot = terminal.CreateSnapshot();
         // The active tab should have the ▶ indicator (ANSI stripped, but text preserved)
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Dashboard"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -61,7 +60,7 @@ public class TabStyleTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText(expectedContent).Should().BeTrue();
+        Assert.True(snapshot.ContainsText(expectedContent));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -81,8 +80,8 @@ public class TabStyleTests
 
         var snapshot = terminal.CreateSnapshot();
         // Should not crash and should contain at least Dashboard label
-        snapshot.Should().NotBeNull();
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
+        Assert.NotNull(snapshot);
+        Assert.True(snapshot.ContainsText("Dashboard"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -99,9 +98,9 @@ public class TabStyleTests
 
         var snapshot = terminal.CreateSnapshot();
         // Check for tab labels (ANSI stripped but text preserved)
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
-        snapshot.ContainsText("Roster").Should().BeTrue();
-        snapshot.ContainsText("Decisions").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Dashboard"));
+        Assert.True(snapshot.ContainsText("Roster"));
+        Assert.True(snapshot.ContainsText("Decisions"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -124,7 +123,7 @@ public class TabStyleTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Dashboard"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

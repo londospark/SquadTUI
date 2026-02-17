@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Hex1b;
 using Hex1b.Automation;
 
@@ -17,7 +16,7 @@ public class ExtremeWidthTests
 
         // Should not crash — just verify the terminal renders something
         var snapshot = terminal.CreateSnapshot();
-        snapshot.Should().NotBeNull();
+        Assert.NotNull(snapshot);
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -32,7 +31,7 @@ public class ExtremeWidthTests
         await Task.Delay(300);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.Should().NotBeNull();
+        Assert.NotNull(snapshot);
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -47,9 +46,9 @@ public class ExtremeWidthTests
         await Task.Delay(300);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.Should().NotBeNull();
+        Assert.NotNull(snapshot);
         // Narrow layout shows SquadTUI header
-        snapshot.ContainsText("SquadTUI").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("SquadTUI"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -65,8 +64,8 @@ public class ExtremeWidthTests
 
         var snapshot = terminal.CreateSnapshot();
         // Wide layout should show team roster and activity panels
-        snapshot.ContainsText("Team Roster").Should().BeTrue();
-        snapshot.ContainsText("Activity").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Team Roster"));
+        Assert.True(snapshot.ContainsText("Activity"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -81,8 +80,8 @@ public class ExtremeWidthTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Team Roster").Should().BeTrue();
-        snapshot.ContainsText("Activity").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Team Roster"));
+        Assert.True(snapshot.ContainsText("Activity"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -97,7 +96,7 @@ public class ExtremeWidthTests
         await Task.Delay(300);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.Should().NotBeNull();
+        Assert.NotNull(snapshot);
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -112,7 +111,7 @@ public class ExtremeWidthTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.Should().NotBeNull();
+        Assert.NotNull(snapshot);
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -127,7 +126,7 @@ public class ExtremeWidthTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Team Roster").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Team Roster"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -142,7 +141,7 @@ public class ExtremeWidthTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Team Roster").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Team Roster"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

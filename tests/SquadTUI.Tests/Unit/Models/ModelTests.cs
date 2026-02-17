@@ -1,4 +1,3 @@
-using FluentAssertions;
 using SquadTUI.Models;
 
 namespace SquadTUI.Tests.Unit.Models;
@@ -9,43 +8,43 @@ public class ModelTests
     public void SquadMember_DefaultsToActiveStatus()
     {
         var member = new SquadMember("Test", "Dev");
-        member.Status.Should().Be(MemberStatus.Active);
+        Assert.Equal(MemberStatus.Active, member.Status);
     }
 
     [Fact]
     public void SquadMember_DefaultsNullCurrentTask()
     {
         var member = new SquadMember("Test", "Dev");
-        member.CurrentTask.Should().BeNull();
+        Assert.Null(member.CurrentTask);
     }
 
     [Fact]
     public void SquadMember_DefaultsNullCharterPath()
     {
         var member = new SquadMember("Test", "Dev");
-        member.CharterPath.Should().BeNull();
+        Assert.Null(member.CharterPath);
     }
 
     [Fact]
     public void SquadTask_DefaultsToPendingStatus()
     {
         var task = new SquadTask("t1", "Test Task");
-        task.Status.Should().Be(SquadTaskStatus.Pending);
+        Assert.Equal(SquadTaskStatus.Pending, task.Status);
     }
 
     [Fact]
     public void SquadTask_DefaultsNullAssignee()
     {
         var task = new SquadTask("t1", "Test Task");
-        task.Assignee.Should().BeNull();
+        Assert.Null(task.Assignee);
     }
 
     [Fact]
     public void SquadTask_DefaultsNullTimestamps()
     {
         var task = new SquadTask("t1", "Test Task");
-        task.StartedAt.Should().BeNull();
-        task.CompletedAt.Should().BeNull();
+        Assert.Null(task.StartedAt);
+        Assert.Null(task.CompletedAt);
     }
 
     [Fact]
@@ -53,7 +52,7 @@ public class ModelTests
     {
         var a = new SquadMember("Danny", "Lead", MemberStatus.Active);
         var b = new SquadMember("Danny", "Lead", MemberStatus.Active);
-        a.Should().Be(b);
+        Assert.Equal(b, a);
     }
 
     [Fact]
@@ -61,7 +60,7 @@ public class ModelTests
     {
         var a = new SquadMember("Danny", "Lead", MemberStatus.Active);
         var b = new SquadMember("Danny", "Lead", MemberStatus.Idle);
-        a.Should().NotBe(b);
+        Assert.NotEqual(b, a);
     }
 
     [Fact]
@@ -69,7 +68,7 @@ public class ModelTests
     {
         var a = new SquadTask("t1", "Task", Status: SquadTaskStatus.Done);
         var b = new SquadTask("t1", "Task", Status: SquadTaskStatus.Done);
-        a.Should().Be(b);
+        Assert.Equal(b, a);
     }
 
     [Fact]
@@ -77,32 +76,32 @@ public class ModelTests
     {
         var original = new SquadMember("Danny", "Lead");
         var modified = original with { Status = MemberStatus.Working };
-        modified.Status.Should().Be(MemberStatus.Working);
-        original.Status.Should().Be(MemberStatus.Active);
+        Assert.Equal(MemberStatus.Working, modified.Status);
+        Assert.Equal(MemberStatus.Active, original.Status);
     }
 
     [Fact]
     public void DecisionEntry_StoresAllFields()
     {
         var entry = new DecisionEntry("Title", "2026-01-01", "Author", "Content", "/path", 5);
-        entry.Title.Should().Be("Title");
-        entry.Date.Should().Be("2026-01-01");
-        entry.Author.Should().Be("Author");
-        entry.Content.Should().Be("Content");
-        entry.FilePath.Should().Be("/path");
-        entry.LineNumber.Should().Be(5);
+        Assert.Equal("Title", entry.Title);
+        Assert.Equal("2026-01-01", entry.Date);
+        Assert.Equal("Author", entry.Author);
+        Assert.Equal("Content", entry.Content);
+        Assert.Equal("/path", entry.FilePath);
+        Assert.Equal(5, entry.LineNumber);
     }
 
     [Fact]
     public void Skill_StoresAllFields()
     {
         var skill = new Skill("test", "desc", "manual", "high", "body", "test-slug");
-        skill.Name.Should().Be("test");
-        skill.Description.Should().Be("desc");
-        skill.Source.Should().Be("manual");
-        skill.Confidence.Should().Be("high");
-        skill.Content.Should().Be("body");
-        skill.Slug.Should().Be("test-slug");
+        Assert.Equal("test", skill.Name);
+        Assert.Equal("desc", skill.Description);
+        Assert.Equal("manual", skill.Source);
+        Assert.Equal("high", skill.Confidence);
+        Assert.Equal("body", skill.Content);
+        Assert.Equal("test-slug", skill.Slug);
     }
 
     [Fact]
@@ -117,18 +116,18 @@ public class ModelTests
             ["Decision 1"],
             ["Outcome 1"],
             "Done stuff");
-        entry.Timestamp.Should().Be(DateTimeOffset.Parse("2026-02-16T00:00:00Z"));
-        entry.Participants.Should().HaveCount(2);
-        entry.Decisions.Should().ContainSingle();
-        entry.Outcomes.Should().ContainSingle();
-        entry.WhatWasDone.Should().Be("Done stuff");
+        Assert.Equal(DateTimeOffset.Parse("2026-02-16T00:00:00Z"), entry.Timestamp);
+        Assert.Equal(2, entry.Participants.Count);
+        Assert.Single(entry.Decisions);
+        Assert.Single(entry.Outcomes);
+        Assert.Equal("Done stuff", entry.WhatWasDone);
     }
 
     [Fact]
     public void TeamRoster_DefaultsNullMembers()
     {
         var roster = new TeamRoster("Test");
-        roster.Members.Should().BeNull();
-        roster.Description.Should().BeNull();
+        Assert.Null(roster.Members);
+        Assert.Null(roster.Description);
     }
 }

@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Hex1b;
 using Hex1b.Automation;
 
@@ -16,7 +15,7 @@ public class DashboardScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Team Roster").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Team Roster"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -31,8 +30,8 @@ public class DashboardScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Tasks:").Should().BeTrue();
-        snapshot.ContainsText("active").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Tasks:"));
+        Assert.True(snapshot.ContainsText("active"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -47,7 +46,7 @@ public class DashboardScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Activity").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Activity"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -62,7 +61,7 @@ public class DashboardScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Decisions").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Decisions"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

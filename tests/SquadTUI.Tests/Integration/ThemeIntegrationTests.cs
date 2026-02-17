@@ -1,4 +1,3 @@
-using FluentAssertions;
 using SquadTUI.Screens;
 using SquadTUI.Themes;
 using SquadTUI.Tests.Fixtures;
@@ -11,7 +10,7 @@ public class ThemeIntegrationTests
     public void AppState_DefaultThemeIndex_IsZero()
     {
         var state = new AppState();
-        state.SelectedThemeIndex.Should().Be(0);
+        Assert.Equal(0, state.SelectedThemeIndex);
     }
 
     [Fact]
@@ -22,7 +21,7 @@ public class ThemeIntegrationTests
         {
             state.SelectedThemeIndex = (state.SelectedThemeIndex + 1) % ThemeManager.ThemeNames.Length;
         }
-        state.SelectedThemeIndex.Should().Be(1);
+        Assert.Equal(1, state.SelectedThemeIndex);
     }
 
     [Fact]
@@ -31,40 +30,40 @@ public class ThemeIntegrationTests
         for (int i = 0; i < ThemeManager.ThemeNames.Length; i++)
         {
             var theme = ThemeManager.GetTheme(i);
-            theme.Should().NotBeNull($"theme at index {i} ({ThemeManager.ThemeNames[i]}) should be creatable");
+            Assert.NotNull(theme);
         }
     }
 
     [Fact]
     public void SampleData_IsAvailable()
     {
-        SampleData.Members.Should().NotBeEmpty();
-        SampleData.Tasks.Should().NotBeEmpty();
-        SampleData.Decisions.Should().NotBeEmpty();
-        SampleData.Skills.Should().NotBeEmpty();
-        SampleData.LogEntries.Should().NotBeEmpty();
+        Assert.NotEmpty(SampleData.Members);
+        Assert.NotEmpty(SampleData.Tasks);
+        Assert.NotEmpty(SampleData.Decisions);
+        Assert.NotEmpty(SampleData.Skills);
+        Assert.NotEmpty(SampleData.LogEntries);
     }
 
     [Fact]
     public void AppState_ScreenNavigation_Works()
     {
         var state = new AppState();
-        state.CurrentScreen.Should().Be(Screen.Dashboard);
+        Assert.Equal(Screen.Dashboard, state.CurrentScreen);
 
         state.CurrentScreen = Screen.Roster;
-        state.CurrentScreen.Should().Be(Screen.Roster);
+        Assert.Equal(Screen.Roster, state.CurrentScreen);
 
         state.CurrentScreen = Screen.Decisions;
-        state.CurrentScreen.Should().Be(Screen.Decisions);
+        Assert.Equal(Screen.Decisions, state.CurrentScreen);
     }
 
     [Fact]
     public void AppState_MemberSelection_Works()
     {
         var state = new AppState();
-        state.SelectedMemberName.Should().BeNull();
+        Assert.Null(state.SelectedMemberName);
 
         state.SelectedMemberName = "Sonic";
-        state.SelectedMemberName.Should().Be("Sonic");
+        Assert.Equal("Sonic", state.SelectedMemberName);
     }
 }

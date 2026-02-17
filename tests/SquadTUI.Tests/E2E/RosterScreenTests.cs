@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Hex1b;
 using Hex1b.Automation;
 using Hex1b.Input;
@@ -23,9 +22,9 @@ public class RosterScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Sonic").Should().BeTrue();
-        snapshot.ContainsText("Tails").Should().BeTrue();
-        snapshot.ContainsText("Knuckles").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Sonic"));
+        Assert.True(snapshot.ContainsText("Tails"));
+        Assert.True(snapshot.ContainsText("Knuckles"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -46,9 +45,9 @@ public class RosterScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Sonic").Should().BeTrue();
-        snapshot.ContainsText("Role:").Should().BeTrue();
-        snapshot.ContainsText("Status:").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Sonic"));
+        Assert.True(snapshot.ContainsText("Role:"));
+        Assert.True(snapshot.ContainsText("Status:"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -70,8 +69,8 @@ public class RosterScreenTests
 
         var snapshot = terminal.CreateSnapshot();
         // Detail pane now shows charter excerpt and tasks inline
-        snapshot.ContainsText("Charter").Should().BeTrue();
-        snapshot.ContainsText("Task:").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Charter"));
+        Assert.True(snapshot.ContainsText("Task:"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -94,7 +93,7 @@ public class RosterScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Dashboard"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

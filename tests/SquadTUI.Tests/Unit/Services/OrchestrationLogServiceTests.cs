@@ -1,4 +1,3 @@
-using FluentAssertions;
 using SquadTUI.Services;
 
 namespace SquadTUI.Tests.Unit.Services;
@@ -41,8 +40,8 @@ public class OrchestrationLogServiceTests : IDisposable
         var entries = await svc.GetEntriesAsync();
 
         var entry = entries.First();
-        entry.Date.Should().Be("2026-02-16");
-        entry.Topic.Should().Be("kickoff");
+        Assert.Equal("2026-02-16", entry.Date);
+        Assert.Equal("kickoff", entry.Topic);
     }
 
     [Fact]
@@ -61,8 +60,10 @@ public class OrchestrationLogServiceTests : IDisposable
         var svc = new OrchestrationLogService(SquadDir);
         var entries = await svc.GetEntriesAsync();
 
-        entries.First().Participants.Should().HaveCount(3);
-        entries.First().Participants.Should().Contain(["Danny", "Linus", "Rusty"]);
+        Assert.Equal(3, entries.First().Participants.Count);
+        Assert.Contains("Danny", entries.First().Participants);
+        Assert.Contains("Linus", entries.First().Participants);
+        Assert.Contains("Rusty", entries.First().Participants);
     }
 
     [Fact]
@@ -80,8 +81,8 @@ public class OrchestrationLogServiceTests : IDisposable
         var svc = new OrchestrationLogService(SquadDir);
         var entries = await svc.GetEntriesAsync();
 
-        entries.First().Decisions.Should().HaveCount(2);
-        entries.First().Decisions.Should().Contain("Use Hex1b framework");
+        Assert.Equal(2, entries.First().Decisions.Count);
+        Assert.Contains("Use Hex1b framework", entries.First().Decisions);
     }
 
     [Fact]
@@ -99,8 +100,8 @@ public class OrchestrationLogServiceTests : IDisposable
         var svc = new OrchestrationLogService(SquadDir);
         var entries = await svc.GetEntriesAsync();
 
-        entries.First().Outcomes.Should().HaveCount(2);
-        entries.First().Outcomes.Should().Contain("Repository initialized");
+        Assert.Equal(2, entries.First().Outcomes.Count);
+        Assert.Contains("Repository initialized", entries.First().Outcomes);
     }
 
     [Fact]
@@ -109,7 +110,7 @@ public class OrchestrationLogServiceTests : IDisposable
         var svc = new OrchestrationLogService(SquadDir);
         var entries = await svc.GetEntriesAsync();
 
-        entries.Should().BeEmpty();
+        Assert.Empty(entries);
     }
 
     [Fact]
@@ -121,7 +122,7 @@ public class OrchestrationLogServiceTests : IDisposable
         {
             var svc = new OrchestrationLogService(emptyDir);
             var entries = await svc.GetEntriesAsync();
-            entries.Should().BeEmpty();
+            Assert.Empty(entries);
         }
         finally
         {
@@ -145,10 +146,10 @@ public class OrchestrationLogServiceTests : IDisposable
         var svc = new OrchestrationLogService(SquadDir);
         var entries = await svc.GetEntriesAsync();
 
-        entries.Should().HaveCount(3);
-        entries[0].Date.Should().Be("2026-02-17");
-        entries[1].Date.Should().Be("2026-02-16");
-        entries[2].Date.Should().Be("2026-02-15");
+        Assert.Equal(3, entries.Count);
+        Assert.Equal("2026-02-17", entries[0].Date);
+        Assert.Equal("2026-02-16", entries[1].Date);
+        Assert.Equal("2026-02-15", entries[2].Date);
     }
 
     [Fact]
@@ -164,8 +165,8 @@ public class OrchestrationLogServiceTests : IDisposable
         var svc = new OrchestrationLogService(SquadDir);
         var entries = await svc.GetEntriesByDateAsync("2026-02-16");
 
-        entries.Should().ContainSingle();
-        entries.First().Date.Should().Be("2026-02-16");
+        Assert.Single(entries);
+        Assert.Equal("2026-02-16", entries.First().Date);
     }
 
     [Fact]
@@ -182,7 +183,7 @@ public class OrchestrationLogServiceTests : IDisposable
         var svc = new OrchestrationLogService(SquadDir);
         var entries = await svc.GetEntriesAsync();
 
-        entries.First().Summary.Should().Be("Project Kickoff Session");
+        Assert.Equal("Project Kickoff Session", entries.First().Summary);
     }
 
     [Fact]
@@ -197,6 +198,6 @@ public class OrchestrationLogServiceTests : IDisposable
         var svc = new OrchestrationLogService(SquadDir);
         var entries = await svc.GetEntriesAsync();
 
-        entries.First().Topic.Should().Be("sprint planning session");
+        Assert.Equal("sprint planning session", entries.First().Topic);
     }
 }

@@ -1,4 +1,3 @@
-using FluentAssertions;
 using LanguageExt;
 using static LanguageExt.Prelude;
 using SquadTUI.Models;
@@ -20,8 +19,7 @@ public class SampleDataLeakTests
     {
         var srcDir = FindSrcDir();
         var sampleFiles = Directory.GetFiles(srcDir, "SampleData.cs", SearchOption.AllDirectories);
-        sampleFiles.Should().BeEmpty(
-            "SampleData.cs must not exist in the production project (src/SquadTUI/)");
+        Assert.Empty(sampleFiles);
     }
 
     [Fact]
@@ -38,9 +36,7 @@ public class SampleDataLeakTests
                 violations.Add(Path.GetFileName(file));
         }
 
-        violations.Should().BeEmpty(
-            "no .cs file in src/SquadTUI/ should reference SampleData — " +
-            $"found in: {string.Join(", ", violations)}");
+        Assert.Empty(violations);
     }
 
     [Fact]
@@ -48,11 +44,10 @@ public class SampleDataLeakTests
     {
         var srcDir = FindSrcDir();
         var csproj = Directory.GetFiles(srcDir, "*.csproj", SearchOption.TopDirectoryOnly);
-        csproj.Should().NotBeEmpty("SquadTUI.csproj should exist");
+        Assert.NotEmpty(csproj);
 
         var content = File.ReadAllText(csproj[0]);
-        content.Should().NotContain("SampleData",
-            "the production .csproj must not reference SampleData");
+        Assert.DoesNotContain("SampleData", content);
     }
 
     [Fact]
@@ -63,8 +58,7 @@ public class SampleDataLeakTests
 
         foreach (var sampleName in SampleDataNames)
         {
-            memberNames.Should().NotContain(sampleName,
-                $"production AppState should not contain SampleData member name '{sampleName}'");
+            Assert.DoesNotContain(sampleName, memberNames);
         }
     }
 
@@ -79,8 +73,7 @@ public class SampleDataLeakTests
 
         foreach (var sampleName in SampleDataNames)
         {
-            assignees.Should().NotContain(sampleName,
-                $"production AppState tasks should not have SampleData assignee '{sampleName}'");
+            Assert.DoesNotContain(sampleName, assignees);
         }
     }
 
@@ -92,8 +85,7 @@ public class SampleDataLeakTests
 
         foreach (var sampleName in SampleDataNames)
         {
-            authors.Should().NotContain(sampleName,
-                $"production AppState decisions should not have SampleData author '{sampleName}'");
+            Assert.DoesNotContain(sampleName, authors);
         }
     }
 
@@ -102,8 +94,7 @@ public class SampleDataLeakTests
     {
         var testDir = FindTestDir();
         var fixtureFile = Path.Combine(testDir, "Fixtures", "SampleData.cs");
-        File.Exists(fixtureFile).Should().BeTrue(
-            "SampleData.cs should exist in tests/SquadTUI.Tests/Fixtures/");
+        Assert.True(File.Exists(fixtureFile));
     }
 
     private static AppState CreateStateWithRealData()

@@ -1,4 +1,3 @@
-using FluentAssertions;
 using LanguageExt;
 using static LanguageExt.Prelude;
 using SquadTUI.Models;
@@ -25,7 +24,7 @@ public class ThemeCoverageTests
     [InlineData(9)]
     public void GetAccentCode_IsNonEmpty_ForAllThemes(int index)
     {
-        ThemeManager.GetAccentCode(index).Should().NotBeNullOrEmpty();
+        Assert.False(string.IsNullOrEmpty(ThemeManager.GetAccentCode(index)));
     }
 
     [Theory]
@@ -41,7 +40,7 @@ public class ThemeCoverageTests
     [InlineData(9)]
     public void GetSecondaryAccent_IsNonEmpty_ForAllThemes(int index)
     {
-        ThemeManager.GetSecondaryAccent(index).Should().NotBeNullOrEmpty();
+        Assert.False(string.IsNullOrEmpty(ThemeManager.GetSecondaryAccent(index)));
     }
 
     [Theory]
@@ -57,7 +56,7 @@ public class ThemeCoverageTests
     [InlineData(9)]
     public void GetPanelHeaderBg_IsNonEmpty_ForAllThemes(int index)
     {
-        ThemeManager.GetPanelHeaderBg(index).Should().NotBeNullOrEmpty();
+        Assert.False(string.IsNullOrEmpty(ThemeManager.GetPanelHeaderBg(index)));
     }
 
     [Theory]
@@ -73,7 +72,7 @@ public class ThemeCoverageTests
     [InlineData(9)]
     public void GetPanelDetailBg_IsNonEmpty_ForAllThemes(int index)
     {
-        ThemeManager.GetPanelDetailBg(index).Should().NotBeNullOrEmpty();
+        Assert.False(string.IsNullOrEmpty(ThemeManager.GetPanelDetailBg(index)));
     }
 
     [Theory]
@@ -94,10 +93,10 @@ public class ThemeCoverageTests
         var headerBg = ThemeManager.GetPanelHeaderBg(index);
         var detailBg = ThemeManager.GetPanelDetailBg(index);
 
-        accent.Should().StartWith("\x1b[");
-        secondary.Should().StartWith("\x1b[");
-        headerBg.Should().StartWith("\x1b[");
-        detailBg.Should().StartWith("\x1b[");
+        Assert.StartsWith("\x1b[", accent);
+        Assert.StartsWith("\x1b[", secondary);
+        Assert.StartsWith("\x1b[", headerBg);
+        Assert.StartsWith("\x1b[", detailBg);
     }
 
     [Theory]
@@ -115,7 +114,7 @@ public class ThemeCoverageTests
     {
         var accent = ThemeManager.GetAccentCode(index);
         // All RGB foreground codes should be \x1b[38;2;RRR;GGG;BBBm — same format
-        accent.Should().Contain("38;2;", "all accents use RGB foreground codes");
+        Assert.Contains("38;2;", accent);
     }
 
     [Theory]
@@ -132,7 +131,7 @@ public class ThemeCoverageTests
     public void GetPanelBgColor_ReturnsNonNull_ForAllThemes(int index)
     {
         var color = ThemeManager.GetPanelBgColor(index);
-        color.Should().NotBeNull();
+        Assert.NotNull(color);
     }
 
     [Theory]
@@ -149,7 +148,7 @@ public class ThemeCoverageTests
     public void GetPanelDetailBgColor_ReturnsNonNull_ForAllThemes(int index)
     {
         var color = ThemeManager.GetPanelDetailBgColor(index);
-        color.Should().NotBeNull();
+        Assert.NotNull(color);
     }
 
     [Theory]
@@ -166,23 +165,23 @@ public class ThemeCoverageTests
     public void GetPanelAltBgColor_ReturnsNonNull_ForAllThemes(int index)
     {
         var color = ThemeManager.GetPanelAltBgColor(index);
-        color.Should().NotBeNull();
+        Assert.NotNull(color);
     }
 
     [Fact]
     public void ThemeCycling_WrapsAtIndex10()
     {
-        ThemeManager.GetAccentCode(10).Should().Be(ThemeManager.GetAccentCode(0));
-        ThemeManager.GetAccentCode(11).Should().Be(ThemeManager.GetAccentCode(1));
-        ThemeManager.GetAccentCode(19).Should().Be(ThemeManager.GetAccentCode(9));
-        ThemeManager.GetAccentCode(20).Should().Be(ThemeManager.GetAccentCode(0));
+        Assert.Equal(ThemeManager.GetAccentCode(0), ThemeManager.GetAccentCode(10));
+        Assert.Equal(ThemeManager.GetAccentCode(1), ThemeManager.GetAccentCode(11));
+        Assert.Equal(ThemeManager.GetAccentCode(9), ThemeManager.GetAccentCode(19));
+        Assert.Equal(ThemeManager.GetAccentCode(0), ThemeManager.GetAccentCode(20));
     }
 
     [Fact]
     public void ThemeCycling_SecondaryAccent_WrapsAtIndex10()
     {
-        ThemeManager.GetSecondaryAccent(10).Should().Be(ThemeManager.GetSecondaryAccent(0));
-        ThemeManager.GetSecondaryAccent(20).Should().Be(ThemeManager.GetSecondaryAccent(0));
+        Assert.Equal(ThemeManager.GetSecondaryAccent(0), ThemeManager.GetSecondaryAccent(10));
+        Assert.Equal(ThemeManager.GetSecondaryAccent(0), ThemeManager.GetSecondaryAccent(20));
     }
 
     [Fact]
@@ -191,9 +190,9 @@ public class ThemeCoverageTests
         for (int i = 0; i < 10; i++)
         {
             var rule = ThemeManager.GetDimRule(i, 20);
-            rule.Should().NotBeNullOrEmpty();
-            rule.Should().Contain("━", $"theme {i} dim rule should contain ━ chars");
-            rule.Should().Contain("\x1b[0m", $"theme {i} dim rule should end with reset");
+            Assert.False(string.IsNullOrEmpty(rule));
+            Assert.Contains("━", rule);
+            Assert.Contains("\x1b[0m", rule);
         }
     }
 
@@ -211,21 +210,21 @@ public class ThemeCoverageTests
     public void GetTheme_ReturnsThemeWithCorrectName(int index)
     {
         var theme = ThemeManager.GetTheme(index);
-        theme.Should().NotBeNull();
+        Assert.NotNull(theme);
     }
 
     [Fact]
     public void AllThemes_HaveDistinctAccentCodes()
     {
         var accents = Enumerable.Range(0, 10).Select(ThemeManager.GetAccentCode).ToList();
-        accents.Should().OnlyHaveUniqueItems("each theme should have a unique accent");
+        Assert.Equal(accents.Count, accents.Distinct().Count());
     }
 
     [Fact]
     public void AllThemes_HaveDistinctSecondaryAccents()
     {
         var secondaries = Enumerable.Range(0, 10).Select(ThemeManager.GetSecondaryAccent).ToList();
-        secondaries.Should().OnlyHaveUniqueItems("each theme should have a unique secondary accent");
+        Assert.Equal(secondaries.Count, secondaries.Distinct().Count());
     }
 
     [Fact]
@@ -236,7 +235,7 @@ public class ThemeCoverageTests
         {
             state.SelectedThemeIndex = i;
             var accent = ThemeManager.GetAccentCode(state.SelectedThemeIndex);
-            accent.Should().NotBeNullOrEmpty($"theme index {i} should produce valid accent");
+            Assert.False(string.IsNullOrEmpty(accent));
         }
     }
 }

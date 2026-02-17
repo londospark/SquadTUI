@@ -1,4 +1,3 @@
-using FluentAssertions;
 using SquadTUI.Models;
 using SquadTUI.Services;
 
@@ -15,16 +14,16 @@ public class TeamServiceIntegrationTests
         var svc = new TeamService(GetFixturesPath());
         var roster = await svc.GetRosterAsync();
 
-        roster.Members.Should().NotBeNull();
+        Assert.NotNull(roster.Members);
         // 5 members + 1 coordinator = 6
-        roster.Members!.Count.Should().BeGreaterThanOrEqualTo(5);
+        Assert.True(roster.Members!.Count >= 5);
 
         var names = roster.Members.Select(m => m.Name).ToList();
-        names.Should().Contain("Danny");
-        names.Should().Contain("Linus");
-        names.Should().Contain("Rusty");
-        names.Should().Contain("Basher");
-        names.Should().Contain("Saul");
+        Assert.Contains("Danny", names);
+        Assert.Contains("Linus", names);
+        Assert.Contains("Rusty", names);
+        Assert.Contains("Basher", names);
+        Assert.Contains("Saul", names);
     }
 
     [Fact]
@@ -33,8 +32,8 @@ public class TeamServiceIntegrationTests
         var svc = new TeamService(GetFixturesPath());
         var roster = await svc.GetRosterAsync();
 
-        roster.Members!.First().Name.Should().Be("Squad");
-        roster.Members!.First().Role.Should().Be("Coordinator");
+        Assert.Equal("Squad", roster.Members!.First().Name);
+        Assert.Equal("Coordinator", roster.Members!.First().Role);
     }
 
     [Fact]
@@ -44,13 +43,13 @@ public class TeamServiceIntegrationTests
         var roster = await svc.GetRosterAsync();
 
         var danny = roster.Members!.First(m => m.Name == "Danny");
-        danny.Status.Should().Be(MemberStatus.Active);
+        Assert.Equal(MemberStatus.Active, danny.Status);
 
         var rusty = roster.Members!.First(m => m.Name == "Rusty");
-        rusty.Status.Should().Be(MemberStatus.Working);
+        Assert.Equal(MemberStatus.Working, rusty.Status);
 
         var saul = roster.Members!.First(m => m.Name == "Saul");
-        saul.Status.Should().Be(MemberStatus.Idle);
+        Assert.Equal(MemberStatus.Idle, saul.Status);
     }
 
     [Fact]
@@ -59,8 +58,8 @@ public class TeamServiceIntegrationTests
         var svc = new TeamService(GetFixturesPath());
         var roster = await svc.GetRosterAsync();
 
-        roster.Description.Should().NotBeNullOrEmpty();
-        roster.Description.Should().Contain("AI squads");
+        Assert.False(string.IsNullOrEmpty(roster.Description));
+        Assert.Contains("AI squads", roster.Description);
     }
 
     [Fact]
@@ -70,8 +69,8 @@ public class TeamServiceIntegrationTests
         var roster = await svc.GetRosterAsync();
 
         var danny = roster.Members!.First(m => m.Name == "Danny");
-        danny.CharterPath.Should().NotBeNull();
-        File.Exists(danny.CharterPath).Should().BeTrue();
+        Assert.NotNull(danny.CharterPath);
+        Assert.True(File.Exists(danny.CharterPath));
     }
 
     [Fact]
@@ -80,7 +79,7 @@ public class TeamServiceIntegrationTests
         var svc = new TeamService(GetFixturesPath());
         var member = await svc.GetMemberAsync("Danny");
 
-        member.Should().NotBeNull();
-        member!.Role.Should().Be("Lead");
+        Assert.NotNull(member);
+        Assert.Equal("Lead", member!.Role);
     }
 }

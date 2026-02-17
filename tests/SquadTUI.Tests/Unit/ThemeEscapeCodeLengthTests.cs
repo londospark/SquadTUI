@@ -1,4 +1,3 @@
-using FluentAssertions;
 using SquadTUI.Rendering;
 using SquadTUI.Themes;
 
@@ -20,8 +19,7 @@ public class ThemeEscapeCodeLengthTests
             .Select(i => ThemeManager.GetAccentCode(i).Length)
             .ToList();
 
-        lengths.Should().AllBeEquivalentTo(lengths[0],
-            "accent codes must have uniform length to prevent layout shift");
+        Assert.All(lengths, item => Assert.Equal(lengths[0], item));
     }
 
     [Fact]
@@ -31,8 +29,7 @@ public class ThemeEscapeCodeLengthTests
             .Select(i => ThemeManager.GetSecondaryAccent(i).Length)
             .ToList();
 
-        lengths.Should().AllBeEquivalentTo(lengths[0],
-            "secondary accent codes must have uniform length to prevent layout shift");
+        Assert.All(lengths, item => Assert.Equal(lengths[0], item));
     }
 
     [Fact]
@@ -42,8 +39,7 @@ public class ThemeEscapeCodeLengthTests
             .Select(i => ThemeManager.GetPanelHeaderBg(i).Length)
             .ToList();
 
-        lengths.Should().AllBeEquivalentTo(lengths[0],
-            "panel header background codes must have uniform length to prevent layout shift");
+        Assert.All(lengths, item => Assert.Equal(lengths[0], item));
     }
 
     [Fact]
@@ -53,8 +49,7 @@ public class ThemeEscapeCodeLengthTests
             .Select(i => ThemeManager.GetPanelDetailBg(i).Length)
             .ToList();
 
-        lengths.Should().AllBeEquivalentTo(lengths[0],
-            "panel detail background codes must have uniform length to prevent layout shift");
+        Assert.All(lengths, item => Assert.Equal(lengths[0], item));
     }
 
     [Fact]
@@ -63,9 +58,8 @@ public class ThemeEscapeCodeLengthTests
         for (int i = 0; i < ThemeCount; i++)
         {
             var code = ThemeManager.GetAccentCode(i);
-            code.Should().StartWith("\x1b[38;2;",
-                $"theme {ThemeManager.ThemeNames[i]} accent should use RGB foreground format");
-            code.Should().EndWith("m");
+            Assert.StartsWith("\x1b[38;2;", code);
+            Assert.EndsWith("m", code);
         }
     }
 
@@ -75,9 +69,8 @@ public class ThemeEscapeCodeLengthTests
         for (int i = 0; i < ThemeCount; i++)
         {
             var code = ThemeManager.GetSecondaryAccent(i);
-            code.Should().StartWith("\x1b[38;2;",
-                $"theme {ThemeManager.ThemeNames[i]} secondary accent should use RGB foreground format");
-            code.Should().EndWith("m");
+            Assert.StartsWith("\x1b[38;2;", code);
+            Assert.EndsWith("m", code);
         }
     }
 
@@ -88,8 +81,7 @@ public class ThemeEscapeCodeLengthTests
             .Select(i => ThemeManager.GetDimRule(i).Length)
             .ToList();
 
-        lengths.Should().AllBeEquivalentTo(lengths[0],
-            "dim rule strings must have uniform length to prevent layout shift");
+        Assert.All(lengths, item => Assert.Equal(lengths[0], item));
     }
 
     [Fact]
@@ -99,7 +91,6 @@ public class ThemeEscapeCodeLengthTests
             .Select(i => PanelRenderer.PanelTitle(i, "📈", "Test Title").Length)
             .ToList();
 
-        lengths.Should().AllBeEquivalentTo(lengths[0],
-            "panel titles must have uniform length across themes to prevent layout shift");
+        Assert.All(lengths, item => Assert.Equal(lengths[0], item));
     }
 }

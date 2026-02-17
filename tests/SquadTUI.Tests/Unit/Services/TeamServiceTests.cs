@@ -1,4 +1,3 @@
-using FluentAssertions;
 using SquadTUI.Models;
 using SquadTUI.Services;
 
@@ -52,7 +51,7 @@ public class TeamServiceTests : IDisposable
         var svc = new TeamService(SquadDir);
         var roster = await svc.GetRosterAsync();
 
-        roster.Members.Should().HaveCount(3);
+        Assert.Equal(3, roster.Members.Count);
     }
 
     [Fact]
@@ -72,7 +71,8 @@ public class TeamServiceTests : IDisposable
         var svc = new TeamService(SquadDir);
         var roster = await svc.GetRosterAsync();
 
-        roster.Members!.Select(m => m.Name).Should().Contain(["Danny", "Linus"]);
+        Assert.Contains("Danny", roster.Members!.Select(m => m.Name));
+        Assert.Contains("Linus", roster.Members!.Select(m => m.Name));
     }
 
     [Fact]
@@ -91,7 +91,7 @@ public class TeamServiceTests : IDisposable
         var svc = new TeamService(SquadDir);
         var roster = await svc.GetRosterAsync();
 
-        roster.Members!.First().Role.Should().Be("Lead");
+        Assert.Equal("Lead", roster.Members!.First().Role);
     }
 
     [Fact]
@@ -113,9 +113,9 @@ public class TeamServiceTests : IDisposable
         var roster = await svc.GetRosterAsync();
 
         var members = roster.Members!;
-        members.First(m => m.Name == "Danny").Status.Should().Be(MemberStatus.Active);
-        members.First(m => m.Name == "Linus").Status.Should().Be(MemberStatus.Idle);
-        members.First(m => m.Name == "Rusty").Status.Should().Be(MemberStatus.Working);
+        Assert.Equal(MemberStatus.Active, members.First(m => m.Name == "Danny").Status);
+        Assert.Equal(MemberStatus.Idle, members.First(m => m.Name == "Linus").Status);
+        Assert.Equal(MemberStatus.Working, members.First(m => m.Name == "Rusty").Status);
     }
 
     [Fact]
@@ -140,9 +140,9 @@ public class TeamServiceTests : IDisposable
         var svc = new TeamService(SquadDir);
         var roster = await svc.GetRosterAsync();
 
-        roster.Members.Should().HaveCount(2);
-        roster.Members!.First().Name.Should().Be("Squad");
-        roster.Members!.First().Role.Should().Be("Coordinator");
+        Assert.Equal(2, roster.Members.Count);
+        Assert.Equal("Squad", roster.Members!.First().Name);
+        Assert.Equal("Coordinator", roster.Members!.First().Role);
     }
 
     [Fact]
@@ -151,8 +151,8 @@ public class TeamServiceTests : IDisposable
         var svc = new TeamService(SquadDir);
         var roster = await svc.GetRosterAsync();
 
-        roster.Members.Should().BeNull();
-        roster.ProjectName.Should().Be("SquadTUI");
+        Assert.Null(roster.Members);
+        Assert.Equal("SquadTUI", roster.ProjectName);
     }
 
     [Fact]
@@ -171,8 +171,8 @@ public class TeamServiceTests : IDisposable
         var svc = new TeamService(SquadDir);
         var member = await svc.GetMemberAsync("danny");
 
-        member.Should().NotBeNull();
-        member!.Name.Should().Be("Danny");
+        Assert.NotNull(member);
+        Assert.Equal("Danny", member!.Name);
     }
 
     [Fact]
@@ -191,7 +191,7 @@ public class TeamServiceTests : IDisposable
         var svc = new TeamService(SquadDir);
         var member = await svc.GetMemberAsync("Unknown");
 
-        member.Should().BeNull();
+        Assert.Null(member);
     }
 
     [Fact]
@@ -214,7 +214,7 @@ public class TeamServiceTests : IDisposable
         var svc = new TeamService(SquadDir);
         var roster = await svc.GetRosterAsync();
 
-        roster.Description.Should().Be("A terminal user interface for managing AI squads");
+        Assert.Equal("A terminal user interface for managing AI squads", roster.Description);
     }
 
     [Fact]
@@ -234,8 +234,8 @@ public class TeamServiceTests : IDisposable
         var svc = new TeamService(SquadDir);
         var roster = await svc.GetRosterAsync();
 
-        roster.Members!.First().CharterPath.Should().NotBeNull();
-        File.Exists(roster.Members!.First().CharterPath).Should().BeTrue();
+        Assert.NotNull(roster.Members!.First().CharterPath);
+        Assert.True(File.Exists(roster.Members!.First().CharterPath));
     }
 
     [Fact]
@@ -254,6 +254,6 @@ public class TeamServiceTests : IDisposable
         var svc = new TeamService(SquadDir);
         var roster = await svc.GetRosterAsync();
 
-        roster.Members!.First().CharterPath.Should().BeNull();
+        Assert.Null(roster.Members!.First().CharterPath);
     }
 }

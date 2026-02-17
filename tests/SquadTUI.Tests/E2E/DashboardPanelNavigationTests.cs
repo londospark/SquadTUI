@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Hex1b;
 using Hex1b.Automation;
 using Hex1b.Input;
@@ -24,7 +23,7 @@ public class DashboardPanelNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Dashboard"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -49,7 +48,7 @@ public class DashboardPanelNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Dashboard"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -71,7 +70,7 @@ public class DashboardPanelNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Dashboard"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -93,7 +92,7 @@ public class DashboardPanelNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Team Roster").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Team Roster"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -116,7 +115,7 @@ public class DashboardPanelNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Activity Log").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Activity Log"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -140,7 +139,7 @@ public class DashboardPanelNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Decisions").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Decisions"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -165,7 +164,7 @@ public class DashboardPanelNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Sprint Metrics").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Sprint Metrics"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -197,7 +196,7 @@ public class DashboardPanelNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Team Roster").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Team Roster"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -213,7 +212,7 @@ public class DashboardPanelNavigationTests
 
         // Default focus is panel 0 — Team Roster header should have reverse video
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Team Roster").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Team Roster"));
 
         // RightArrow to panel 1 and verify Activity header is visible
         var sequence = new Hex1bTerminalInputSequenceBuilder()
@@ -223,8 +222,8 @@ public class DashboardPanelNavigationTests
         await Task.Delay(200);
 
         snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Activity").Should().BeTrue();
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Activity"));
+        Assert.True(snapshot.ContainsText("Dashboard"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

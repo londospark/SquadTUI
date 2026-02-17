@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Hex1b;
 using Hex1b.Automation;
 using Hex1b.Input;
@@ -23,9 +22,9 @@ public class MetricsScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Sprint Metrics").Should().BeTrue();
-        snapshot.ContainsText("Sprint Overview").Should().BeTrue();
-        snapshot.ContainsText("Completion Rate:").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Sprint Metrics"));
+        Assert.True(snapshot.ContainsText("Sprint Overview"));
+        Assert.True(snapshot.ContainsText("Completion Rate:"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -46,8 +45,8 @@ public class MetricsScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Velocity View").Should().BeTrue();
-        snapshot.ContainsText("Avg Velocity:").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Velocity View"));
+        Assert.True(snapshot.ContainsText("Avg Velocity:"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -68,7 +67,7 @@ public class MetricsScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Team size:").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Team size:"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -95,7 +94,7 @@ public class MetricsScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Burndown View").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Burndown View"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -124,7 +123,7 @@ public class MetricsScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Velocity View").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Velocity View"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Hex1b;
 using Hex1b.Automation;
 using Hex1b.Input;
@@ -23,7 +22,7 @@ public class ThemeModalTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Theme Selection").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Theme Selection"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -44,9 +43,9 @@ public class ThemeModalTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Ocean").Should().BeTrue();
-        snapshot.ContainsText("Heist").Should().BeTrue();
-        snapshot.ContainsText("Sunset").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Ocean"));
+        Assert.True(snapshot.ContainsText("Heist"));
+        Assert.True(snapshot.ContainsText("Sunset"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -69,8 +68,8 @@ public class ThemeModalTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Theme Selection").Should().BeFalse();
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
+        Assert.False(snapshot.ContainsText("Theme Selection"));
+        Assert.True(snapshot.ContainsText("Dashboard"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -91,9 +90,9 @@ public class ThemeModalTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Navigate").Should().BeTrue();
-        snapshot.ContainsText("Confirm").Should().BeTrue();
-        snapshot.ContainsText("Cancel").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Navigate"));
+        Assert.True(snapshot.ContainsText("Confirm"));
+        Assert.True(snapshot.ContainsText("Cancel"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -116,8 +115,8 @@ public class ThemeModalTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Theme Selection").Should().BeFalse();
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
+        Assert.False(snapshot.ContainsText("Theme Selection"));
+        Assert.True(snapshot.ContainsText("Dashboard"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -139,8 +138,8 @@ public class ThemeModalTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
-        snapshot.ContainsText("Theme Selection").Should().BeFalse();
+        Assert.True(snapshot.ContainsText("Dashboard"));
+        Assert.False(snapshot.ContainsText("Theme Selection"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
