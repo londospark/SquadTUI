@@ -11,6 +11,12 @@ public class ThemeBackgroundTests
     [InlineData(1)]
     [InlineData(2)]
     [InlineData(3)]
+    [InlineData(4)]
+    [InlineData(5)]
+    [InlineData(6)]
+    [InlineData(7)]
+    [InlineData(8)]
+    [InlineData(9)]
     public void EachTheme_HasBackgroundColor(int index)
     {
         var theme = ThemeManager.GetTheme(index);
@@ -36,6 +42,12 @@ public class ThemeBackgroundTests
     [InlineData(1)]
     [InlineData(2)]
     [InlineData(3)]
+    [InlineData(4)]
+    [InlineData(5)]
+    [InlineData(6)]
+    [InlineData(7)]
+    [InlineData(8)]
+    [InlineData(9)]
     public void EachTheme_DividerColorDiffersFromBackground(int index)
     {
         var theme = ThemeManager.GetTheme(index);
@@ -52,6 +64,12 @@ public class ThemeBackgroundTests
     [InlineData(1)]
     [InlineData(2)]
     [InlineData(3)]
+    [InlineData(4)]
+    [InlineData(5)]
+    [InlineData(6)]
+    [InlineData(7)]
+    [InlineData(8)]
+    [InlineData(9)]
     public void EachTheme_DividerColorIsNotPureBlack(int index)
     {
         var theme = ThemeManager.GetTheme(index);
@@ -82,6 +100,12 @@ public class ThemeBackgroundTests
     [InlineData(1, "Heist")]
     [InlineData(2, "Sunset")]
     [InlineData(3, "HighContrast")]
+    [InlineData(4, "Forest")]
+    [InlineData(5, "Cyberpunk")]
+    [InlineData(6, "Midnight")]
+    [InlineData(7, "Ember")]
+    [InlineData(8, "Arctic")]
+    [InlineData(9, "Retro")]
     public void Theme_HasExpectedName(int index, string expectedName)
     {
         ThemeManager.ThemeNames[index].Should().Be(expectedName);
