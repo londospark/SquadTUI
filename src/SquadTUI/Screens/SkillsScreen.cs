@@ -34,7 +34,8 @@ public static class SkillsScreen
 
         var members = state.Members.GetOrEmpty();
         var relatedMembers = GetRelatedMembers(selected.Name, members);
-        var confidence = GetConfidenceLevel(selected.Name);
+        var confidenceValue = ProgressBarRenderer.ConfidenceToFloat(selected.Confidence);
+        var confidence = ProgressBarRenderer.Render(confidenceValue);
 
         var hBg = ThemeManager.GetPanelHeaderBg(state.SelectedThemeIndex);
         var panelBg = ThemeManager.GetPanelBgColor(state.SelectedThemeIndex);
@@ -64,7 +65,7 @@ public static class SkillsScreen
                     detail.Text($"  {sec}{new string('━', 36)}{R}"),
                     detail.Text(""),
                     detail.Text($"    {D}Description:{R}  {selected.Description}{R}"),
-                    detail.Text($"    {D}Confidence:{R}   {confidence.Bar} {B}{confidence.Level}{R}"),
+                    detail.Text($"    {D}Confidence:{R}   {confidence.Bar} {B}{confidence.Label}{R}"),
                     detail.Text(""),
                     detail.Text($"  {sec}{new string('━', 36)}{R}"),
                     detail.Text(""),
@@ -91,29 +92,14 @@ public static class SkillsScreen
         ]).Fill();
     }
 
-    private static List<string> GetRelatedMembers(string skillName, IReadOnlyList<Models.SquadMember> members)
-    {
-        return skillName switch
+    private static List<string> GetRelatedMembers(string skillName, IReadOnlyList<Models.SquadMember> members) =>
+        skillName switch
         {
-            "code-review" => members.Where(m => m.Role.Contains("Dev") || m.Role.Contains("Lead")).Select(m => m.Name).ToList(),
-            "testing" => members.Where(m => m.Role.Contains("Test")).Select(m => m.Name).ToList(),
-            "documentation" => members.Where(m => m.Role.Contains("Scribe")).Select(m => m.Name).ToList(),
-            "refactoring" => members.Where(m => m.Role.Contains("Dev")).Select(m => m.Name).ToList(),
-            "debugging" => members.Where(m => m.Role.Contains("Dev") || m.Role.Contains("Test")).Select(m => m.Name).ToList(),
+            "code-review" => (from m in members where m.Role.Contains("Dev") || m.Role.Contains("Lead") select m.Name).ToList(),
+            "testing" => (from m in members where m.Role.Contains("Test") select m.Name).ToList(),
+            "documentation" => (from m in members where m.Role.Contains("Scribe") select m.Name).ToList(),
+            "refactoring" => (from m in members where m.Role.Contains("Dev") select m.Name).ToList(),
+            "debugging" => (from m in members where m.Role.Contains("Dev") || m.Role.Contains("Test") select m.Name).ToList(),
             _ => []
         };
-    }
-
-    private static (string Bar, string Level) GetConfidenceLevel(string skillName)
-    {
-        return skillName switch
-        {
-            "code-review" => ("\x1b[32m████████\x1b[90m░░\x1b[0m", "High"),
-            "testing" => ("\x1b[32m███████\x1b[90m░░░\x1b[0m", "High"),
-            "documentation" => ("\x1b[33m██████\x1b[90m░░░░\x1b[0m", "Medium"),
-            "refactoring" => ("\x1b[33m█████\x1b[90m░░░░░\x1b[0m", "Medium"),
-            "debugging" => ("\x1b[32m████████\x1b[90m░░\x1b[0m", "High"),
-            _ => ("\x1b[33m████\x1b[90m░░░░░░\x1b[0m", "Medium")
-        };
-    }
 }

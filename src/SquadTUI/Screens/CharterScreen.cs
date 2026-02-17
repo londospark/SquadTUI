@@ -9,6 +9,8 @@ namespace SquadTUI.Screens;
 
 public static class CharterScreen
 {
+    private const int VisibleLines = 20;
+
     public static Hex1bWidget Render(WidgetContext<VStackWidget> v, AppState state, Hex1bApp app)
     {
         var members = state.Members.GetOrEmpty();
@@ -23,6 +25,22 @@ public static class CharterScreen
         var panelBg = ThemeManager.GetPanelBgColor(state.SelectedThemeIndex);
         var em = state.Settings.ShowEmoji;
 
+        // Render all markdown lines, then slice for scrolling
+        var allWidgets = MarkdownRenderer.Render(v, charter);
+        var totalLines = allWidgets.Length;
+        var maxScroll = Math.Max(0, totalLines - VisibleLines);
+        state.CharterScrollOffset = Math.Clamp(state.CharterScrollOffset, 0, maxScroll);
+
+        var visibleWidgets = allWidgets
+            .Skip(state.CharterScrollOffset)
+            .Take(VisibleLines)
+            .ToArray();
+
+        // Scroll indicator
+        var scrollInfo = totalLines > VisibleLines
+            ? $"  {D}[{state.CharterScrollOffset + 1}–{Math.Min(state.CharterScrollOffset + VisibleLines, totalLines)}/{totalLines}] j/k to scroll{R}"
+            : "";
+
         return new BackgroundPanelWidget(panelBg, v.VStack(inner =>
         [
             inner.Text($"  {B}{acc}{Icon("📜", "▪", em)} Charter — {memberName}{R}"),
@@ -30,10 +48,10 @@ public static class CharterScreen
             inner.Text(""),
             inner.VStack(scroll =>
             [
-                ..MarkdownRenderer.Render(scroll, charter),
+                ..visibleWidgets,
             ]).Fill(),
             inner.Text(""),
-            inner.Text($"  {D}Esc Back{R}"),
+            inner.Text($"  {D}Esc Back{R}{scrollInfo}"),
         ]).Fill());
     }
 }

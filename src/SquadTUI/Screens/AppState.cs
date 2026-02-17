@@ -51,8 +51,13 @@ public class AppState
     public bool ShowHelp { get; set; } = false;
     public bool ShowBurndown { get; set; } = false;
 
+    // Scroll offset for markdown views (Charter, etc.)
+    public int CharterScrollOffset { get; set; } = 0;
+
     // Theme modal overlay
     public bool ShowSettingsOverlay { get; set; } = false;
+    public bool ShowSettingsModal { get; set; } = false;
+    public int SettingsModalSelectedIndex { get; set; } = 0;
     public int PreviewThemeIndex { get; set; } = -1; // -1 means "use SelectedThemeIndex"
     public int OriginalThemeIndex { get; set; } = 0;
 

@@ -25,14 +25,103 @@ public static class MarkdownRenderer
 
         var lines = markdown.Split('\n');
         var widgets = new List<Hex1bWidget>();
+        var i = 0;
 
-        foreach (var rawLine in lines)
+        while (i < lines.Length)
         {
-            var line = rawLine.TrimEnd('\r');
+            var line = lines[i].TrimEnd('\r');
+
+            // Detect markdown tables (lines starting with |)
+            if (line.TrimStart().StartsWith('|'))
+            {
+                var tableLines = new List<string>();
+                while (i < lines.Length && lines[i].TrimEnd('\r').TrimStart().StartsWith('|'))
+                {
+                    tableLines.Add(lines[i].TrimEnd('\r'));
+                    i++;
+                }
+                widgets.AddRange(RenderTable(ctx, tableLines));
+                continue;
+            }
+
             widgets.Add(RenderLine(ctx, line));
+            i++;
         }
 
         return widgets.ToArray();
+    }
+
+    private static Hex1bWidget[] RenderTable<T>(WidgetContext<T> ctx, List<string> tableLines) where T : Hex1bWidget
+    {
+        if (tableLines.Count == 0) return [];
+
+        // Parse rows, skipping separator lines (|---|---|)
+        var rows = new List<string[]>();
+        var separatorIndex = -1;
+        for (var i = 0; i < tableLines.Count; i++)
+        {
+            var trimmed = tableLines[i].Trim();
+            var cells = ParseTableRow(trimmed);
+            if (cells.Length > 0 && cells.All(c => c.Trim().All(ch => ch == '-' || ch == ':' || ch == ' ')))
+            {
+                separatorIndex = i;
+                continue; // skip separator
+            }
+            rows.Add(cells);
+        }
+
+        if (rows.Count == 0) return [];
+
+        // Calculate column widths
+        var colCount = rows.Max(r => r.Length);
+        var colWidths = new int[colCount];
+        foreach (var row in rows)
+        {
+            for (var c = 0; c < row.Length; c++)
+                colWidths[c] = Math.Max(colWidths[c], row[c].Trim().Length);
+        }
+
+        var widgets = new List<Hex1bWidget>();
+
+        // Top border: ┌─────┬─────┐
+        widgets.Add(ctx.Text($"  {DarkGray}┌{string.Join("┬", colWidths.Select(w => new string('─', w + 2)))}┐{Reset}"));
+
+        for (var r = 0; r < rows.Count; r++)
+        {
+            var row = rows[r];
+            var cellTexts = new string[colCount];
+            for (var c = 0; c < colCount; c++)
+            {
+                var cell = c < row.Length ? row[c].Trim() : "";
+                cellTexts[c] = cell.PadRight(colWidths[c]);
+            }
+
+            if (r == 0 && separatorIndex == 1)
+            {
+                // Header row: bold
+                widgets.Add(ctx.Text($"  {DarkGray}│{Reset} {string.Join($" {DarkGray}│{Reset} ", cellTexts.Select(c => $"{Bold}{c}{Reset}"))} {DarkGray}│{Reset}"));
+                // Header separator: ├─────┼─────┤
+                widgets.Add(ctx.Text($"  {DarkGray}├{string.Join("┼", colWidths.Select(w => new string('─', w + 2)))}┤{Reset}"));
+            }
+            else
+            {
+                // Data row
+                widgets.Add(ctx.Text($"  {DarkGray}│{Reset} {string.Join($" {DarkGray}│{Reset} ", cellTexts)} {DarkGray}│{Reset}"));
+            }
+        }
+
+        // Bottom border: └─────┴─────┘
+        widgets.Add(ctx.Text($"  {DarkGray}└{string.Join("┴", colWidths.Select(w => new string('─', w + 2)))}┘{Reset}"));
+
+        return widgets.ToArray();
+    }
+
+    private static string[] ParseTableRow(string line)
+    {
+        // Remove leading/trailing | and split
+        if (line.StartsWith('|')) line = line[1..];
+        if (line.EndsWith('|')) line = line[..^1];
+        return line.Split('|');
     }
 
     private static Hex1bWidget RenderLine<T>(WidgetContext<T> ctx, string line) where T : Hex1bWidget
