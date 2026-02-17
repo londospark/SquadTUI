@@ -1,4 +1,3 @@
-using FluentAssertions;
 using SquadTUI.Services;
 
 namespace SquadTUI.Tests.Integration;
@@ -14,7 +13,7 @@ public class SkillServiceIntegrationTests
         var svc = new SkillService(GetFixturesPath());
         var skills = await svc.GetSkillsAsync();
 
-        skills.Should().ContainSingle();
+        Assert.Single(skills);
     }
 
     [Fact]
@@ -24,11 +23,11 @@ public class SkillServiceIntegrationTests
         var skills = await svc.GetSkillsAsync();
 
         var skill = skills.First();
-        skill.Name.Should().Be("test-skill");
-        skill.Description.Should().Be("A skill for testing purposes");
-        skill.Source.Should().Be("manual");
-        skill.Confidence.Should().Be("high");
-        skill.Slug.Should().Be("test-skill");
+        Assert.Equal("test-skill", skill.Name);
+        Assert.Equal("A skill for testing purposes", skill.Description);
+        Assert.Equal("manual", skill.Source);
+        Assert.Equal("high", skill.Confidence);
+        Assert.Equal("test-skill", skill.Slug);
     }
 
     [Fact]
@@ -37,7 +36,7 @@ public class SkillServiceIntegrationTests
         var svc = new SkillService(GetFixturesPath());
         var skills = await svc.GetSkillsAsync();
 
-        skills.First().Content.Should().Contain("integration tests");
+        Assert.Contains("integration tests", skills.First().Content);
     }
 
     [Fact]
@@ -46,8 +45,8 @@ public class SkillServiceIntegrationTests
         var svc = new SkillService(GetFixturesPath());
         var skill = await svc.GetSkillAsync("test-skill");
 
-        skill.Should().NotBeNull();
-        skill!.Name.Should().Be("test-skill");
+        Assert.NotNull(skill);
+        Assert.Equal("test-skill", skill!.Name);
     }
 
     [Fact]
@@ -56,6 +55,6 @@ public class SkillServiceIntegrationTests
         var svc = new SkillService(GetFixturesPath());
         var skill = await svc.GetSkillAsync("nonexistent");
 
-        skill.Should().BeNull();
+        Assert.Null(skill);
     }
 }

@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Hex1b;
 using Hex1b.Automation;
 using Hex1b.Input;
@@ -30,7 +29,7 @@ public class NoSquadGuardTests
 
         var snapshot = terminal.CreateSnapshot();
         // Should still be on NoSquad screen — look for welcome text
-        snapshot.ContainsText("Welcome to SquadTUI").Should().BeTrue(
+        Assert.True(snapshot.ContainsText("Welcome to SquadTUI"),
             $"pressing {key} should not navigate away from NoSquad screen");
 
         cts.Cancel();
@@ -52,7 +51,7 @@ public class NoSquadGuardTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Welcome to SquadTUI").Should().BeTrue(
+        Assert.True(snapshot.ContainsText("Welcome to SquadTUI"),
             "pressing S should not navigate away from NoSquad screen");
 
         cts.Cancel();
@@ -78,7 +77,7 @@ public class NoSquadGuardTests
 
             // Verify we start on NoSquad
             var snapshot1 = terminal.CreateSnapshot();
-            snapshot1.ContainsText("Welcome to SquadTUI").Should().BeTrue();
+            Assert.True(snapshot1.ContainsText("Welcome to SquadTUI"));
 
             // Press C to create squad structure
             var sequence = new Hex1bTerminalInputSequenceBuilder()
@@ -89,7 +88,7 @@ public class NoSquadGuardTests
 
             // Should now be on Dashboard
             var snapshot2 = terminal.CreateSnapshot();
-            snapshot2.ContainsText("Dashboard").Should().BeTrue(
+            Assert.True(snapshot2.ContainsText("Dashboard"),
                 "pressing C should create squad and navigate to Dashboard");
 
             cts.Cancel();
@@ -125,10 +124,10 @@ public class NoSquadGuardTests
             await Task.Delay(300);
 
             // Verify .squad structure was created (new directory name)
-            Directory.Exists(Path.Combine(tempDir, ".squad")).Should().BeTrue();
-            Directory.Exists(Path.Combine(tempDir, ".squad", "agents")).Should().BeTrue();
-            File.Exists(Path.Combine(tempDir, ".squad", "team.md")).Should().BeTrue();
-            File.Exists(Path.Combine(tempDir, ".squad", "decisions.md")).Should().BeTrue();
+            Assert.True(Directory.Exists(Path.Combine(tempDir, ".squad")));
+            Assert.True(Directory.Exists(Path.Combine(tempDir, ".squad", "agents")));
+            Assert.True(File.Exists(Path.Combine(tempDir, ".squad", "team.md")));
+            Assert.True(File.Exists(Path.Combine(tempDir, ".squad", "decisions.md")));
 
             cts.Cancel();
             try { await runTask; } catch (OperationCanceledException) { }

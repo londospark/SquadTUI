@@ -1,4 +1,3 @@
-using FluentAssertions;
 using LanguageExt;
 using static LanguageExt.Prelude;
 using NSubstitute;
@@ -45,11 +44,11 @@ public class IntegrationTests
         var logs = await bridge.LoadLogDataAsync();
         var tasks = await bridge.LoadTasksFromRosterAsync();
 
-        roster.IsLeft.Should().BeTrue();
-        decisions.IsLeft.Should().BeTrue();
-        skills.IsLeft.Should().BeTrue();
-        logs.IsLeft.Should().BeTrue();
-        tasks.IsLeft.Should().BeTrue();
+        Assert.True(roster.IsLeft);
+        Assert.True(decisions.IsLeft);
+        Assert.True(skills.IsLeft);
+        Assert.True(logs.IsLeft);
+        Assert.True(tasks.IsLeft);
     }
 
     [Fact]
@@ -69,9 +68,9 @@ public class IntegrationTests
         var roster = await bridge.LoadRosterDataAsync();
         var decisions = await bridge.LoadDecisionsDataAsync();
 
-        roster.IsLeft.Should().BeTrue("team service failed");
-        decisions.IsRight.Should().BeTrue("decision service succeeded");
-        decisions.GetOrEmpty().Should().HaveCount(1);
+        Assert.True(roster.IsLeft);
+        Assert.True(decisions.IsRight);
+        Assert.Equal(1, decisions.GetOrEmpty().Count);
     }
 
     [Fact]
@@ -85,7 +84,7 @@ public class IntegrationTests
         var bridge = new DataBridge(sp);
 
         var result = await bridge.LoadCharterContentAsync("nobody");
-        result.IsNone.Should().BeTrue();
+        Assert.True(result.IsNone);
     }
 
     [Fact]
@@ -99,7 +98,7 @@ public class IntegrationTests
         var bridge = new DataBridge(sp);
 
         var result = await bridge.LoadCharterContentAsync("crash");
-        result.IsNone.Should().BeTrue("exception should be caught and return None");
+        Assert.True(result.IsNone);
     }
 
     [Fact]
@@ -113,8 +112,8 @@ public class IntegrationTests
         var bridge = new DataBridge(sp);
 
         var result = await bridge.LoadRosterDataAsync();
-        result.IsRight.Should().BeTrue();
-        result.GetOrEmpty().Should().BeEmpty();
+        Assert.True(result.IsRight);
+        Assert.Empty(result.GetOrEmpty());
     }
 
     [Fact]
@@ -128,8 +127,8 @@ public class IntegrationTests
         var bridge = new DataBridge(sp);
 
         var result = await bridge.LoadRosterDataAsync();
-        result.IsRight.Should().BeTrue();
-        result.GetOrEmpty().Should().BeEmpty("null Members should become empty list");
+        Assert.True(result.IsRight);
+        Assert.Empty(result.GetOrEmpty());
     }
 
     #endregion
@@ -155,9 +154,9 @@ public class IntegrationTests
             }),
         };
 
-        state.Members.GetOrEmpty().Should().HaveCount(1);
-        state.Tasks.GetOrEmpty().Should().HaveCount(1);
-        state.Decisions.GetOrEmpty().Should().HaveCount(1);
+        Assert.Equal(1, state.Members.GetOrEmpty().Count);
+        Assert.Equal(1, state.Tasks.GetOrEmpty().Count);
+        Assert.Equal(1, state.Decisions.GetOrEmpty().Count);
     }
 
     [Fact]
@@ -170,9 +169,9 @@ public class IntegrationTests
             Decisions = Left<AppError, IReadOnlyList<DecisionEntry>>(new NoDataError("decisions")),
         };
 
-        state.Members.IsLeft.Should().BeTrue();
-        state.Tasks.IsLeft.Should().BeTrue();
-        state.Decisions.IsLeft.Should().BeTrue();
+        Assert.True(state.Members.IsLeft);
+        Assert.True(state.Tasks.IsLeft);
+        Assert.True(state.Decisions.IsLeft);
     }
 
     [Fact]
@@ -187,10 +186,10 @@ public class IntegrationTests
             Tasks = Left<AppError, IReadOnlyList<SquadTask>>(new ServiceError("Tasks", "timeout")),
         };
 
-        state.Members.IsRight.Should().BeTrue();
-        state.Members.GetOrEmpty().Should().HaveCount(1);
-        state.Tasks.IsLeft.Should().BeTrue();
-        state.Tasks.GetOrEmpty().Should().BeEmpty();
+        Assert.True(state.Members.IsRight);
+        Assert.Equal(1, state.Members.GetOrEmpty().Count);
+        Assert.True(state.Tasks.IsLeft);
+        Assert.Empty(state.Tasks.GetOrEmpty());
     }
 
     #endregion
@@ -201,7 +200,7 @@ public class IntegrationTests
     public void AppSettings_DefaultThemeName_IsOcean()
     {
         var settings = new AppSettings();
-        settings.ThemeName.Should().Be("Ocean");
+        Assert.Equal("Ocean", settings.ThemeName);
     }
 
     [Theory]
@@ -217,7 +216,7 @@ public class IntegrationTests
     [InlineData(9, "Retro")]
     public void ThemeIndex_MapsToThemeName(int index, string expectedName)
     {
-        ThemeManager.ThemeNames[index].Should().Be(expectedName);
+        Assert.Equal(expectedName, ThemeManager.ThemeNames[index]);
     }
 
     [Fact]
@@ -227,7 +226,7 @@ public class IntegrationTests
         for (int i = 0; i < 10; i++)
         {
             state.SelectedThemeIndex = i;
-            ThemeManager.ThemeNames[state.SelectedThemeIndex].Should().NotBeNullOrEmpty();
+            Assert.False(string.IsNullOrEmpty(ThemeManager.ThemeNames[state.SelectedThemeIndex]));
         }
     }
 
@@ -238,7 +237,7 @@ public class IntegrationTests
         foreach (var name in ThemeManager.ThemeNames)
         {
             settings.ThemeName = name;
-            settings.ThemeName.Should().Be(name);
+            Assert.Equal(name, settings.ThemeName);
         }
     }
 
@@ -249,8 +248,8 @@ public class IntegrationTests
         var json = System.Text.Json.JsonSerializer.Serialize(settings);
         var deserialized = System.Text.Json.JsonSerializer.Deserialize<AppSettings>(json);
 
-        deserialized.Should().NotBeNull();
-        deserialized!.ThemeName.Should().Be("Cyberpunk");
+        Assert.NotNull(deserialized);
+        Assert.Equal("Cyberpunk", deserialized!.ThemeName);
     }
 
     [Fact]
@@ -268,13 +267,13 @@ public class IntegrationTests
         var json = System.Text.Json.JsonSerializer.Serialize(settings);
         var deserialized = System.Text.Json.JsonSerializer.Deserialize<AppSettings>(json);
 
-        deserialized.Should().NotBeNull();
-        deserialized!.ThemeName.Should().Be("Retro");
-        deserialized.VimBindings.Should().BeFalse();
-        deserialized.MouseEnabled.Should().BeFalse();
-        deserialized.ShowEmoji.Should().BeFalse();
-        deserialized.MarkdownRendering.Should().BeFalse();
-        deserialized.DefaultScreen.Should().Be("Roster");
+        Assert.NotNull(deserialized);
+        Assert.Equal("Retro", deserialized!.ThemeName);
+        Assert.False(deserialized.VimBindings);
+        Assert.False(deserialized.MouseEnabled);
+        Assert.False(deserialized.ShowEmoji);
+        Assert.False(deserialized.MarkdownRendering);
+        Assert.Equal("Roster", deserialized.DefaultScreen);
     }
 
     [Fact]
@@ -282,7 +281,7 @@ public class IntegrationTests
     {
         var corrupt = "{ invalid json @@@ }";
         var act = () => System.Text.Json.JsonSerializer.Deserialize<AppSettings>(corrupt);
-        act.Should().Throw<System.Text.Json.JsonException>();
+        Assert.Throws<System.Text.Json.JsonException>(act);
     }
 
     #endregion

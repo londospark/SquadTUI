@@ -1,4 +1,3 @@
-using FluentAssertions;
 using NSubstitute;
 using SquadTUI.Models;
 using SquadTUI.Services;
@@ -39,9 +38,9 @@ public class SquadDataProviderTests
 
         var dashboard = await _provider.GetDashboardAsync();
 
-        dashboard.Team.Should().NotBeNull();
-        dashboard.Decisions.Should().NotBeEmpty();
-        dashboard.Activity.Should().NotBeEmpty();
+        Assert.NotNull(dashboard.Team);
+        Assert.NotEmpty(dashboard.Decisions);
+        Assert.NotEmpty(dashboard.Activity);
     }
 
     [Fact]
@@ -61,8 +60,8 @@ public class SquadDataProviderTests
 
         var dashboard = await _provider.GetDashboardAsync();
 
-        dashboard.Team.TotalMembers.Should().Be(3);
-        dashboard.Team.ActiveMembers.Should().Be(2); // Active + Working
+        Assert.Equal(3, dashboard.Team.TotalMembers);
+        Assert.Equal(2, dashboard.Team.ActiveMembers); // Active + Working
     }
 
     [Fact]
@@ -84,9 +83,9 @@ public class SquadDataProviderTests
 
         var dashboard = await _provider.GetDashboardAsync();
 
-        dashboard.Activity.Should().ContainSingle();
-        dashboard.Activity[0].MemberName.Should().Be("Danny");
-        dashboard.Activity[0].LogEntries.Should().ContainSingle();
+        Assert.Single(dashboard.Activity);
+        Assert.Equal("Danny", dashboard.Activity[0].MemberName);
+        Assert.Single(dashboard.Activity[0].LogEntries);
     }
 
     [Fact]
@@ -97,7 +96,7 @@ public class SquadDataProviderTests
 
         var result = await _provider.GetRosterAsync();
 
-        result.Should().Be(roster);
+        Assert.Equal(roster, result);
     }
 
     [Fact]
@@ -108,7 +107,7 @@ public class SquadDataProviderTests
 
         var result = await _provider.GetDecisionsAsync();
 
-        result.Should().BeEquivalentTo(decisions);
+        Assert.Equal(decisions, result);
     }
 
     [Fact]
@@ -122,7 +121,7 @@ public class SquadDataProviderTests
 
         var result = await _provider.GetLogEntriesAsync();
 
-        result.Should().BeEquivalentTo(logs);
+        Assert.Equal(logs, result);
     }
 
     [Fact]
@@ -133,6 +132,6 @@ public class SquadDataProviderTests
 
         var result = await _provider.GetSkillsAsync();
 
-        result.Should().BeEquivalentTo(skills);
+        Assert.Equal(skills, result);
     }
 }

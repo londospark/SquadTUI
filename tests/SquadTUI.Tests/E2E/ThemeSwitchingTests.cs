@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Hex1b;
 using Hex1b.Automation;
 using Hex1b.Input;
@@ -17,7 +16,7 @@ public class ThemeSwitchingTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Dashboard"));
 
         // Press T three times to cycle through themes
         for (int i = 0; i < 3; i++)
@@ -31,7 +30,7 @@ public class ThemeSwitchingTests
 
         // App should still render correctly after theme cycling
         var snapshot2 = terminal.CreateSnapshot();
-        snapshot2.ContainsText("Dashboard").Should().BeTrue();
+        Assert.True(snapshot2.ContainsText("Dashboard"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -46,7 +45,7 @@ public class ThemeSwitchingTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Dashboard"));
 
         // Press T 4 times to wrap around to initial theme
         for (int i = 0; i < 4; i++)
@@ -59,7 +58,7 @@ public class ThemeSwitchingTests
         }
 
         var finalSnapshot = terminal.CreateSnapshot();
-        finalSnapshot.ContainsText("Dashboard").Should().BeTrue();
+        Assert.True(finalSnapshot.ContainsText("Dashboard"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -74,7 +73,7 @@ public class ThemeSwitchingTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Dashboard"));
 
         var sequence = new Hex1bTerminalInputSequenceBuilder()
             .Key(Hex1bKey.T)
@@ -84,8 +83,8 @@ public class ThemeSwitchingTests
 
         // After theme change, nav and content should still render
         var snapshot2 = terminal.CreateSnapshot();
-        snapshot2.ContainsText("Dashboard").Should().BeTrue();
-        snapshot2.ContainsText("Roster").Should().BeTrue();
+        Assert.True(snapshot2.ContainsText("Dashboard"));
+        Assert.True(snapshot2.ContainsText("Roster"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Hex1b;
 using Hex1b.Automation;
 using Hex1b.Input;
@@ -23,7 +22,7 @@ public class SettingsNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Theme Selection").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Theme Selection"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -46,7 +45,7 @@ public class SettingsNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Dashboard"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -67,7 +66,7 @@ public class SettingsNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Ocean").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Ocean"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -88,7 +87,7 @@ public class SettingsNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Heist").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Heist"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -109,7 +108,7 @@ public class SettingsNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Navigate").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Navigate"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -130,8 +129,8 @@ public class SettingsNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Confirm").Should().BeTrue();
-        snapshot.ContainsText("Cancel").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Confirm"));
+        Assert.True(snapshot.ContainsText("Cancel"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -152,8 +151,8 @@ public class SettingsNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Theme Selection").Should().BeTrue();
-        snapshot.ContainsText("Ocean").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Theme Selection"));
+        Assert.True(snapshot.ContainsText("Ocean"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -174,7 +173,7 @@ public class SettingsNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Theme Selection").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Theme Selection"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

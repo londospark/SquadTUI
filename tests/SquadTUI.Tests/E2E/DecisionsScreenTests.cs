@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Hex1b;
 using Hex1b.Automation;
 using Hex1b.Input;
@@ -23,7 +22,7 @@ public class DecisionsScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Project Architecture").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Project Architecture"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -44,8 +43,8 @@ public class DecisionsScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Sonic").Should().BeTrue();
-        snapshot.ContainsText("2026-02-16").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Sonic"));
+        Assert.True(snapshot.ContainsText("2026-02-16"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -67,7 +66,7 @@ public class DecisionsScreenTests
 
         var snapshot = terminal.CreateSnapshot();
         // Detail pane now shows selected decision title and content inline
-        snapshot.ContainsText("Date:").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Date:"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

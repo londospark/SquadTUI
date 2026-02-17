@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Hex1b.Theming;
 using SquadTUI.Themes;
 
@@ -21,7 +20,7 @@ public class ThemeBackgroundTests
     {
         var theme = ThemeManager.GetTheme(index);
         var bg = theme.Get(GlobalTheme.BackgroundColor);
-        bg.Should().NotBeNull();
+        Assert.NotNull(bg);
     }
 
     [Fact]
@@ -34,7 +33,7 @@ public class ThemeBackgroundTests
             var bg = theme.Get(GlobalTheme.BackgroundColor);
             backgrounds.Add(bg.ToBackgroundAnsi());
         }
-        backgrounds.Should().OnlyHaveUniqueItems("each theme should have a unique background color");
+        Assert.Equal(backgrounds.Distinct().Count(), backgrounds.Count());
     }
 
     [Theory]
@@ -56,7 +55,7 @@ public class ThemeBackgroundTests
 
         var bgAnsi = bg.ToBackgroundAnsi();
         var divAnsi = divider.ToBackgroundAnsi();
-        divAnsi.Should().NotBe(bgAnsi, "divider color should differ from background color");
+        Assert.NotEqual(bgAnsi, divAnsi);
     }
 
     [Theory]
@@ -79,7 +78,7 @@ public class ThemeBackgroundTests
         // Compare ANSI output — pure black would be a specific sequence
         var divAnsi = divider.ToBackgroundAnsi();
         var blackAnsi = pureBlack.ToBackgroundAnsi();
-        divAnsi.Should().NotBe(blackAnsi, "divider color should not be pure black");
+        Assert.NotEqual(blackAnsi, divAnsi);
     }
 
     [Fact]
@@ -92,7 +91,7 @@ public class ThemeBackgroundTests
             var divider = theme.Get(SplitterTheme.DividerColor);
             dividers.Add(divider.ToBackgroundAnsi());
         }
-        dividers.Should().OnlyHaveUniqueItems("each theme should have a unique divider color");
+        Assert.Equal(dividers.Distinct().Count(), dividers.Count());
     }
 
     [Theory]
@@ -108,6 +107,6 @@ public class ThemeBackgroundTests
     [InlineData(9, "Retro")]
     public void Theme_HasExpectedName(int index, string expectedName)
     {
-        ThemeManager.ThemeNames[index].Should().Be(expectedName);
+        Assert.Equal(expectedName, ThemeManager.ThemeNames[index]);
     }
 }

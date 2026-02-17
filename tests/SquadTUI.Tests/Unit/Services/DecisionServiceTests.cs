@@ -1,4 +1,3 @@
-using FluentAssertions;
 using SquadTUI.Services;
 
 namespace SquadTUI.Tests.Unit.Services;
@@ -64,7 +63,7 @@ public class DecisionServiceTests : IDisposable
         var svc = new DecisionService(SquadDir);
         var decisions = await svc.GetDecisionsAsync();
 
-        decisions.Should().HaveCount(3);
+        Assert.Equal(3, decisions.Count);
     }
 
     [Fact]
@@ -85,9 +84,9 @@ public class DecisionServiceTests : IDisposable
         var decisions = await svc.GetDecisionsAsync();
 
         var d = decisions.First();
-        d.Title.Should().Be("Architecture Decision");
-        d.Date.Should().Be("2026-02-16");
-        d.Author.Should().Be("Danny");
+        Assert.Equal("Architecture Decision", d.Title);
+        Assert.Equal("2026-02-16", d.Date);
+        Assert.Equal("Danny", d.Author);
     }
 
     [Fact]
@@ -105,9 +104,9 @@ public class DecisionServiceTests : IDisposable
         var decisions = await svc.GetDecisionsAsync();
 
         var d = decisions.First();
-        d.Title.Should().Be("Simple Decision");
-        d.Date.Should().BeEmpty();
-        d.Author.Should().BeEmpty();
+        Assert.Equal("Simple Decision", d.Title);
+        Assert.Empty(d.Date);
+        Assert.Empty(d.Author);
     }
 
     [Fact]
@@ -127,7 +126,7 @@ public class DecisionServiceTests : IDisposable
         var svc = new DecisionService(SquadDir);
         var decisions = await svc.GetDecisionsAsync();
 
-        decisions.First().Content.Should().Contain("This is the content of the decision.");
+        Assert.Contains("This is the content of the decision.", decisions.First().Content);
     }
 
     [Fact]
@@ -152,7 +151,7 @@ public class DecisionServiceTests : IDisposable
         var svc = new DecisionService(SquadDir);
         var decisions = await svc.GetDecisionsAsync();
 
-        decisions.Should().HaveCount(2);
+        Assert.Equal(2, decisions.Count);
     }
 
     [Fact]
@@ -167,7 +166,7 @@ public class DecisionServiceTests : IDisposable
         var svc = new DecisionService(SquadDir);
         var decisions = await svc.GetDecisionsAsync();
 
-        decisions.Should().BeEmpty();
+        Assert.Empty(decisions);
     }
 
     [Fact]
@@ -176,7 +175,7 @@ public class DecisionServiceTests : IDisposable
         var svc = new DecisionService(SquadDir);
         var decisions = await svc.GetDecisionsAsync();
 
-        decisions.Should().BeEmpty();
+        Assert.Empty(decisions);
     }
 
     [Fact]
@@ -185,7 +184,7 @@ public class DecisionServiceTests : IDisposable
         var svc = new DecisionService(SquadDir);
         var decisions = await svc.GetDecisionsAsync();
 
-        decisions.Should().BeEmpty();
+        Assert.Empty(decisions);
     }
 
     [Fact]
@@ -202,7 +201,7 @@ public class DecisionServiceTests : IDisposable
         var svc = new DecisionService(SquadDir);
         var decisions = await svc.GetDecisionsAsync();
 
-        decisions.First().Date.Should().Be("2026-02-16");
+        Assert.Equal("2026-02-16", decisions.First().Date);
     }
 
     [Fact]
@@ -223,8 +222,8 @@ public class DecisionServiceTests : IDisposable
         var decisions = await svc.GetDecisionsAsync();
 
         var d = decisions.First();
-        d.Date.Should().Be("2026-02-17");
-        d.Author.Should().Be("Saul");
+        Assert.Equal("2026-02-17", d.Date);
+        Assert.Equal("Saul", d.Author);
     }
 
     [Fact]
@@ -241,7 +240,7 @@ public class DecisionServiceTests : IDisposable
         var svc = new DecisionService(SquadDir);
         var decisions = await svc.GetDecisionsAsync();
 
-        decisions.First().FilePath.Should().NotBeNull();
-        decisions.First().LineNumber.Should().BeGreaterThan(0);
+        Assert.NotNull(decisions.First().FilePath);
+        Assert.True(decisions.First().LineNumber > 0);
     }
 }

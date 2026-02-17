@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Hex1b;
 using Hex1b.Automation;
 using Hex1b.Input;
@@ -24,7 +23,7 @@ public class CharterNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Team Roster").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Team Roster"));
 
         // Escape from Roster should go to Dashboard
         var backToDashboard = new Hex1bTerminalInputSequenceBuilder()
@@ -34,7 +33,7 @@ public class CharterNavigationTests
         await Task.Delay(200);
 
         snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Team Roster").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Team Roster"));
 
         // Navigate to Decisions
         var toDecisions = new Hex1bTerminalInputSequenceBuilder()
@@ -44,7 +43,7 @@ public class CharterNavigationTests
         await Task.Delay(200);
 
         snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Decisions").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Decisions"));
 
         // Escape from Decisions should go to Dashboard
         var backAgain = new Hex1bTerminalInputSequenceBuilder()
@@ -54,7 +53,7 @@ public class CharterNavigationTests
         await Task.Delay(200);
 
         snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Team Roster").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Team Roster"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

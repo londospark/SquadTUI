@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Hex1b;
 using Hex1b.Automation;
 using Hex1b.Input;
@@ -23,7 +22,7 @@ public class HelpNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Help").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Help"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -44,8 +43,8 @@ public class HelpNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("NAVIGATION").Should().BeTrue();
-        snapshot.ContainsText("ACTIONS").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("NAVIGATION"));
+        Assert.True(snapshot.ContainsText("ACTIONS"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -66,7 +65,7 @@ public class HelpNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("LIST NAVIGATION").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("LIST NAVIGATION"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -92,7 +91,7 @@ public class HelpNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Dashboard"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -116,7 +115,7 @@ public class HelpNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Dashboard"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

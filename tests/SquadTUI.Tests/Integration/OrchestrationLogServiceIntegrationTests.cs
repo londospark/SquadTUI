@@ -1,4 +1,3 @@
-using FluentAssertions;
 using SquadTUI.Services;
 
 namespace SquadTUI.Tests.Integration;
@@ -14,7 +13,7 @@ public class OrchestrationLogServiceIntegrationTests
         var svc = new OrchestrationLogService(GetFixturesPath());
         var entries = await svc.GetEntriesAsync();
 
-        entries.Should().NotBeEmpty();
+        Assert.NotEmpty(entries);
     }
 
     [Fact]
@@ -24,7 +23,7 @@ public class OrchestrationLogServiceIntegrationTests
         var entries = await svc.GetEntriesAsync();
 
         var kickoff = entries.First(e => e.Topic == "kickoff");
-        kickoff.Date.Should().Be("2026-02-16");
+        Assert.Equal("2026-02-16", kickoff.Date);
     }
 
     [Fact]
@@ -34,7 +33,9 @@ public class OrchestrationLogServiceIntegrationTests
         var entries = await svc.GetEntriesAsync();
 
         var kickoff = entries.First(e => e.Topic == "kickoff");
-        kickoff.Participants.Should().Contain(["Danny", "Linus", "Rusty"]);
+        Assert.Contains("Danny", kickoff.Participants);
+        Assert.Contains("Linus", kickoff.Participants);
+        Assert.Contains("Rusty", kickoff.Participants);
     }
 
     [Fact]
@@ -44,7 +45,7 @@ public class OrchestrationLogServiceIntegrationTests
         var entries = await svc.GetEntriesAsync();
 
         var kickoff = entries.First(e => e.Topic == "kickoff");
-        kickoff.Decisions.Should().Contain("Use Hex1b framework");
+        Assert.Contains("Use Hex1b framework", kickoff.Decisions);
     }
 
     [Fact]
@@ -54,6 +55,6 @@ public class OrchestrationLogServiceIntegrationTests
         var entries = await svc.GetEntriesAsync();
 
         var kickoff = entries.First(e => e.Topic == "kickoff");
-        kickoff.Outcomes.Should().Contain("Repository initialized");
+        Assert.Contains("Repository initialized", kickoff.Outcomes);
     }
 }

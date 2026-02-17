@@ -1,4 +1,3 @@
-using FluentAssertions;
 using SquadTUI.Themes;
 
 namespace SquadTUI.Tests.Unit;
@@ -8,7 +7,7 @@ public class ThemeManagerTests
     [Fact]
     public void ThemeNames_HasTenThemes()
     {
-        ThemeManager.ThemeNames.Should().HaveCount(10);
+        Assert.Equal(10, ThemeManager.ThemeNames.Length);
     }
 
     [Theory]
@@ -24,7 +23,7 @@ public class ThemeManagerTests
     [InlineData(9, "Retro")]
     public void ThemeNames_MatchExpectedOrder(int index, string expected)
     {
-        ThemeManager.ThemeNames[index].Should().Be(expected);
+        Assert.Equal(expected, ThemeManager.ThemeNames[index]);
     }
 
     [Theory]
@@ -41,7 +40,7 @@ public class ThemeManagerTests
     public void GetTheme_ReturnsNonNull(int index)
     {
         var theme = ThemeManager.GetTheme(index);
-        theme.Should().NotBeNull();
+        Assert.NotNull(theme);
     }
 
     [Theory]
@@ -52,22 +51,22 @@ public class ThemeManagerTests
     {
         var theme = ThemeManager.GetTheme(input);
         var expected = ThemeManager.GetTheme(expectedEquivalent);
-        theme.Should().NotBeNull();
-        expected.Should().NotBeNull();
+        Assert.NotNull(theme);
+        Assert.NotNull(expected);
     }
 
     [Fact]
     public void CreateOceanTheme_ReturnsTheme()
     {
         var theme = ThemeManager.CreateOceanTheme();
-        theme.Should().NotBeNull();
+        Assert.NotNull(theme);
     }
 
     [Fact]
     public void CreateHeistTheme_ReturnsTheme()
     {
         var theme = ThemeManager.CreateHeistTheme();
-        theme.Should().NotBeNull();
+        Assert.NotNull(theme);
     }
 
     [Theory]
@@ -84,7 +83,7 @@ public class ThemeManagerTests
     public void GetAccentCode_ReturnsNonNullString(int index)
     {
         var code = ThemeManager.GetAccentCode(index);
-        code.Should().NotBeNullOrEmpty();
+        Assert.False(string.IsNullOrEmpty(code));
     }
 
     [Theory]
@@ -101,7 +100,7 @@ public class ThemeManagerTests
     public void GetAccentCode_ReturnsAnsiEscapeCode(int index)
     {
         var code = ThemeManager.GetAccentCode(index);
-        code.Should().StartWith("\x1b[");
+        Assert.StartsWith("\x1b[", code);
     }
 
     [Theory]
@@ -113,14 +112,14 @@ public class ThemeManagerTests
     {
         var code = ThemeManager.GetAccentCode(input);
         var expected = ThemeManager.GetAccentCode(expectedEquivalent);
-        code.Should().Be(expected);
+        Assert.Equal(expected, code);
     }
 
     [Fact]
     public void GetPanelColors_ReturnsNonNull()
     {
         var colors = ThemeManager.GetPanelColors(0);
-        colors.Should().NotBeNull();
+        Assert.NotNull(colors);
     }
 
     [Fact]
@@ -129,7 +128,7 @@ public class ThemeManagerTests
         for (int i = 0; i < 10; i++)
         {
             var colors = ThemeManager.GetPanelColors(i);
-            colors.Accent.Should().Be(ThemeManager.GetAccentCode(i));
+            Assert.Equal(ThemeManager.GetAccentCode(i), colors.Accent);
         }
     }
 
@@ -141,7 +140,7 @@ public class ThemeManagerTests
     {
         // C# modulo with negative numbers may return negative, but GetTheme should handle it
         var act = () => ThemeManager.GetTheme(index);
-        act.Should().NotThrow();
+        act();
     }
 
     [Theory]
@@ -151,8 +150,8 @@ public class ThemeManagerTests
     public void GetAccentCode_VeryLargeIndex_WrapsCorrectly(int index)
     {
         var code = ThemeManager.GetAccentCode(index);
-        code.Should().NotBeNullOrEmpty();
-        code.Should().StartWith("\x1b[");
+        Assert.False(string.IsNullOrEmpty(code));
+        Assert.StartsWith("\x1b[", code);
     }
 
     [Theory]
@@ -165,8 +164,8 @@ public class ThemeManagerTests
     public void GetPanelColors_ReturnsValidForAllIndices(int index)
     {
         var colors = ThemeManager.GetPanelColors(index);
-        colors.Should().NotBeNull();
-        colors.Accent.Should().NotBeNullOrEmpty();
+        Assert.NotNull(colors);
+        Assert.False(string.IsNullOrEmpty(colors.Accent));
     }
 
     [Fact]
@@ -175,26 +174,26 @@ public class ThemeManagerTests
         var colors100 = ThemeManager.GetPanelColors(100);
         var colors0 = ThemeManager.GetPanelColors(0);
         // 100 % 10 == 0, so they should match
-        colors100.Accent.Should().Be(colors0.Accent);
+        Assert.Equal(colors0.Accent, colors100.Accent);
     }
 
     [Fact]
     public void CreateSunsetTheme_ReturnsTheme()
     {
         var theme = ThemeManager.CreateSunsetTheme();
-        theme.Should().NotBeNull();
+        Assert.NotNull(theme);
     }
 
     [Fact]
     public void CreateHighContrastTheme_ReturnsTheme()
     {
         var theme = ThemeManager.CreateHighContrastTheme();
-        theme.Should().NotBeNull();
+        Assert.NotNull(theme);
     }
 
     [Fact]
     public void AllThemes_HaveDistinctNames()
     {
-        ThemeManager.ThemeNames.Should().OnlyHaveUniqueItems();
+        Assert.Equal(ThemeManager.ThemeNames.Distinct().Count(), ThemeManager.ThemeNames.Count());
     }
 }

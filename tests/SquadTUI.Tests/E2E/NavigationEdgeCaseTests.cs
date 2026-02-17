@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Hex1b;
 using Hex1b.Automation;
 using Hex1b.Input;
@@ -23,7 +22,7 @@ public class NavigationEdgeCaseTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Dashboard"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -51,7 +50,7 @@ public class NavigationEdgeCaseTests
 
         var snapshot = terminal.CreateSnapshot();
         // Should end on Metrics (screen 6)
-        snapshot.ContainsText("Sprint Metrics").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Sprint Metrics"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -72,7 +71,7 @@ public class NavigationEdgeCaseTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Dashboard"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -96,7 +95,7 @@ public class NavigationEdgeCaseTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Sprint Metrics").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Sprint Metrics"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -118,7 +117,7 @@ public class NavigationEdgeCaseTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Dashboard"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -139,7 +138,7 @@ public class NavigationEdgeCaseTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Dashboard"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -163,7 +162,7 @@ public class NavigationEdgeCaseTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Sprint Metrics").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Sprint Metrics"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -185,7 +184,7 @@ public class NavigationEdgeCaseTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Dashboard"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -208,7 +207,7 @@ public class NavigationEdgeCaseTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Team Roster").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Team Roster"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -237,7 +236,7 @@ public class NavigationEdgeCaseTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Dashboard"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

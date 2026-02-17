@@ -1,4 +1,3 @@
-using FluentAssertions;
 using SquadTUI.Tests.Fixtures;
 
 namespace SquadTUI.Tests.Unit;
@@ -12,8 +11,7 @@ public class SampleDataTests
         foreach (var task in SampleData.Tasks)
         {
             if (task.Assignee is not null)
-                memberNames.Should().Contain(task.Assignee,
-                    $"task '{task.Title}' assignee '{task.Assignee}' should exist in Members");
+                Assert.Contains(task.Assignee, memberNames);
         }
     }
 
@@ -25,8 +23,7 @@ public class SampleDataTests
         {
             foreach (var participant in log.Participants)
             {
-                memberNames.Should().Contain(participant,
-                    $"log '{log.Topic}' participant '{participant}' should exist in Members");
+                Assert.Contains(participant, memberNames);
             }
         }
     }
@@ -37,8 +34,7 @@ public class SampleDataTests
         foreach (var member in SampleData.Members)
         {
             var charter = SampleData.GetCharterFor(member.Name);
-            charter.Should().NotBeNullOrWhiteSpace(
-                $"charter for '{member.Name}' should be non-empty");
+            Assert.False(string.IsNullOrWhiteSpace(charter));
         }
     }
 
@@ -47,7 +43,7 @@ public class SampleDataTests
     {
         foreach (var member in SampleData.Members)
         {
-            member.Name.Should().NotBeNullOrWhiteSpace();
+            Assert.False(string.IsNullOrWhiteSpace(member.Name));
         }
     }
 
@@ -56,7 +52,7 @@ public class SampleDataTests
     {
         foreach (var member in SampleData.Members)
         {
-            member.Role.Should().NotBeNullOrWhiteSpace();
+            Assert.False(string.IsNullOrWhiteSpace(member.Role));
         }
     }
 
@@ -64,7 +60,7 @@ public class SampleDataTests
     public void Tasks_HaveUniqueIds()
     {
         var ids = SampleData.Tasks.Select(t => t.Id).ToList();
-        ids.Should().OnlyHaveUniqueItems();
+        Assert.Equal(ids.Distinct().Count(), ids.Count());
     }
 
     [Fact]
@@ -72,8 +68,7 @@ public class SampleDataTests
     {
         foreach (var decision in SampleData.Decisions)
         {
-            decision.Date.Should().NotBeNullOrWhiteSpace(
-                $"decision '{decision.Title}' should have a date");
+            Assert.False(string.IsNullOrWhiteSpace(decision.Date));
         }
     }
 
@@ -82,39 +77,38 @@ public class SampleDataTests
     {
         foreach (var decision in SampleData.Decisions)
         {
-            decision.Author.Should().NotBeNullOrWhiteSpace(
-                $"decision '{decision.Title}' should have an author");
+            Assert.False(string.IsNullOrWhiteSpace(decision.Author));
         }
     }
 
     [Fact]
     public void Members_HasAtLeastOneEntry()
     {
-        SampleData.Members.Should().NotBeEmpty();
+        Assert.NotEmpty(SampleData.Members);
     }
 
     [Fact]
     public void Tasks_HasAtLeastOneEntry()
     {
-        SampleData.Tasks.Should().NotBeEmpty();
+        Assert.NotEmpty(SampleData.Tasks);
     }
 
     [Fact]
     public void Decisions_HasAtLeastOneEntry()
     {
-        SampleData.Decisions.Should().NotBeEmpty();
+        Assert.NotEmpty(SampleData.Decisions);
     }
 
     [Fact]
     public void Skills_HasAtLeastOneEntry()
     {
-        SampleData.Skills.Should().NotBeEmpty();
+        Assert.NotEmpty(SampleData.Skills);
     }
 
     [Fact]
     public void LogEntries_HasAtLeastOneEntry()
     {
-        SampleData.LogEntries.Should().NotBeEmpty();
+        Assert.NotEmpty(SampleData.LogEntries);
     }
 
     [Fact]
@@ -122,7 +116,7 @@ public class SampleDataTests
     {
         foreach (var skill in SampleData.Skills)
         {
-            skill.Name.Should().NotBeNullOrWhiteSpace();
+            Assert.False(string.IsNullOrWhiteSpace(skill.Name));
         }
     }
 
@@ -131,7 +125,7 @@ public class SampleDataTests
     {
         foreach (var skill in SampleData.Skills)
         {
-            skill.Description.Should().NotBeNullOrWhiteSpace();
+            Assert.False(string.IsNullOrWhiteSpace(skill.Description));
         }
     }
 
@@ -139,33 +133,33 @@ public class SampleDataTests
     public void GetCharterFor_UnknownMember_ReturnsFallback()
     {
         var charter = SampleData.GetCharterFor("UnknownPerson");
-        charter.Should().Contain("No charter available yet.");
+        Assert.Contains("No charter available yet.", charter);
     }
 
     [Fact]
     public void SprintHistory_Has3Entries()
     {
-        SampleData.SprintHistory.Should().HaveCount(3);
+        Assert.Equal(3, SampleData.SprintHistory.Count);
     }
 
     [Fact]
     public void OverallCompletionRate_IsBetween0And100()
     {
-        SampleData.OverallCompletionRate.Should().BeInRange(0, 100);
+        Assert.InRange(SampleData.OverallCompletionRate, 0, 100);
     }
 
     [Fact]
     public void AverageVelocity_IsPositive()
     {
-        SampleData.AverageVelocity.Should().BeGreaterThan(0);
+        Assert.True(SampleData.AverageVelocity > 0);
     }
 
     [Fact]
     public void VelocityTrend_ReturnsValidNumber()
     {
         var trend = SampleData.VelocityTrend;
-        double.IsNaN(trend).Should().BeFalse();
-        double.IsInfinity(trend).Should().BeFalse();
+        Assert.False(double.IsNaN(trend));
+        Assert.False(double.IsInfinity(trend));
     }
 
     [Fact]
@@ -175,9 +169,8 @@ public class SampleDataTests
         var utilization = SampleData.TeamUtilization;
         foreach (var entry in utilization)
         {
-            memberNames.Should().Contain(entry.Name,
-                $"utilization entry '{entry.Name}' should match a member");
-            entry.Utilization.Should().BeInRange(0, 100);
+            Assert.Contains(entry.Name, memberNames);
+            Assert.InRange(entry.Utilization, 0, 100);
         }
     }
 }

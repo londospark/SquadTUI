@@ -1,4 +1,3 @@
-using FluentAssertions;
 using SquadTUI.Services;
 
 namespace SquadTUI.Tests.Unit.Services;
@@ -48,11 +47,11 @@ public class SkillServiceTests : IDisposable
         var skills = await svc.GetSkillsAsync();
 
         var skill = skills.First();
-        skill.Name.Should().Be("Test Skill");
-        skill.Description.Should().Be("A test skill");
-        skill.Source.Should().Be("manual");
-        skill.Confidence.Should().Be("high");
-        skill.Slug.Should().Be("test-skill");
+        Assert.Equal("Test Skill", skill.Name);
+        Assert.Equal("A test skill", skill.Description);
+        Assert.Equal("manual", skill.Source);
+        Assert.Equal("high", skill.Confidence);
+        Assert.Equal("test-skill", skill.Slug);
     }
 
     [Fact]
@@ -68,8 +67,8 @@ public class SkillServiceTests : IDisposable
         var skills = await svc.GetSkillsAsync();
 
         var skill = skills.First();
-        skill.Name.Should().Be("My Custom Skill");
-        skill.Description.Should().BeEmpty();
+        Assert.Equal("My Custom Skill", skill.Name);
+        Assert.Empty(skill.Description);
     }
 
     [Fact]
@@ -81,7 +80,7 @@ public class SkillServiceTests : IDisposable
         {
             var svc = new SkillService(emptyDir);
             var skills = await svc.GetSkillsAsync();
-            skills.Should().BeEmpty();
+            Assert.Empty(skills);
         }
         finally
         {
@@ -99,7 +98,7 @@ public class SkillServiceTests : IDisposable
         var svc = new SkillService(SquadDir);
         var skills = await svc.GetSkillsAsync();
 
-        skills.Should().BeEmpty();
+        Assert.Empty(skills);
     }
 
     [Fact]
@@ -108,7 +107,7 @@ public class SkillServiceTests : IDisposable
         var svc = new SkillService(SquadDir);
         var skill = await svc.GetSkillAsync("nonexistent");
 
-        skill.Should().BeNull();
+        Assert.Null(skill);
     }
 
     [Fact]
@@ -126,9 +125,9 @@ public class SkillServiceTests : IDisposable
         var svc = new SkillService(SquadDir);
         var skill = await svc.GetSkillAsync("code-review");
 
-        skill.Should().NotBeNull();
-        skill!.Name.Should().Be("Code Review");
-        skill.Slug.Should().Be("code-review");
+        Assert.NotNull(skill);
+        Assert.Equal("Code Review", skill!.Name);
+        Assert.Equal("code-review", skill.Slug);
     }
 
     [Fact]
@@ -149,8 +148,8 @@ public class SkillServiceTests : IDisposable
         var svc = new SkillService(SquadDir);
         var skills = await svc.GetSkillsAsync();
 
-        skills.First().Content.Should().Contain("Body content line 1.");
-        skills.First().Content.Should().Contain("Body content line 2.");
+        Assert.Contains("Body content line 1.", skills.First().Content);
+        Assert.Contains("Body content line 2.", skills.First().Content);
     }
 
     [Fact]
@@ -163,7 +162,7 @@ public class SkillServiceTests : IDisposable
         var svc = new SkillService(SquadDir);
         var skills = await svc.GetSkillsAsync();
 
-        skills.First().Name.Should().Be("fallback-name");
+        Assert.Equal("fallback-name", skills.First().Name);
     }
 
     [Fact]
@@ -186,6 +185,6 @@ public class SkillServiceTests : IDisposable
         var svc = new SkillService(SquadDir);
         var skills = await svc.GetSkillsAsync();
 
-        skills.Should().HaveCount(2);
+        Assert.Equal(2, skills.Count);
     }
 }

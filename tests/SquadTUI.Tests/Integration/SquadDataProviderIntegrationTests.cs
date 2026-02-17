@@ -1,4 +1,3 @@
-using FluentAssertions;
 using SquadTUI.Services;
 
 namespace SquadTUI.Tests.Integration;
@@ -20,9 +19,9 @@ public class SquadDataProviderIntegrationTests
 
         var dashboard = await provider.GetDashboardAsync();
 
-        dashboard.Team.Should().NotBeNull();
-        dashboard.Team.TotalMembers.Should().BeGreaterThan(0);
-        dashboard.Decisions.Should().NotBeEmpty();
+        Assert.NotNull(dashboard.Team);
+        Assert.True(dashboard.Team.TotalMembers > 0);
+        Assert.NotEmpty(dashboard.Decisions);
     }
 
     [Fact]
@@ -37,8 +36,8 @@ public class SquadDataProviderIntegrationTests
 
         var roster = await provider.GetRosterAsync();
 
-        roster.Members.Should().NotBeNull();
-        roster.Members!.Select(m => m.Name).Should().Contain("Danny");
+        Assert.NotNull(roster.Members);
+        Assert.Contains("Danny", roster.Members!.Select(m => m.Name));
     }
 
     [Fact]
@@ -54,8 +53,8 @@ public class SquadDataProviderIntegrationTests
         var dashboard = await provider.GetDashboardAsync();
 
         // Active + Working members
-        dashboard.Team.ActiveMembers.Should().BeGreaterThan(0);
-        dashboard.Team.ActiveMembers.Should().BeLessThanOrEqualTo(dashboard.Team.TotalMembers);
+        Assert.True(dashboard.Team.ActiveMembers > 0);
+        Assert.True(dashboard.Team.ActiveMembers <= dashboard.Team.TotalMembers);
     }
 
     [Fact]
@@ -70,7 +69,7 @@ public class SquadDataProviderIntegrationTests
 
         var skills = await provider.GetSkillsAsync();
 
-        skills.Should().NotBeEmpty();
+        Assert.NotEmpty(skills);
     }
 
     [Fact]
@@ -85,6 +84,6 @@ public class SquadDataProviderIntegrationTests
 
         var logs = await provider.GetLogEntriesAsync();
 
-        logs.Should().NotBeEmpty();
+        Assert.NotEmpty(logs);
     }
 }

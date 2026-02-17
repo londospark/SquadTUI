@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Hex1b;
 using Hex1b.Automation;
 using Hex1b.Input;
@@ -17,7 +16,7 @@ public class AppNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Dashboard"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -38,7 +37,7 @@ public class AppNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Team Roster").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Team Roster"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -59,7 +58,7 @@ public class AppNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Decisions").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Decisions"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -80,7 +79,7 @@ public class AppNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Skills").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Skills"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -101,7 +100,7 @@ public class AppNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Activity Log").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Activity Log"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -122,7 +121,7 @@ public class AppNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Sprint Metrics").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Sprint Metrics"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -145,8 +144,8 @@ public class AppNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
-        snapshot.ContainsText("Team Roster").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Dashboard"));
+        Assert.True(snapshot.ContainsText("Team Roster"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -166,7 +165,7 @@ public class AppNavigationTests
         await sequence.ApplyAsync(terminal);
 
         var completed = await Task.WhenAny(runTask, Task.Delay(2000));
-        completed.Should().Be(runTask, "app should exit when Q is pressed");
+        Assert.Equal(runTask, completed);
 
         cts.Cancel();
     }
@@ -181,11 +180,11 @@ public class AppNavigationTests
 
         var snapshot = terminal.CreateSnapshot();
         // NavBar uses emoji labels without bracket wrapping
-        snapshot.ContainsText("Dashboard").Should().BeTrue();
-        snapshot.ContainsText("Roster").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Dashboard"));
+        Assert.True(snapshot.ContainsText("Roster"));
         // Should NOT have bracket-style labels like [1]Dashboard
-        snapshot.ContainsText("[1]").Should().BeFalse();
-        snapshot.ContainsText("[2]").Should().BeFalse();
+        Assert.False(snapshot.ContainsText("[1]"));
+        Assert.False(snapshot.ContainsText("[2]"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -201,7 +200,7 @@ public class AppNavigationTests
 
         var snapshot = terminal.CreateSnapshot();
         // [Q]Quit was removed from NavBar
-        snapshot.ContainsText("[Q]Quit").Should().BeFalse();
+        Assert.False(snapshot.ContainsText("[Q]Quit"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -217,7 +216,7 @@ public class AppNavigationTests
 
         var snapshot = terminal.CreateSnapshot();
         // InfoBar was removed — no status bar at bottom
-        snapshot.ContainsText("InfoBar").Should().BeFalse();
+        Assert.False(snapshot.ContainsText("InfoBar"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -238,7 +237,7 @@ public class AppNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Theme Selection").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Theme Selection"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -259,7 +258,7 @@ public class AppNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        snapshot.ContainsText("Help").Should().BeTrue();
+        Assert.True(snapshot.ContainsText("Help"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

@@ -1,4 +1,3 @@
-using FluentAssertions;
 using SquadTUI.Services;
 
 namespace SquadTUI.Tests.Unit.Services;
@@ -15,7 +14,7 @@ public class SquadDetectorTests
             Directory.CreateDirectory(aiTeamDir);
             File.WriteAllText(Path.Combine(aiTeamDir, "team.md"), "# Team");
 
-            SquadDetector.HasValidSquad(tempDir).Should().BeTrue();
+            Assert.True(SquadDetector.HasValidSquad(tempDir));
         }
         finally
         {
@@ -32,7 +31,7 @@ public class SquadDetectorTests
             var agentsDir = Path.Combine(tempDir, ".ai-team", "agents");
             Directory.CreateDirectory(agentsDir);
 
-            SquadDetector.HasValidSquad(tempDir).Should().BeTrue();
+            Assert.True(SquadDetector.HasValidSquad(tempDir));
         }
         finally
         {
@@ -47,7 +46,7 @@ public class SquadDetectorTests
         try
         {
             Directory.CreateDirectory(tempDir);
-            SquadDetector.HasValidSquad(tempDir).Should().BeFalse();
+            Assert.False(SquadDetector.HasValidSquad(tempDir));
         }
         finally
         {
@@ -63,7 +62,7 @@ public class SquadDetectorTests
         {
             Directory.CreateDirectory(Path.Combine(tempDir, ".ai-team"));
             // No team.md and no agents dir
-            SquadDetector.HasValidSquad(tempDir).Should().BeFalse();
+            Assert.False(SquadDetector.HasValidSquad(tempDir));
         }
         finally
         {

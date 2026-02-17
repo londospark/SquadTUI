@@ -1,4 +1,3 @@
-using FluentAssertions;
 using SquadTUI.Services;
 
 namespace SquadTUI.Tests.Integration;
@@ -15,7 +14,7 @@ public class DecisionServiceIntegrationTests
         var decisions = await svc.GetDecisionsAsync();
 
         // 3 from decisions.md + 1 from inbox
-        decisions.Should().HaveCount(4);
+        Assert.Equal(4, decisions.Count);
     }
 
     [Fact]
@@ -25,9 +24,9 @@ public class DecisionServiceIntegrationTests
         var decisions = await svc.GetDecisionsAsync();
 
         var titles = decisions.Select(d => d.Title).ToList();
-        titles.Should().Contain("Project Architecture");
-        titles.Should().Contain("UX Design");
-        titles.Should().Contain("Testing Strategy");
+        Assert.Contains("Project Architecture", titles);
+        Assert.Contains("UX Design", titles);
+        Assert.Contains("Testing Strategy", titles);
     }
 
     [Fact]
@@ -37,8 +36,8 @@ public class DecisionServiceIntegrationTests
         var decisions = await svc.GetDecisionsAsync();
 
         var arch = decisions.First(d => d.Title == "Project Architecture");
-        arch.Author.Should().Be("Danny");
-        arch.Date.Should().Be("2026-02-16");
+        Assert.Equal("Danny", arch.Author);
+        Assert.Equal("2026-02-16", arch.Date);
     }
 
     [Fact]
@@ -48,7 +47,7 @@ public class DecisionServiceIntegrationTests
         var decisions = await svc.GetDecisionsAsync();
 
         var inbox = decisions.First(d => d.Title == "Data Layer Design");
-        inbox.Author.Should().Be("Rusty");
-        inbox.Content.Should().Contain("File-based data providers");
+        Assert.Equal("Rusty", inbox.Author);
+        Assert.Contains("File-based data providers", inbox.Content);
     }
 }

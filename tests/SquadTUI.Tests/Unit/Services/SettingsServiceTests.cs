@@ -1,4 +1,3 @@
-using FluentAssertions;
 using SquadTUI.Models;
 using SquadTUI.Services;
 
@@ -10,11 +9,11 @@ public class SettingsServiceTests
     public void DefaultSettings_HaveExpectedValues()
     {
         var settings = new AppSettings();
-        settings.ThemeName.Should().Be("Ocean");
-        settings.VimBindings.Should().BeTrue();
-        settings.MouseEnabled.Should().BeTrue();
-        settings.ShowEmoji.Should().BeTrue();
-        settings.MarkdownRendering.Should().BeTrue();
-        settings.DefaultScreen.Should().Be("Dashboard");
+        Assert.Equal("Ocean", settings.ThemeName);
+        Assert.True(settings.VimBindings);
+        Assert.True(settings.MouseEnabled);
+        Assert.True(settings.ShowEmoji);
+        Assert.True(settings.MarkdownRendering);
+        Assert.Equal("Dashboard", settings.DefaultScreen);
     }
 }

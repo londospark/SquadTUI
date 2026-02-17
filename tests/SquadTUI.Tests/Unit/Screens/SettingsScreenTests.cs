@@ -1,4 +1,3 @@
-using FluentAssertions;
 using SquadTUI.Screens;
 
 namespace SquadTUI.Tests.Unit.Screens;
@@ -8,48 +7,48 @@ public class SettingsScreenTests
     [Fact]
     public void Screen_Enum_IncludesSettings()
     {
-        Enum.IsDefined(typeof(Screen), Screen.Settings).Should().BeTrue();
+        Assert.True(Enum.IsDefined(typeof(Screen), Screen.Settings));
     }
 
     [Fact]
     public void AppState_SettingsSelectedIndex_DefaultsToZero()
     {
         var state = new AppState();
-        state.SettingsSelectedIndex.Should().Be(0);
+        Assert.Equal(0, state.SettingsSelectedIndex);
     }
 
     [Fact]
     public void AppState_Settings_HasDefaultThemeName()
     {
         var state = new AppState();
-        state.Settings.ThemeName.Should().Be("Ocean");
+        Assert.Equal("Ocean", state.Settings.ThemeName);
     }
 
     [Fact]
     public void AppState_Settings_VimBindings_DefaultsTrue()
     {
         var state = new AppState();
-        state.Settings.VimBindings.Should().BeTrue();
+        Assert.True(state.Settings.VimBindings);
     }
 
     [Fact]
     public void AppState_Settings_MouseEnabled_DefaultsTrue()
     {
         var state = new AppState();
-        state.Settings.MouseEnabled.Should().BeTrue();
+        Assert.True(state.Settings.MouseEnabled);
     }
 
     [Fact]
     public void AppState_Settings_ShowEmoji_DefaultsTrue()
     {
         var state = new AppState();
-        state.Settings.ShowEmoji.Should().BeTrue();
+        Assert.True(state.Settings.ShowEmoji);
     }
 
     [Fact]
     public void AppState_Settings_MarkdownRendering_DefaultsTrue()
     {
         var state = new AppState();
-        state.Settings.MarkdownRendering.Should().BeTrue();
+        Assert.True(state.Settings.MarkdownRendering);
     }
 }

@@ -1,4 +1,3 @@
-using FluentAssertions;
 using SquadTUI.Services;
 
 namespace SquadTUI.Tests.Unit.Services;
@@ -25,7 +24,7 @@ public class FileWatcherServiceTests : IDisposable
     public void IsWatching_IsFalse_ByDefault()
     {
         using var svc = new FileWatcherService();
-        svc.IsWatching.Should().BeFalse();
+        Assert.False(svc.IsWatching);
     }
 
     [Fact]
@@ -33,7 +32,7 @@ public class FileWatcherServiceTests : IDisposable
     {
         using var svc = new FileWatcherService();
         svc.Start(_tempDir);
-        svc.IsWatching.Should().BeTrue();
+        Assert.True(svc.IsWatching);
     }
 
     [Fact]
@@ -42,7 +41,7 @@ public class FileWatcherServiceTests : IDisposable
         using var svc = new FileWatcherService();
         svc.Start(_tempDir);
         svc.Stop();
-        svc.IsWatching.Should().BeFalse();
+        Assert.False(svc.IsWatching);
     }
 
     [Fact]
@@ -51,7 +50,7 @@ public class FileWatcherServiceTests : IDisposable
         using var svc = new FileWatcherService();
         var nonExistent = Path.Combine(Path.GetTempPath(), "SquadTUI_NoExist_" + Guid.NewGuid().ToString("N"));
         svc.Start(nonExistent);
-        svc.IsWatching.Should().BeFalse();
+        Assert.False(svc.IsWatching);
     }
 
     [Fact]
@@ -60,7 +59,7 @@ public class FileWatcherServiceTests : IDisposable
         using var svc = new FileWatcherService();
         svc.Start(_tempDir);
         svc.Start(_tempDir); // idempotent
-        svc.IsWatching.Should().BeTrue();
+        Assert.True(svc.IsWatching);
     }
 
     [Fact]
@@ -69,7 +68,7 @@ public class FileWatcherServiceTests : IDisposable
         var svc = new FileWatcherService();
         svc.Start(_tempDir);
         svc.Dispose();
-        svc.IsWatching.Should().BeFalse();
+        Assert.False(svc.IsWatching);
     }
 
     [Fact]
@@ -84,7 +83,7 @@ public class FileWatcherServiceTests : IDisposable
 
         // Wait for the event to propagate (FileSystemWatcher is async)
         await Task.Delay(500);
-        fired.Should().BeTrue();
+        Assert.True(fired);
     }
 
     [Fact]
@@ -104,6 +103,6 @@ public class FileWatcherServiceTests : IDisposable
 
         await Task.Delay(500);
         // Debounce (2s window) means only 1 event should fire for rapid writes
-        fireCount.Should().BeGreaterThan(0).And.BeLessThanOrEqualTo(2);
+        Assert.True(fireCount > 0 && fireCount <= 2);
     }
 }
