@@ -1,4 +1,4 @@
-﻿using Hex1b;
+using Hex1b;
 using Hex1b.Input;
 using SquadTUI.Screens;
 using SquadTUI.Services;
@@ -32,11 +32,13 @@ _ = Task.Run(async () =>
         var decisionsTask = bridge.LoadDecisionsDataAsync();
         var skillsTask = bridge.LoadSkillsDataAsync();
         var logsTask = bridge.LoadLogDataAsync();
-        await Task.WhenAll(membersTask, decisionsTask, skillsTask, logsTask);
+        var tasksTask = bridge.LoadTasksFromRosterAsync();
+        await Task.WhenAll(membersTask, decisionsTask, skillsTask, logsTask, tasksTask);
         state.Members = await membersTask;
         state.Decisions = await decisionsTask;
         state.Skills = await skillsTask;
         state.LogEntries = await logsTask;
+        state.Tasks = await tasksTask;
         state.IsLoading = false;
     }
     catch (Exception ex)

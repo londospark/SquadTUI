@@ -10,7 +10,7 @@ public static class DashboardScreen
     public static Hex1bWidget Render(WidgetContext<VStackWidget> v, AppState state, Hex1bApp app)
     {
         var members = state.Members ?? SampleData.Members;
-        var tasks = SampleData.Tasks;
+        var tasks = state.Tasks ?? SampleData.Tasks;
         var activeCount = members.Count(m => m.Status == Models.MemberStatus.Active);
         var inProgressTasks = tasks.Count(t => t.Status == Models.SquadTaskStatus.InProgress);
         var completedTasks = tasks.Count(t => t.Status == Models.SquadTaskStatus.Done);
