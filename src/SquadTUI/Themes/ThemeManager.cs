@@ -19,21 +19,21 @@ public static class ThemeManager
     /// <summary>Returns the ANSI foreground accent color code for the given theme.</summary>
     public static string GetAccentCode(int index) => (index % ThemeNames.Length) switch
     {
-        0 => "\x1b[38;2;88;196;220m",  // Bright cyan
-        1 => "\x1b[38;2;255;199;95m",  // Warm gold
+        0 => "\x1b[38;2;088;196;220m", // Bright cyan
+        1 => "\x1b[38;2;255;199;095m", // Warm gold
         2 => "\x1b[38;2;255;121;198m", // Hot pink
-        3 => "\x1b[97m",               // BrightWhite
-        _ => "\x1b[38;2;88;196;220m"
+        3 => "\x1b[38;2;255;255;255m", // BrightWhite (RGB)
+        _ => "\x1b[38;2;088;196;220m"
     };
 
     /// <summary>Returns a secondary accent for subtle highlights.</summary>
     public static string GetSecondaryAccent(int index) => (index % ThemeNames.Length) switch
     {
-        0 => "\x1b[38;2;56;132;170m",  // Muted teal
-        1 => "\x1b[38;2;180;140;70m",  // Bronze
-        2 => "\x1b[38;2;189;95;147m",  // Dusty rose
+        0 => "\x1b[38;2;056;132;170m", // Muted teal
+        1 => "\x1b[38;2;180;140;070m", // Bronze
+        2 => "\x1b[38;2;189;095;147m", // Dusty rose
         3 => "\x1b[38;2;160;160;160m", // Silver
-        _ => "\x1b[38;2;56;132;170m"
+        _ => "\x1b[38;2;056;132;170m"
     };
 
     /// <summary>Returns a rule line in the theme's secondary accent.</summary>
