@@ -23,6 +23,26 @@ public class AppState
 {
     public Screen CurrentScreen { get; set; } = Screen.Dashboard;
     public Screen? PreviousScreen { get; set; }
+
+    // Stack navigation — push on drill-in, pop on Escape
+    public Stack<Screen> NavigationStack { get; set; } = new();
+
+    public void NavigateTo(Screen screen)
+    {
+        NavigationStack.Push(CurrentScreen);
+        CurrentScreen = screen;
+    }
+
+    public void NavigateBack()
+    {
+        if (NavigationStack.Count > 0)
+            CurrentScreen = NavigationStack.Pop();
+        else
+        {
+            CurrentScreen = Screen.Dashboard;
+            DashboardFocusedPanel = 0;
+        }
+    }
     public string? SelectedMemberName { get; set; }
     public int RosterSelectedIndex { get; set; }
     public int DecisionSelectedIndex { get; set; }

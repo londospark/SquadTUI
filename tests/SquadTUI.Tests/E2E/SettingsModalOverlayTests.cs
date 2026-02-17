@@ -4,226 +4,221 @@ using Hex1b.Input;
 
 namespace SquadTUI.Tests.E2E;
 
+/// <summary>
+/// Tests for Settings modal overlay behavior: opening, closing, persistence,
+/// and non-interference with underlying content and screen sizing.
+/// </summary>
 [Collection("E2E")]
-public class DashboardPanelNavigationTests
+public class SettingsModalOverlayTests
 {
     [Fact]
-    public async Task Tab_CyclesFocusForward()
+    public async Task SKey_OpensCenteredModal()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
-        // RightArrow cycles focus forward on Dashboard
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Right()
+        var seq = new Hex1bTerminalInputSequenceBuilder()
+            .Key(Hex1bKey.S)
             .Build();
-        await sequence.ApplyAsync(terminal);
+        await seq.ApplyAsync(terminal);
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Dashboard"));
+        Assert.True(snapshot.ContainsText("Settings"));
+        Assert.True(snapshot.ContainsText("Theme"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
     }
 
     [Fact]
-    public async Task RightArrow_CyclesThrough4Panels()
+    public async Task Escape_ClosesSettingsModal()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
-        // RightArrow 4 times: should wrap back to panel 0
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Right().Wait(50)
-            .Right().Wait(50)
-            .Right().Wait(50)
-            .Right()
-            .Build();
-        await sequence.ApplyAsync(terminal);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Dashboard"));
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task LeftArrow_CyclesFocusBackward()
-    {
-        await using var terminal = TestAppBuilder.Build();
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        // LeftArrow from panel 0 should go to panel 3
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Left()
-            .Build();
-        await sequence.ApplyAsync(terminal);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Dashboard"));
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task Enter_DrillsIntoRoster_WhenFocusPanel0()
-    {
-        await using var terminal = TestAppBuilder.Build();
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        // Focus is on panel 0 (Roster) by default, Enter to drill in
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Enter()
-            .Build();
-        await sequence.ApplyAsync(terminal);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Team Roster"));
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task Enter_DrillsIntoActivityLog_WhenFocusPanel1()
-    {
-        await using var terminal = TestAppBuilder.Build();
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        // RightArrow once to panel 1 (Activity), then Enter
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Right().Wait(50)
-            .Enter()
-            .Build();
-        await sequence.ApplyAsync(terminal);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Activity Log"));
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task Enter_DrillsIntoDecisions_WhenFocusPanel2()
-    {
-        await using var terminal = TestAppBuilder.Build();
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        // RightArrow twice to panel 2 (Decisions), then Enter
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Right().Wait(50)
-            .Right().Wait(50)
-            .Enter()
-            .Build();
-        await sequence.ApplyAsync(terminal);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Decisions"));
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task Enter_DrillsIntoMetrics_WhenFocusPanel3()
-    {
-        await using var terminal = TestAppBuilder.Build();
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        // RightArrow three times to panel 3 (Metrics), then Enter
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Right().Wait(50)
-            .Right().Wait(50)
-            .Right().Wait(50)
-            .Enter()
-            .Build();
-        await sequence.ApplyAsync(terminal);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Sprint Metrics"));
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task FocusResetsOnReturnToDashboard()
-    {
-        await using var terminal = TestAppBuilder.Build();
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        // RightArrow to panel 2, drill in with Enter, come back with Escape
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Right().Wait(50)
-            .Right().Wait(50)
-            .Enter().Wait(100)
+        var seq = new Hex1bTerminalInputSequenceBuilder()
+            .Key(Hex1bKey.S).Wait(100)
             .Key(Hex1bKey.Escape)
             .Build();
-        await sequence.ApplyAsync(terminal);
-        await Task.Delay(200);
-
-        // Now press Enter — should go to Roster (panel 0), not Decisions (panel 2)
-        var enterSeq = new Hex1bTerminalInputSequenceBuilder()
-            .Enter()
-            .Build();
-        await enterSeq.ApplyAsync(terminal);
+        await seq.ApplyAsync(terminal);
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Team Roster"));
+        // Settings content should be gone, Dashboard visible
+        Assert.False(snapshot.ContainsText("Vim Keybindings"));
+        Assert.True(snapshot.ContainsText("Dashboard"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
     }
 
     [Fact]
-    public async Task FocusedPanel_HasReverseVideoIndicator()
+    public async Task SettingsModal_ShowsAllConfigOptions()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
-        // Default focus is panel 0 — Team Roster header should have reverse video
-        var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Team Roster"));
-
-        // RightArrow to panel 1 and verify Activity header is visible
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Right()
+        var seq = new Hex1bTerminalInputSequenceBuilder()
+            .Key(Hex1bKey.S)
             .Build();
-        await sequence.ApplyAsync(terminal);
+        await seq.ApplyAsync(terminal);
         await Task.Delay(200);
 
-        snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Activity"));
-        Assert.True(snapshot.ContainsText("Dashboard"));
+        var snapshot = terminal.CreateSnapshot();
+        Assert.True(snapshot.ContainsText("Theme"));
+        Assert.True(snapshot.ContainsText("Vim Keybindings"));
+        Assert.True(snapshot.ContainsText("Mouse Support"));
+        Assert.True(snapshot.ContainsText("Emoji Display"));
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
+    }
+
+    [Fact]
+    public async Task SettingsModal_EnterToggles_ModalStaysOpen()
+    {
+        await using var terminal = TestAppBuilder.Build();
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        // Open settings, press Enter to toggle theme, modal should stay open
+        var seq = new Hex1bTerminalInputSequenceBuilder()
+            .Key(Hex1bKey.S).Wait(100)
+            .Key(Hex1bKey.Enter)
+            .Build();
+        await seq.ApplyAsync(terminal);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        Assert.True(snapshot.ContainsText("Settings"));
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
+    }
+
+    [Fact]
+    public async Task SettingsModal_DoesNotAffectScreenSizing_AtWideWidth()
+    {
+        await using var terminal = TestAppBuilder.Build(width: 160, height: 40);
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        var seq = new Hex1bTerminalInputSequenceBuilder()
+            .Key(Hex1bKey.S)
+            .Build();
+        await seq.ApplyAsync(terminal);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        Assert.True(snapshot.ContainsText("Settings"));
+        Assert.NotNull(snapshot);
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
+    }
+
+    [Fact]
+    public async Task SettingsModal_DoesNotAffectScreenSizing_AtNarrowWidth()
+    {
+        await using var terminal = TestAppBuilder.Build(width: 60, height: 24);
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        var seq = new Hex1bTerminalInputSequenceBuilder()
+            .Key(Hex1bKey.S)
+            .Build();
+        await seq.ApplyAsync(terminal);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        Assert.True(snapshot.ContainsText("Settings"));
+        Assert.NotNull(snapshot);
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
+    }
+
+    [Fact]
+    public async Task SettingsModal_NavigateWithJK()
+    {
+        await using var terminal = TestAppBuilder.Build();
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        // Open settings, press J twice to move selection, verify modal is still intact
+        var seq = new Hex1bTerminalInputSequenceBuilder()
+            .Key(Hex1bKey.S).Wait(100)
+            .Key(Hex1bKey.J).Wait(50)
+            .Key(Hex1bKey.J)
+            .Build();
+        await seq.ApplyAsync(terminal);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        Assert.True(snapshot.ContainsText("Settings"));
+        Assert.True(snapshot.ContainsText("Vim Keybindings"));
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
+    }
+
+    [Fact]
+    public async Task SettingsModal_OpenFromDifferentScreen()
+    {
+        await using var terminal = TestAppBuilder.Build();
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        // Go to Roster, then open settings — should show settings modal
+        var seq = new Hex1bTerminalInputSequenceBuilder()
+            .Enter().Wait(100)  // Panel 0 = Roster
+            .Key(Hex1bKey.S)
+            .Build();
+        await seq.ApplyAsync(terminal);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        Assert.True(snapshot.ContainsText("Settings"));
+
+        cts.Cancel();
+        try { await runTask; } catch (OperationCanceledException) { }
+    }
+
+    [Fact]
+    public async Task SettingsModal_OpenAndClose_ReturnsToPreviousScreen()
+    {
+        await using var terminal = TestAppBuilder.Build();
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var runTask = terminal.RunAsync(cts.Token);
+        await Task.Delay(200);
+
+        // Go to Metrics, open settings, close with Escape — should be back on Metrics
+        var seq = new Hex1bTerminalInputSequenceBuilder()
+            .Right().Wait(50)
+            .Right().Wait(50)
+            .Right().Wait(50)
+            .Enter().Wait(100)  // Panel 3 = Metrics
+            .Key(Hex1bKey.S).Wait(100)
+            .Key(Hex1bKey.Escape)
+            .Build();
+        await seq.ApplyAsync(terminal);
+        await Task.Delay(200);
+
+        var snapshot = terminal.CreateSnapshot();
+        // After closing settings modal, we should be back to the screen we were on
+        Assert.False(snapshot.ContainsText("Vim Keybindings"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

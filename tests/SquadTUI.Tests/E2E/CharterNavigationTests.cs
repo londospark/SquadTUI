@@ -15,9 +15,9 @@ public class CharterNavigationTests
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
-        // Navigate to Roster
+        // Navigate to Roster via Enter (panel 0)
         var toRoster = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D2)
+            .Enter()
             .Build();
         await toRoster.ApplyAsync(terminal);
         await Task.Delay(200);
@@ -35,9 +35,11 @@ public class CharterNavigationTests
         snapshot = terminal.CreateSnapshot();
         Assert.True(snapshot.ContainsText("Team Roster"));
 
-        // Navigate to Decisions
+        // Navigate to Decisions via panel 2 (Right x2, Enter)
         var toDecisions = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D3)
+            .Right().Wait(50)
+            .Right().Wait(50)
+            .Enter()
             .Build();
         await toDecisions.ApplyAsync(terminal);
         await Task.Delay(200);

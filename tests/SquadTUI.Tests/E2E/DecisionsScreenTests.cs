@@ -7,6 +7,14 @@ namespace SquadTUI.Tests.E2E;
 [Collection("E2E")]
 public class DecisionsScreenTests
 {
+    /// <summary>Helper: navigate to Decisions via panel 2 (Right x2, Enter)</summary>
+    private static Hex1bTerminalInputSequence NavToDecisions() =>
+        new Hex1bTerminalInputSequenceBuilder()
+            .Right().Wait(50)
+            .Right().Wait(50)
+            .Enter()
+            .Build();
+
     [Fact]
     public async Task Decisions_ShowsDecisionTitles()
     {
@@ -15,10 +23,7 @@ public class DecisionsScreenTests
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D3)
-            .Build();
-        await sequence.ApplyAsync(terminal);
+        await NavToDecisions().ApplyAsync(terminal);
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
@@ -36,10 +41,7 @@ public class DecisionsScreenTests
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D3)
-            .Build();
-        await sequence.ApplyAsync(terminal);
+        await NavToDecisions().ApplyAsync(terminal);
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
@@ -58,14 +60,10 @@ public class DecisionsScreenTests
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D3)
-            .Build();
-        await sequence.ApplyAsync(terminal);
+        await NavToDecisions().ApplyAsync(terminal);
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        // Detail pane now shows selected decision title and content inline
         Assert.True(snapshot.ContainsText("Date:"));
 
         cts.Cancel();

@@ -72,16 +72,16 @@ public class HelpNavigationTests
     }
 
     [Fact]
-    public async Task EscapeFromHelp_ReturnsToDashboard()
+    public async Task EscapeFromHelp_ReturnsToPreviousScreen()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
-        // Go to Roster, then open help, then escape — global Escape returns to Dashboard
+        // Go to Roster, then open help, then escape — stack pops back to Roster
         var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D2)
+            .Enter()  // Panel 0 = Roster
             .Wait(100)
             .Key(Hex1bKey.F1)
             .Wait(100)
@@ -91,7 +91,7 @@ public class HelpNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Dashboard"));
+        Assert.True(snapshot.ContainsText("Team Roster"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

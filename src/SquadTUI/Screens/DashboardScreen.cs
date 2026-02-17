@@ -41,7 +41,7 @@ public static class DashboardScreen
 
         string PanelHeader(int panelIndex, string emoji, string ascii, string title) =>
             focus == panelIndex
-                ? $"  {hlBg}{hlFg} {Icon(emoji, ascii, em)} {title} {R}"
+                ? $"  {hlBg}{hlFg}{Icon(emoji, ascii, em)} {title}{R}"
                 : $"  {hBg}{B}{acc}{Icon(emoji, ascii, em)} {title}{R}";
 
         return v.Responsive(r =>

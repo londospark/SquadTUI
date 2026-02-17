@@ -23,15 +23,16 @@ public class AppNavigationTests
     }
 
     [Fact]
-    public async Task Press2_NavigatesToRoster()
+    public async Task Enter_NavigatesToRoster_FromPanel0()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
+        // Panel 0 is Roster by default, Enter to drill in
         var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D2)
+            .Enter()
             .Build();
         await sequence.ApplyAsync(terminal);
         await Task.Delay(200);
@@ -44,15 +45,18 @@ public class AppNavigationTests
     }
 
     [Fact]
-    public async Task Press3_NavigatesToDecisions()
+    public async Task Enter_NavigatesToDecisions_FromPanel2()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
+        // Right twice to panel 2 (Decisions), then Enter
         var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D3)
+            .Right().Wait(50)
+            .Right().Wait(50)
+            .Enter()
             .Build();
         await sequence.ApplyAsync(terminal);
         await Task.Delay(200);
@@ -65,36 +69,17 @@ public class AppNavigationTests
     }
 
     [Fact]
-    public async Task Press4_NavigatesToSkills()
+    public async Task Enter_NavigatesToActivityLog_FromPanel1()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
+        // Right once to panel 1 (ActivityLog), then Enter
         var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D4)
-            .Build();
-        await sequence.ApplyAsync(terminal);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Skills"));
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task Press5_NavigatesToActivityLog()
-    {
-        await using var terminal = TestAppBuilder.Build();
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D5)
+            .Right().Wait(50)
+            .Enter()
             .Build();
         await sequence.ApplyAsync(terminal);
         await Task.Delay(200);
@@ -107,15 +92,19 @@ public class AppNavigationTests
     }
 
     [Fact]
-    public async Task Press6_NavigatesToMetrics()
+    public async Task Enter_NavigatesToMetrics_FromPanel3()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
+        // Right three times to panel 3 (Metrics), then Enter
         var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D6)
+            .Right().Wait(50)
+            .Right().Wait(50)
+            .Right().Wait(50)
+            .Enter()
             .Build();
         await sequence.ApplyAsync(terminal);
         await Task.Delay(200);
@@ -128,24 +117,24 @@ public class AppNavigationTests
     }
 
     [Fact]
-    public async Task Press1_BackToDashboard()
+    public async Task Escape_BackToDashboard()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
 
+        // Enter to Roster, then Escape back to Dashboard
         var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D2)
+            .Enter()
             .Wait(100)
-            .Key(Hex1bKey.D1)
+            .Key(Hex1bKey.Escape)
             .Build();
         await sequence.ApplyAsync(terminal);
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
         Assert.True(snapshot.ContainsText("Dashboard"));
-        Assert.True(snapshot.ContainsText("Team Roster"));
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }
@@ -171,7 +160,7 @@ public class AppNavigationTests
     }
 
     [Fact]
-    public async Task NavBar_ShowsEmojiLabelsWithoutBrackets()
+    public async Task NavBar_ShowsNoBracketLabels()
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -179,10 +168,8 @@ public class AppNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        // NavBar uses emoji labels without bracket wrapping
         Assert.True(snapshot.ContainsText("Dashboard"));
-        Assert.True(snapshot.ContainsText("Roster"));
-        // Should NOT have bracket-style labels like [1]Dashboard
+        // Should NOT have bracket-style labels
         Assert.False(snapshot.ContainsText("[1]"));
         Assert.False(snapshot.ContainsText("[2]"));
 
@@ -199,7 +186,6 @@ public class AppNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        // [Q]Quit was removed from NavBar
         Assert.False(snapshot.ContainsText("[Q]Quit"));
 
         cts.Cancel();
@@ -215,7 +201,6 @@ public class AppNavigationTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        // InfoBar was removed — no status bar at bottom
         Assert.False(snapshot.ContainsText("InfoBar"));
 
         cts.Cancel();

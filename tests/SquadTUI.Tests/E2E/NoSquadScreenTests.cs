@@ -102,22 +102,20 @@ public class NoSquadScreenTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        // When on NoSquad, the NavBar should not be visible.
-        // "Dashboard" in the tab bar would indicate NavBar is showing.
-        // However, "Welcome to SquadTUI" confirms we're on NoSquad.
-        // We check that pressing 1-6 doesn't navigate away as a resilient assertion.
+        // When on NoSquad, navigation keys should not work.
+        // We check that pressing Enter doesn't navigate away as a resilient assertion.
         Assert.True(snapshot.ContainsText("Welcome to SquadTUI"));
 
-        // Press D1 — should NOT show Dashboard content (should stay on NoSquad)
+        // Press Enter — should NOT navigate away (should stay on NoSquad)
         var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D1)
+            .Enter()
             .Build();
         await sequence.ApplyAsync(terminal);
         await Task.Delay(200);
 
         var snapshot2 = terminal.CreateSnapshot();
         Assert.True(snapshot2.ContainsText("Welcome to SquadTUI"),
-            "NavBar navigation should not work on NoSquad screen");
+            "Navigation should not work on NoSquad screen");
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

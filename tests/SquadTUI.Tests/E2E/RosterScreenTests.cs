@@ -16,7 +16,7 @@ public class RosterScreenTests
         await Task.Delay(200);
 
         var navSequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D2)
+            .Enter()  // Panel 0 = Roster
             .Build();
         await navSequence.ApplyAsync(terminal);
         await Task.Delay(200);
@@ -39,7 +39,7 @@ public class RosterScreenTests
         await Task.Delay(200);
 
         var navSequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D2)
+            .Enter()  // Panel 0 = Roster
             .Build();
         await navSequence.ApplyAsync(terminal);
         await Task.Delay(200);
@@ -62,13 +62,12 @@ public class RosterScreenTests
         await Task.Delay(200);
 
         var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D2)
+            .Enter()  // Panel 0 = Roster
             .Build();
         await sequence.ApplyAsync(terminal);
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        // Detail pane now shows charter excerpt and tasks inline
         Assert.True(snapshot.ContainsText("Charter"));
         Assert.True(snapshot.ContainsText("Task:"));
 
@@ -85,7 +84,7 @@ public class RosterScreenTests
         await Task.Delay(200);
 
         var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.D2)
+            .Enter()  // Panel 0 = Roster
             .Wait(100)
             .Key(Hex1bKey.Escape)
             .Build();
