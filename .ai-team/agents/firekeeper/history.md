@@ -107,3 +107,21 @@ Each story is written from the **user's perspective**, not the builder's. They d
 
 📌 **From decisions:** Comprehensive stack navigation UX spec finalized — Dashboard is home, Tab/Enter/Escape pattern, responsive breakpoints (≥120/80–119/<80 cols), settings modal design, accessibility guidelines. 8 user stories covering navigation clarity, keyboard discoverability, settings modal, error states, information density, breadcrumbs, onboarding, accessibility. Firekeeper to design ThemePanel style guide and panel background palette.
 
+### UX Refactoring Audit (2026-02-17)
+
+Performed full UX audit of all screens and key bindings. Key changes:
+
+1. **HelpScreen accuracy fix:** Replaced stale keybindings ("1-6" screen nav, "h/l" prev/next, "?" toggle help) with accurate ones (Tab/Enter/Escape for stack nav, F1 for help, j/k for list nav, R/T/S/E/V/Q/A/D for actions). Changed "Press ? to dismiss" → "Press F1 or Escape to dismiss". Removed HelpScreen's own F1/Escape bindings since AppLayout already handles navigation via NavigationStack.
+
+2. **BindCI helper extraction:** Created `BindCI(keys, key, action, label)` in AppLayout.cs that registers both `keys.Key()` and `keys.Shift().Key()` for case-insensitive letter handling. Eliminated ~160 lines of duplicated Shift+Key bindings across three binding methods (BindKeys, BindModalKeys, BindSettingsModalKeys).
+
+3. **Badge helper reconciliation:** Discovered Siegmeyer already created `StatusBadges.cs` with `Member()` and `Task()` methods. Removed my redundant `StatusBadge()`/`TaskBadge()` from `IconHelper.cs`. Updated DashboardScreen and MemberDetailScreen to use `StatusBadges.Member()`/`StatusBadges.Task()`.
+
+4. **Build fix:** Added missing `using SquadTUI.Models` to 5 screen files (ActivityLogScreen, CharterScreen, DecisionsScreen, RosterScreen, SkillsScreen) where ThemeContext refactoring had inadvertently dropped it, breaking `GetOrEmpty()` extension method.
+
+**Key learnings:**
+- ThemeContext/ScreenHelper/StatusBadges patterns are now the standard — use them for all new screens
+- `BindCI()` is the pattern for all letter-key bindings in AppLayout going forward
+- HelpScreen content must be kept in sync when keybindings change in AppLayout
+- The `PreviousScreen` property on AppState is now unused; NavigationStack is the canonical nav pattern
+
