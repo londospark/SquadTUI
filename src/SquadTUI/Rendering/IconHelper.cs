@@ -1,3 +1,5 @@
+using SquadTUI.Models;
+
 namespace SquadTUI.Rendering;
 
 /// <summary>

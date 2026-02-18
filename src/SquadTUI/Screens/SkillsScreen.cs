@@ -2,7 +2,6 @@ using Hex1b;
 using Hex1b.Widgets;
 using SquadTUI.Models;
 using SquadTUI.Rendering;
-using SquadTUI.Themes;
 using static SquadTUI.Rendering.IconHelper;
 
 namespace SquadTUI.Screens;
@@ -13,83 +12,64 @@ public static class SkillsScreen
     {
         var skills = state.Skills.GetOrEmpty();
         if (skills.Count == 0)
-        {
-            var D0 = PanelRenderer.Dim;
-            var R0 = PanelRenderer.Reset;
-            return v.VStack(empty => [
-                empty.Text(""),
-                empty.Text($"  {D0}No skills found. Ensure your .squad/ directory contains skill definitions.{R0}"),
-            ]).Fill();
-        }
-        var em = state.Settings.ShowEmoji;
-        var listItems = skills.Select(s => $"  {Icon("🔧", "◇", em)} {s.Name} — {s.Description}").ToList() as IReadOnlyList<string>;
+            return ScreenHelper.EmptyState(v, "No skills found. Ensure your .squad/ directory contains skill definitions.");
 
+        var t = new ThemeContext(state.SelectedThemeIndex, state.Settings.ShowEmoji);
+        var listItems = skills.Select(s => $"  {Icon("🔧", "◇", t.Em)} {s.Name} — {s.Description}").ToList() as IReadOnlyList<string>;
         var selectedIdx = Math.Clamp(state.SkillSelectedIndex, 0, skills.Count - 1);
         var selected = skills[selectedIdx];
-        var acc = ThemeManager.GetAccentCode(state.SelectedThemeIndex);
-        var sec = ThemeManager.GetSecondaryAccent(state.SelectedThemeIndex);
-        var R = PanelRenderer.Reset;
-        var B = PanelRenderer.Bold;
-        var D = PanelRenderer.Dim;
 
         var members = state.Members.GetOrEmpty();
         var relatedMembers = GetRelatedMembers(selected.Name, members);
         var confidenceValue = ProgressBarRenderer.ConfidenceToFloat(selected.Confidence);
         var confidence = ProgressBarRenderer.Render(confidenceValue);
 
-        var hBg = ThemeManager.GetPanelHeaderBg(state.SelectedThemeIndex);
-        var panelBg = ThemeManager.GetPanelBgColor(state.SelectedThemeIndex);
-        var detailBg = ThemeManager.GetPanelDetailBgColor(state.SelectedThemeIndex);
-
-        return v.HStack(h =>
-        [
-            new BackgroundPanelWidget(panelBg, h.VStack(left =>
+        return ScreenHelper.ListDetailLayout(v, t,
+            listContent: left =>
             [
-                left.Text($"  {hBg}{B}{acc} {Icon("🔧", "◇", em)}  Installed Skills {R}"),
-                left.Text($"  {D}Available capabilities for your squad{R}"),
+                left.Text(t.SectionHeader("🔧", "◇", " Installed Skills ")),
+                left.Text($"  {t.D}Available capabilities for your squad{t.R}"),
                 left.Text(""),
-                left.Text($"  {sec}{new string('━', 30)}{R}"),
+                left.Text(t.Separator(30)),
                 left.Text(""),
                 left.List(listItems)
                     .OnSelectionChanged(e => { state.SkillSelectedIndex = e.SelectedIndex; })
                     .Fill()
-            ]).FillWidth(1).FillHeight()),
-
-            new BackgroundPanelWidget(detailBg, h.VStack(detail =>
+            ],
+            detailContent: detail =>
             {
                 var widgets = new List<Hex1bWidget>
                 {
                     detail.Text(""),
-                    detail.Text($"  {hBg}{B}{acc} {Icon("🔧", "◇", em)}  {selected.Name} {R}"),
+                    detail.Text(t.SectionHeader("🔧", "◇", $" {selected.Name} ")),
                     detail.Text(""),
-                    detail.Text($"  {sec}{new string('━', 36)}{R}"),
+                    detail.Text(t.Separator()),
                     detail.Text(""),
-                    detail.Text($"    {D}Description:{R}  {selected.Description}{R}"),
-                    detail.Text($"    {D}Confidence:{R}   {confidence.Bar} {B}{confidence.Label}{R}"),
+                    detail.Text($"    {t.D}Description:{t.R}  {selected.Description}{t.R}"),
+                    detail.Text($"    {t.D}Confidence:{t.R}   {confidence.Bar} {t.B}{confidence.Label}{t.R}"),
                     detail.Text(""),
-                    detail.Text($"  {sec}{new string('━', 36)}{R}"),
+                    detail.Text(t.Separator()),
                     detail.Text(""),
-                    detail.Text($"  {hBg}{B}{acc}{Icon("👥", "◆", em)} Related Members{R}"),
+                    detail.Text(t.SectionHeader("👥", "◆", "Related Members")),
                     detail.Text(""),
                 };
 
                 if (relatedMembers.Count > 0)
                     foreach (var m in relatedMembers)
-                        widgets.Add(detail.Text($"    • {m}{R}"));
+                        widgets.Add(detail.Text($"    • {m}{t.R}"));
                 else
-                    widgets.Add(detail.Text($"    {D}No members directly associated{R}"));
+                    widgets.Add(detail.Text($"    {t.D}No members directly associated{t.R}"));
 
                 widgets.Add(detail.Text(""));
-                widgets.Add(detail.Text($"  {sec}{new string('━', 36)}{R}"));
+                widgets.Add(detail.Text(t.Separator()));
                 widgets.Add(detail.Text(""));
-                widgets.Add(detail.Text($"  {hBg}{B}{acc}{Icon("📊", "▪", em)} Usage{R}"));
+                widgets.Add(detail.Text(t.SectionHeader("📊", "▪", "Usage")));
                 widgets.Add(detail.Text(""));
-                widgets.Add(detail.Text($"    {D}This skill is available to all squad members{R}"));
-                widgets.Add(detail.Text($"    {D}and can be invoked during task execution.{R}"));
+                widgets.Add(detail.Text($"    {t.D}This skill is available to all squad members{t.R}"));
+                widgets.Add(detail.Text($"    {t.D}and can be invoked during task execution.{t.R}"));
 
                 return widgets.ToArray();
-            }).FillWidth(2).FillHeight()),
-        ]).Fill();
+            });
     }
 
     private static List<string> GetRelatedMembers(string skillName, IReadOnlyList<Models.SquadMember> members) =>
