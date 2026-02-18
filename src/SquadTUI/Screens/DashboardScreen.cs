@@ -41,7 +41,7 @@ public static class DashboardScreen
 
         string PanelHeader(int panelIndex, string emoji, string ascii, string title) =>
             focus == panelIndex
-                ? $"  {hlBg}{hlFg}{Icon(emoji, ascii, em)} {title}{R}"
+                ? $"  {hlBg}{B}{hlFg}{Icon(emoji, ascii, em)} {title}{R}"
                 : $"  {hBg}{B}{acc}{Icon(emoji, ascii, em)} {title}{R}";
 
         return v.Responsive(r =>
@@ -129,6 +129,19 @@ public static class DashboardScreen
                         w.Add(right.Text($"  {D}Blocked:{R}    {B}{blockedTasks}{R} {D}items{R}"));
                         w.Add(right.Text($"  {D}Backlog:{R}    {B}{pendingTasks}{R} {D}pending{R}"));
 
+                        w.Add(right.Text(""));
+                        w.Add(right.Text($"  {sec}{new string('━', 28)}{R}"));
+                        w.Add(right.Text(""));
+                        var skillsList = state.Skills.GetOrEmpty();
+                        w.Add(right.Text(PanelHeader(4, "🔧", "◇", "Skills")));
+                        w.Add(right.Text(""));
+                        if (skillsList.Count > 0)
+                            foreach (var sk in skillsList.Take(3))
+                                w.Add(right.Text($"  {D}{Icon("🔧", "◇", em)} {sk.Name}{R}"));
+                        else
+                            w.Add(right.Text($"  {D}No skills installed{R}"));
+                        w.Add(right.Text($"  {D}{Icon("🔧", "◇", em)} {skillsList.Count} total{R}"));
+
                         return w.ToArray();
                     }).FillWidth(1).FillHeight()),
                 ]).Fill()
@@ -182,6 +195,12 @@ public static class DashboardScreen
                         w.Add(right.Text(""));
                         w.Add(right.Text($"  {D}Velocity:{R}  {B}{completedTasks}{R} {D}tasks/sprint{R}"));
                         w.Add(right.Text($"  {D}Pending:{R}   {B}{pendingTasks}{R}"));
+                        w.Add(right.Text(""));
+                        w.Add(right.Text($"  {sec}{new string('━', 24)}{R}"));
+                        w.Add(right.Text(""));
+                        var skillsList = state.Skills.GetOrEmpty();
+                        w.Add(right.Text(PanelHeader(4, "🔧", "◇", "Skills")));
+                        w.Add(right.Text($"  {D}{Icon("🔧", "◇", em)} {skillsList.Count} installed{R}"));
                         return w.ToArray();
                     }).FillWidth(1).FillHeight()),
                 ]).Fill()
