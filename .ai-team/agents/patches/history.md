@@ -5,6 +5,35 @@
 - **Stack:** C#, .NET 10, Hex1b TUI framework (https://hex1b.dev/)
 - **Created:** 2026-02-16
 
+## Core Context
+
+**Test Infrastructure & Patterns:**
+- Unit tests use `IDisposable` with temp directories for service isolation and determinism
+- Integration tests use fixture files copied to output via `<Content>` in csproj, accessed via `AppContext.BaseDirectory`
+- E2E tests use `Hex1bTerminalInputSequenceBuilder` (not `Hex1bInputSequenceBuilder`), headless mode with `WithHex1bApp().WithHeadless().WithDimensions(w,h)`
+- App lifecycle: `RunAsync(ct)` with `CancellationTokenSource`, `await Task.Delay(200)` sufficient between input steps
+- Hex1b testing: `terminal.CreateSnapshot()` returns snapshot, extension methods `ContainsText()`, `GetText()`, `GetLine()` on `IHex1bTerminalRegion`
+- Resilient assertions: use generic stable text like "Dashboard", "Team Roster" instead of exact header strings that change with UI redesigns
+
+**Testing Gaps Discovered:**
+- SampleData hardcoded in CharterScreen, RosterScreen, MemberDetailScreen (always returns Sonic-universe text; `DataBridge.LoadCharterContentAsync()` exists but unwired)
+- MetricsScreen uses `SampleData.SprintHistory` directly (no service provides real sprint data)
+- `state.IsLoading` and `state.ErrorMessage` set in Program.cs but never read by screens
+- `MemberDetailScreen` defaults `SelectedMemberName` to `"Sonic"` when null
+- `SkillsScreen.GetConfidenceLevel()` hardcoded for 5 known SampleData skills only
+
+**Key Test Fixes:**
+- 2026-02-19: CI green achieved (331 tests) by fixing 7 tests broken by Siegmeyer's UI redesigns (MetricsScreen headers changed, NoSquadScreen layout too tall)
+- Removed recursive CI tests (`DotnetBuild_Succeeds`, `DotnetTest_Passes`) that spawned child processes — infinite recursion
+- Fixed DecisionService.cs CS0136 (duplicate `content` variable) by renaming to `builtContent`, `finalContent`
+- Fixed NavBar.cs CS0826 by explicit `Hex1bWidget[]` array type
+- Fixed Program.cs `...` → `..` (spread operator)
+
+**Recent Focus (Feb 18-19):**
+- 790 total tests across Unit/Integration/E2E with stack navigation and modal test suites
+- Pre-existing 3 test failures due to ANSI text-splitting in styled headers (not regressions)
+- High-priority gaps: SampleData audit, test plan covering 70+ cases, 9 untested production files identified
+
 ## Learnings
 
 <!-- Append new learnings below. Each entry is something lasting about the project. -->

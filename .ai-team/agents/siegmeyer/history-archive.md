@@ -1,58 +1,6 @@
-# Project Context
+# History Archive — Siegmeyer (Frontend Dev)
 
-- **Owner:** LondoSpark (ridecar2@gmail.com)
-- **Project:** SquadTUI — A terminal user interface built with Hex1b (.NET 10) for managing AI squads. Features include viewing squad activity, inspecting individual members, reading/editing charters, tracking sprint velocities, and more.
-- **Stack:** C#, .NET 10, Hex1b TUI framework (https://hex1b.dev/)
-- **Created:** 2026-02-16
-
-## Core Context
-
-**Hex1b API Patterns (Critical for Frontend):**
-- `WidgetContext<VStackWidget>` / `WidgetContext<HStackWidget>` are the builder context types — all extension methods (`.Text()`, `.List()`, `.Border()`, `.HStack()`, etc.) resolve on these
-- `ctx.VStack(v => [...])` returns `Hex1bWidget[]` from builder lambda. Each screen is a static `Render` method returning a single `Hex1bWidget`
-- `.WithInputBindings(keys => { keys.Key(Hex1bKey.D1).Action(() => {...}, "description"); })` for key bindings. The description string is REQUIRED
-- `ListWidget` takes `IReadOnlyList<string>` (not generic items) — format display strings yourself
-- `Hex1bKey` uses `D0`–`D9` for number keys (not `Key0` etc.), `.RightArrow`, `.LeftArrow` for arrows (NOT `.Right`/`.Left` enum values which don't exist)
-- No `app.Quit()` — use `app.RequestStop()` to exit
-- `.FillWidth(int weight)` and `.FillHeight(int weight)` for sizing (plain `.Fill()` works but no-arg `.Fill(int)` does NOT exist)
-- `\x1b[7m` (reverse video) swaps fg/bg for highlighting; `\x1b[48;2;...m` ANSI bg codes in `Text()` only color text portion, NOT full area
-- Use `BackgroundPanelWidget(Hex1bColor color, Hex1bWidget child)` for full-area panel backgrounds
-- Settings modal uses `ZStack` layer 1 + `Backdrop(child)` for auto-centered, input-intercepting overlay. Escape auto-dismisses via `OnClickAway()`
-- Chart widgets available: `ColumnChart`, `TimeSeriesChart`, `ScatterChart`, `BarChart` (in `Hex1b.Charts`), all support `.ShowValues()`, `.ShowGridLines()`, `.FormatValue()`
-
-**UI Design Decisions (Established):**
-- NO box-drawing border characters (`┌─┐│└─┘`) — ever. Use color/spacing/reverse-video for structure
-- Panel backgrounds: three-tier system via `ThemeManager.GetPanelBgColor()` / `GetPanelDetailBgColor()` / `GetPanelAltBgColor()`
-- Headers use `{Bold}{accent}emoji Title{Reset}` followed by `━━━` dim rule separators
-- Dim secondary accent lines for section dividers
-- VStack + Arrow keys for dashboard panel focus (Enter to drill, Escape to pop)
-- Use `▌` side indicators and reverse-video bars, NOT box borders
-- Test assertions use resilient stable text (`"Members:"`, `"Dashboard"`) not styled header strings which can split across ANSI codes
-
-**Navigation Architecture (Sprint 17+):**
-- Stack-based: `AppState.NavigationStack` (Stack<Screen>) tracks navigation depth
-- `NavigateTo(screen)` pushes current, `NavigateBack()` pops
-- Dashboard: Left/Right arrows cycle focused panel (state: `DashboardFocusedPanel` 0-4 for 5 panels)
-- Enter on focused panel pushes that screen (Roster, ActivityLog, Decisions, Skills, Metrics)
-- Escape anywhere pops back, eventually returns to Dashboard
-- Settings modal independent from stack — triggered by S key, closes via Escape or click-away
-
-**Theme System:**
-- 4 themes implemented: Ocean, Heist, Sunset, HighContrast
-- 6 additional themes designed but not yet implemented: Forest, Cyberpunk, Midnight, Ember, Arctic (first light theme), Retro
-- Each theme has: `BackgroundColor`, `PanelBgColor`, `PanelDetailBgColor`, `PanelAltBgColor`, `AccentColor`, `SecondaryAccent`, `SplitterTheme.DividerColor`
-- Per-theme RGB tuples (not ANSI codes) for colors — use `Hex1bColor.FromRgb(r,g,b)`
-- ThemeManager handles index cycling (0-3 for current themes), `GetTheme(index)` clamps out-of-bounds
-
-**Recent Focus (Feb 18-19):**
-- Panel sizing fix: Equal ANSI byte overhead (44 bytes) for focused vs unfocused states to prevent reflow
-- Settings UI: Refresh Interval added as 4th setting, R key binding for manual refresh
-- Navigation audit: Skills panel added as #5 (after Metrics), all panel navigation wired
-- Settings toggles wired: VimBindings now controls j/k binding, MouseEnabled controls mouse input
-
-## Learnings
-
-<!-- Append new learnings below. Each entry is something lasting about the project. -->
+## Entries from Feb 17 and Earlier
 
 ### 2026-02-17 — Initial TUI Screen Build
 
@@ -73,9 +21,8 @@
 - The `InputBindingsBuilder` chain is: `keys.Key(Hex1bKey.X).Action(() => { ... }, "description")` — the description string is required.
 - `TextBlockWidget` is the actual widget name, but the extension method is just `.Text("string")`.
 
-## Learnings
-
 ### UI Modernization Phase 1 Complete
+
 Added emoji icons to all screens to make the TUI more visually engaging and modern:
 - NavBar: 🏠 Dashboard, 👥 Roster, 📋 Decisions, 🔧 Skills, 📊 Log, 📈 Metrics
 - Screen titles updated with emoji icons matching their purpose
@@ -84,6 +31,7 @@ Added emoji icons to all screens to make the TUI more visually engaging and mode
 - Activity/decision/roster icons added throughout
 
 ### Hex1b API Patterns Discovered
+
 Through exploration, confirmed these Hex1b capabilities exist but require proper API docs:
 - **Theming**: Hex1bTheme.Create() with .Set() pattern for colors and sub-themes (ListTheme, ScrollTheme, SplitterTheme)
 - **Responsive**: .Responsive(r => { var width = r.TerminalWidth; }) for responsive layouts
@@ -103,23 +51,6 @@ However, exact syntax and required using statements unclear without official Hex
 - Removed incomplete test files for features not fully implemented (ThemeTests, MarkdownRendererTests, ResponsiveLayoutTests)
 - Core E2E tests (navigation, data loading) remain functional
 - DataBridgeTests removed due to pre-existing API signature mismatches
-
-### Next Steps for Full Modernization
-When official Hex1b API documentation becomes available:
-1. Implement full theme system with 3+ themes (Ocean, Heist, Daylight)
-2. Add markdown rendering for charter content
-3. Implement responsive dashboard layout with terminal width detection
-4. Add TabPanel to Member Detail screen
-5. Implement VScroll for long content regions
-6. Add NotificationPanel/ZStack for help overlay
-
-📌 Team update (2026-02-16): Firekeeper designed comprehensive responsive dashboard UX with tabs, sidebar, color language, and keyboard-first navigation — ready for implementation pending Hex1b API docs — decided by Firekeeper
-
-📌 Team recast (2026-02-18): Squad recast from Ocean's Eleven to Dark Souls universe. Linus is now Siegmeyer. Praise the sun! ☀️
-
-📌 Team update (2026-02-16): Patches expanded test suite to 110 tests (unit, integration, E2E) covering ThemeManager, DataBridge, markdown rendering, theme switching, responsive layouts, and CI pipeline validation. **BLOCKER:** MarkdownRenderer.cs has 5 compilation errors preventing test execution — needs fixing by Siegmeyer — decided by Patches
-
-📌 Team update (2026-02-16): Andre wired real .ai-team/ file data throughout TUI via ServiceProvider, DataBridge, and updated AppState. All screens now load real data async on startup with graceful SampleData fallback — decided by Andre
 
 ### Sprint 6 — UI Cleanup (Issues #11–#19)
 
@@ -310,8 +241,6 @@ The user has stated NO BORDERS multiple times. Yet `┌─┐│└─┘` box-d
 - Arctic is the first light theme — needs careful contrast testing since all existing ANSI foreground codes assume dark backgrounds.
 - All themes follow the established pattern: `WithModernBorders()`, invisible border chars, three-tier panel backgrounds.
 
-📌 Research documented in `.ai-team/decisions/inbox/siegmeyer-frontend-research.md` — includes code sketches for BackdropWidget modal, dashboard focus ring, all 6 theme color specs, chart widget adoption plan, and 15 user stories.
-
 ### Sprint 17 — Stack Navigation + Modal Settings + Panel Sizing
 
 **TabPanel → Stack Navigation:**
@@ -338,8 +267,3 @@ The user has stated NO BORDERS multiple times. Yet `┌─┐│└─┘` box-d
 - NoSquadGuardTests simplified — now tests Enter/Right/Left instead of nonexistent D1-D6 keys.
 - VimKeybindingTests reduced — H/L tests removed since screen cycling no longer exists.
 - Navigation patterns: Roster = `Enter()`, ActivityLog = `Right().Enter()`, Decisions = `Right()×2.Enter()`, Metrics = `Right()×3.Enter()`.
-
-### 2026-02-17 Team Update: Stack Navigation, Settings Modal, Frontend Architecture, New Themes
-
-📌 **From decisions:** Implement stack-based navigation (Tab/Shift+Tab for panel focus, Enter to drill, Escape to pop). Settings is centered modal overlay using BackdropWidget. Remove manual ANSI background codes, replace with ThemePanel. Add 6 new themes (Forest, Cyberpunk, Midnight, Ember, Arctic, Retro). Adopt unused Hex1b widgets (Progress, Scroll, Border, Table, TimeSeriesChart, ColumnChart).
-
