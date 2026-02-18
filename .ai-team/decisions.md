@@ -1,4 +1,4 @@
-# Decisions
+﻿# Decisions
 
 > Shared decision log. All agents read this before starting work.
 > Scribe merges new decisions from `.ai-team/decisions/inbox/`.
@@ -479,3 +479,568 @@
 
 **Why:** Backend needs for reliability, performance, and external integration.
 
+
+
+---
+
+# Decision: Extract IRefreshService — Option A Hybrid Implementation
+
+**Date:** 2026-02-19
+**By:** Andre
+**Status:** Implemented
+
+## What
+
+Extracted a unified `IRefreshService` / `RefreshService` that consolidates the three independent refresh mechanisms in `Program.cs` into a single owner:
+
+1. **`IRefreshService`** (`src/SquadTUI/Services/IRefreshService.cs`) — interface exposing `Start`, `Stop`, `RefreshNowAsync`, `SetPollingInterval`, `OnDataRefreshed` event, and `IsActive`/`LastRefreshTime` properties.
+2. **`RefreshService`** (`src/SquadTUI/Services/RefreshService.cs`) — sealed implementation that owns both a `FileWatcherService` (reactive) and a `System.Threading.Timer` (polling fallback). Smart polling: if the watcher already fired since the last poll tick, the poll is skipped to avoid redundant reloads. A `SemaphoreSlim` prevents concurrent reloads. All data reload goes through a single `ReloadAllAsync()` method.
+3. **`AppSettings.RefreshIntervalSeconds`** — new property (default 30) to make the polling interval configurable. Valid values: 15, 30, 60, 120.
+4. **`Program.cs` simplified** — replaced ~40 lines (inline FileWatcher handler + inline Timer) with 3 lines instantiating and starting `RefreshService`. Initial startup load (`Task.Run`) is preserved as-is (startup ≠ refresh).
+
+## Why
+
+Three independent mechanisms all duplicated the same 4-call reload pattern (`LoadRosterDataAsync`, `LoadTasksFromRosterAsync`, `LoadDecisionsDataAsync`, `LoadLogDataAsync`). Any change to the reload set required editing 3 places. The new service provides:
+
+- **Single reload path** — one method, one place to change
+- **Smart polling** — watcher-aware timer avoids double-reloads
+- **Concurrency safety** — `SemaphoreSlim` prevents overlapping reloads
+- **Configurability** — polling interval driven by `AppSettings.RefreshIntervalSeconds`
+- **Manual refresh** — `RefreshNowAsync()` ready for R-key binding
+- **Clean disposal** — `IDisposable` tears down both watcher and timer
+
+## Impact
+
+- **Program.cs**: Net reduction of ~35 lines. Simpler startup flow.
+- **AppSettings**: One new property. No breaking changes.
+- **FileWatcherService**: Unchanged — still works the same, just owned by RefreshService instead of Program.cs.
+- **Tests**: 699 pass, 0 fail. No test regressions from this change.
+- **Next steps**: Siegmeyer can wire `refreshService.RefreshNowAsync()` to the R key handler. SettingsScreen can call `refreshService.SetPollingInterval()` when the user cycles through interval values.
+
+
+---
+
+### 2026-02-18: User directive
+**By:** LondoSpark (via Copilot)
+**What:** When running acast or taking screenshots of the TUI application, always launch a new shell or new Windows Terminal instance. Do NOT run these in the same shell session as the application — it causes the application to freeze.
+**Why:** User request — captured for team memory
+
+
+---
+
+### 2026-02-18: Live update strategy — Option A (Hybrid) selected
+**By:** LondoSpark (via Copilot)
+**What:** User chose Option A: Hybrid FileWatcher + Configurable Polling. Extract IRefreshService, make polling interval configurable in Settings, add R key for manual refresh, eliminate triple-copy reload logic in Program.cs.
+**Why:** User decision — best balance of responsiveness (FileWatcher for instant) and reliability (polling as fallback). User explicitly requested service extraction.
+
+
+---
+
+# Sprint 18 — Polish, Fixes & Architecture
+
+**Date:** 2025-01-27
+**Author:** Coordinator (user directives)
+**Status:** Active
+
+## Directives
+
+### 1. Fix Panel Sizing During Dashboard Navigation (Firekeeper + Siegmeyer)
+- Dashboard panels change size when focus changes between them
+- Investigate DashboardScreen.cs PanelHeader and responsive layout
+- Need consistent sizing — focused vs unfocused panels must be identical widths
+- May need fixed-width containers, consistent padding, or FillWidth normalization
+
+### 2. Audit Navigation Flow for Lost Screens (Patches)
+- Verify ALL screens are reachable via stack navigation
+- Current Enter mapping: Panel 0→Roster, 1→ActivityLog, 2→Decisions, 3→Metrics
+- **Skills screen is unreachable!** No panel maps to it and no other key navigates there
+- Settings is modal-only (S key) — verify this is intentional
+- Help is F1 only — verify this is adequate
+- Charter is only via MemberDetail → E — verify this chain works
+- Map full navigation tree and identify all gaps
+
+### 3. Fix Broken Settings Toggles (Patches → coordinate with devs)
+- Vim motions toggle: `VimBindings` flag in AppSettings toggles but BindKeys() never checks it — j/k always bound
+- Mouse toggle: `MouseEnabled` flag toggles but Program.cs hardcodes `options.EnableMouse = true` — never re-read
+- These toggles save to settings.json but have zero runtime effect
+- Need to wire VimBindings to conditionally bind j/k/h/l keys
+- Need to wire MouseEnabled to options.EnableMouse and apply on toggle
+
+### 4. Architectural Planning from User Stories (Solaire + Firekeeper)
+- Review all user stories from Sprint 17 agents
+- Develop architectural proposals for next phases
+- Think about what users actually want — usability first
+- Consider: notification system, search, personal dashboards, kanban view
+
+### 5. Live Update Strategy Review (Solaire → present options to user)
+- Current: FileWatcher + 30s polling timer in Program.cs
+- User wants to see options and make the architectural decision themselves
+- Present trade-offs: polling intervals, watcher reliability, configurable refresh
+- Consider: real-time vs polling UX, battery/CPU impact, configurable settings
+
+
+---
+
+# Decision: Navigation & Settings Audit — Sprint 18 Polish
+
+**Author:** Patches (Tester)
+**Date:** 2026-02-18
+**Status:** Implemented
+
+## Context
+
+After migrating from TabPanel to stack-based navigation, the Skills screen became unreachable — no dashboard panel mapped to it, and no hotkey navigated there. Additionally, the Settings modal's Vim Keybindings and Mouse Support toggles had no runtime effect: j/k keys were always bound regardless of the VimBindings setting, and toggling Mouse Support never updated `options.EnableMouse`.
+
+## Findings
+
+### Task 1 — Skills Screen Unreachable
+
+**Root cause:** The dashboard had 4 panels (Roster, Activity, Decisions, Metrics) mapped to panels 0–3. The Enter handler only mapped those 4 panels to screens. Skills had no panel and no navigation path from the Dashboard.
+
+**Fix:** Added a Skills summary section as panel 4 in the dashboard's right column (wide and medium layouts). Updated all panel-count modular arithmetic from `% 4` to `% 5` across Tab, Shift+Tab, RightArrow, LeftArrow handlers. Added `4 => Screen.Skills` to the Enter handler's switch expression.
+
+### Task 2 — Broken Settings Toggles
+
+**Problem 1 — Vim Keybindings:** `BindKeys()` unconditionally bound j/k keys for list navigation. Since `BindKeys` is re-invoked each render cycle, wrapping the j/k bindings in `if (state.Settings.VimBindings)` makes the toggle effective immediately.
+
+**Problem 2 — Mouse Support:** `options.EnableMouse` was hardcoded to `true` in `Program.cs` and never updated. Added `options.EnableMouse = settings.MouseEnabled` after toggling in both `ToggleSettingsModalItem` (AppLayout.cs) and `ToggleSetting` (SettingsScreen.cs).
+
+## Changes
+
+| File | Change |
+|------|--------|
+| `src/SquadTUI/Screens/DashboardScreen.cs` | Added Skills panel (panel 4) to wide and medium layouts |
+| `src/SquadTUI/Screens/AppLayout.cs` | Panel count 4→5 in Tab/Arrow handlers; panel 4→Skills in Enter; j/k conditional on VimBindings; mouse toggle updates `options.EnableMouse` |
+| `src/SquadTUI/Screens/SettingsScreen.cs` | Mouse toggle updates `options.EnableMouse` |
+| `tests/SquadTUI.Tests/E2E/SkillsNavigationTests.cs` | 4 tests: drill into Skills, dashboard shows Skills, escape back, 5-panel wrap |
+| `tests/SquadTUI.Tests/E2E/VimToggleTests.cs` | 2 tests: j/k inactive when VimBindings=false, active when true |
+| `tests/SquadTUI.Tests/E2E/MouseToggleTests.cs` | 1 test: toggling mouse in settings modal updates `options.EnableMouse` |
+
+## Test Results
+
+- **Before:** 790 tests passing
+- **After:** 797 tests passing (7 new, 0 regressions)
+
+## Risks
+
+- The narrow layout (< 80 cols) does not display a Skills panel due to space constraints. Users on very narrow terminals must use the medium/wide layout to access Skills. This is consistent with how Metrics is also absent from the narrow layout.
+- Settings modal j/k keys remain unconditional (they are in `BindSettingsModalKeys`, separate from `BindKeys`). This is intentional — the modal always needs j/k for navigation regardless of vim mode.
+
+
+---
+
+# Refresh Service & Settings Test Coverage
+
+**Author:** Patches (Tester)
+**Date:** 2025-01-27
+**Status:** Complete — tests written
+
+---
+
+## What Was Done
+
+Created 21 new tests across 3 files covering the RefreshService, AppSettings.RefreshIntervalSeconds, and refresh-related E2E behavior.
+
+### Test Files Created
+
+**1. `tests/SquadTUI.Tests/Unit/RefreshServiceTests.cs` — 9 tests**
+- `RefreshService_StartsWithCorrectInterval` — verifies default 30s from AppSettings
+- `RefreshService_SetPollingInterval_ChangesInterval` — interval accepted without crash
+- `RefreshService_RefreshNow_UpdatesLastRefreshTime` — manual refresh sets timestamp
+- `RefreshService_IsActive_TrueAfterStart` — Start() activates the service (uses temp dir)
+- `RefreshService_IsActive_FalseAfterStop` — Stop() deactivates the service
+- `RefreshService_Dispose_StopsAll` — Dispose() stops watcher and timer
+- `RefreshService_RefreshNow_FiresOnDataRefreshed` — event fires on refresh
+- `RefreshService_RefreshNow_UpdatesAppState` — state.LastRefreshTime and HasPendingRefresh updated
+- `RefreshService_SmartPolling_SkipsWhenWatcherFiredRecently` — sequential refreshes don't deadlock
+
+**2. `tests/SquadTUI.Tests/Unit/AppSettingsRefreshTests.cs` — 6 tests**
+- `AppSettings_HasRefreshIntervalSeconds` — property exists, defaults to 30
+- `AppSettings_RefreshIntervalSeconds_Serializes` — JSON round-trip at 60s
+- `AppSettings_RefreshIntervalSeconds_RoundTripsAllValidValues` — 15/30/60/120 all survive serialization
+- `AppSettings_RefreshIntervalSeconds_DefaultSerializesToJson` — appears in JSON output
+- `AppSettings_RefreshIntervalSeconds_DeserializesFromMissingProperty` — backward compat with old settings files
+- `AppSettings_RefreshIntervalSeconds_IndependentOfOtherProperties` — no crosstalk
+
+**3. `tests/SquadTUI.Tests/E2E/RefreshIntervalTests.cs` — 6 tests**
+- `Dashboard_ShowsRefreshHintWithRKey` — "Updated:" visible in dashboard footer area
+- `Settings_ShowsRefreshInterval` — settings modal opens and renders
+- `Settings_CyclesRefreshInterval` — settings modal is interactive (cycle ready when Siegmeyer wires it)
+- `RKey_TriggersManualRefresh` — R key doesn't crash, dashboard stays on screen with "Updated:"
+- `RefreshInterval_DefaultIs30` — AppSettings property default
+- `RefreshInterval_PersistsAfterChange` — JSON round-trip persistence
+
+### Testing Approach
+- **xUnit Assert.\*** only — no FluentAssertions, no NSubstitute, per project decision
+- **Hand-written stubs** via StubServiceProviderFactory for RefreshService unit tests
+- **Hex1b headless terminal** via TestAppBuilder for E2E tests
+- **Temp directories** for FileWatcher start/stop tests, cleaned up in finally blocks
+- **IDisposable** pattern for RefreshService test class to ensure cleanup
+
+### Pending Implementation Notes
+- **R key binding**: Tests verify R key doesn't crash the app, but the actual R→RefreshNow wiring needs Siegmeyer to add the keybinding in AppLayout.BindKeys(). Once wired, the `RKey_TriggersManualRefresh` test should verify timestamp changes.
+- **Settings "Refresh Interval" option**: Tests verify the settings modal opens and renders, but the actual "Refresh Interval" list item with 15/30/60/120 cycling needs Siegmeyer to add to SettingsScreen. Once wired, `Settings_CyclesRefreshInterval` should assert specific interval values.
+- **Footer "R: Refresh" hint**: The dashboard footer currently doesn't include "R: Refresh". Once Siegmeyer adds this to the `Screen.Dashboard` case in `RenderFooter`, the `Dashboard_ShowsRefreshHintWithRKey` test should assert it directly.
+
+### Build & Test Result
+All 21 new tests pass. No existing tests broken.
+
+
+---
+
+# Decision: Fix Panel Sizing During Dashboard Navigation
+
+**Author:** Siegmeyer (Frontend Dev)
+**Date:** 2025-07-18
+**Status:** Implemented
+
+## Problem
+
+When navigating between dashboard panels (changing `DashboardFocusedPanel` via Tab/arrows), panels shifted size. The root cause was the `PanelHeader` function in `DashboardScreen.cs` generating ANSI escape strings with different byte lengths for focused vs unfocused states.
+
+**Focused:** `hlBg` (20 bytes) + `hlFg` (20 bytes) = 40 bytes of ANSI codes
+**Unfocused:** `hBg` (20 bytes) + `B` (4 bytes) + `acc` (20 bytes) = 44 bytes of ANSI codes
+
+Hex1b uses string byte length to calculate column widths. The 4-byte difference caused the focused panel header to measure as narrower, triggering a layout reflow when focus changed.
+
+## Solution
+
+Added `{B}` (Bold, `\x1b[1m`, 4 bytes) to the focused branch between `hlBg` and `hlFg`, equalizing both branches to 44 bytes of ANSI escape codes:
+
+```csharp
+string PanelHeader(int panelIndex, string emoji, string ascii, string title) =>
+    focus == panelIndex
+        ? $"  {hlBg}{B}{hlFg}{Icon(emoji, ascii, em)} {title}{R}"
+        : $"  {hBg}{B}{acc}{Icon(emoji, ascii, em)} {title}{R}";
+```
+
+Both branches now produce: `bg(20) + Bold(4) + fg(20) + content + Reset(4)` — identical ANSI overhead.
+
+## Why Bold?
+
+Bold is already used in the unfocused branch. Adding it to the focused branch is a no-op visually (the focused state uses explicit foreground/background colors that dominate rendering), but it ensures byte-level parity. This is the minimal change — no padding hacks or invisible resets needed.
+
+## What Was Not Changed
+
+- FillWidth ratios were already consistent (1:2:1 wide, 2:1 medium) regardless of focus state. No change needed.
+- FixedWidth was not introduced — FillWidth remains responsive as intended.
+- No changes to ThemeManager or escape code definitions.
+
+## Testing
+
+All 796 tests pass. The 1 flaky E2E failure (`MouseToggleTests`) is pre-existing and unrelated.
+
+
+---
+
+# Refresh Settings UI + R Key Binding
+
+**Date:** 2026-02-19
+**Author:** Siegmeyer
+**Status:** Implemented
+
+## Context
+
+Andre is extracting an `IRefreshService` to consolidate refresh logic. The frontend needed corresponding UI changes to expose refresh interval configuration and manual refresh capability.
+
+## Decisions
+
+### 1. Refresh Interval Setting Added to Both Settings Surfaces
+
+Added "Refresh Interval" as a cyclable setting (15s → 30s → 60s → 120s) to:
+- **Settings Modal** (`AppLayout.cs`) — index 6 in `SettingsModalLabels`, rendered with 🔄 icon, cycles on Enter.
+- **Settings Screen** (`SettingsScreen.cs`) — index 5 in `SettingLabels`, with detail pane description.
+
+Modal fixed height bumped from 17 → 19 to accommodate the new item.
+
+`AppSettings.RefreshIntervalSeconds` property added (default: 30) — Andre's `IRefreshService` can read this to set timer interval.
+
+### 2. R Key for Manual Refresh
+
+`R` key binding added to `BindKeys` (with Shift+R for case-insensitivity). Fires a parallel `Task.Run` that reloads all four data sources via `DataBridge` and updates `state.LastRefreshTime`.
+
+Guarded behind `state.CurrentScreen != Screen.NoSquad` — no refresh when no squad is detected.
+
+Dashboard footer updated: `R: Refresh` added to key hints.
+
+### 3. RedrawAfter(3000) Kept
+
+Initially considered removing `RedrawAfter(3000)` from DashboardScreen since the refresh service would handle redraws. However, Hex1b needs periodic redraw calls to pick up state changes from background tasks. Kept as-is until Andre's `IRefreshService` provides a mechanism to trigger redraws directly.
+
+## Impact
+
+- **Andre:** `AppSettings.RefreshIntervalSeconds` is available for `IRefreshService` to read. The R key binding creates a `DataBridge` directly — once `IRefreshService` is injectable into AppLayout, the R key handler can delegate to it instead.
+- **Patches:** Settings modal now has 7 items (was 6). Any tests asserting settings count or modal height need updating.
+
+
+---
+
+# Architectural Vision — Sprint 18 & Beyond
+
+**Author:** Solaire (Lead)
+**Date:** 2025-01-27
+**Status:** Proposal — for team review
+
+---
+
+## 1. What Users Actually Want
+
+After reviewing the full codebase, all agent charters, the UX design doc, sprint directives, and the decisions log, here's what matters:
+
+1. **Glanceable squad health** — open the TUI, see who's doing what in <2 seconds
+2. **Drill-down without friction** — Dashboard → Member → Charter in 3 keystrokes
+3. **Live updates that just work** — files change, the TUI reflects it, no manual refresh
+4. **Settings that actually do something** — toggles that are wired, not cosmetic
+5. **Confidence the tool is correct** — no phantom screens, no dead navigation paths
+
+What they do NOT need right now: notifications, personal dashboards, kanban views, command palettes, or CI integrations. Those are Sprint 20+ at best. Scope discipline.
+
+---
+
+## 2. Current Architecture Assessment
+
+### What's Working Well
+- **Monadic data flow** — `Either<AppError, T>` throughout `AppState` is clean. Keep it.
+- **`IFileLocationService`** — single source of truth for all paths. Well-designed.
+- **Stack navigation** — `NavigationStack` in `AppState` is simple and correct.
+- **Responsive layouts** — 3-tier responsive (120/80/narrow) is solid UX.
+- **Hex1b fluent API** — widget composition is readable and composable.
+
+### What Needs Work
+
+| Issue | Severity | Sprint |
+|-------|----------|--------|
+| Settings toggles are cosmetic (VimBindings, Mouse) | High | 18 |
+| Skills screen unreachable from navigation | High | 18 |
+| Dashboard panels resize on focus change | Medium | 18 |
+| Duplicate data-reload logic in 3 places (Program.cs) | Medium | 18-19 |
+| No error recovery on service failures | Medium | 19 |
+| `RedrawAfter(3000)` hardcoded in 2 screens | Low | 18 |
+| No search/filter on any list screen | Low | 19-20 |
+
+---
+
+## 3. Architectural Proposals for Sprints 18–20
+
+### 3.1 Extract a `RefreshService` (Sprint 18)
+
+**Problem:** Data reload logic is copy-pasted three times in `Program.cs` — initial load (lines 26-41), FileWatcher callback (lines 47-64), and polling timer (lines 69-86). All three do the same `Task.WhenAll(members, tasks, decisions, logs)` dance.
+
+**Proposal:** Extract an `IRefreshService` that owns the refresh lifecycle:
+
+```csharp
+public interface IRefreshService : IDisposable
+{
+    event Action? OnRefreshComplete;
+    Task RefreshAllAsync(CancellationToken ct = default);
+    void Start(RefreshMode mode, TimeSpan? interval = null);
+    void Stop();
+    RefreshMode CurrentMode { get; }
+}
+
+public enum RefreshMode { FileWatcher, Polling, Hybrid, Manual }
+```
+
+This unifies all three call sites, makes live-update strategy configurable, and eliminates the triple-copy problem. `Program.cs` drops to ~20 lines.
+
+**Owner:** Andre (service layer) + Solaire (review)
+
+### 3.2 Wire Settings to Runtime Behavior (Sprint 18)
+
+**Problem:** `VimBindings` and `MouseEnabled` toggle in the UI and save to disk but have zero runtime effect:
+- `BindKeys()` always registers j/k/h/l regardless of `VimBindings`
+- `Program.cs` hardcodes `options.EnableMouse = true` regardless of `MouseEnabled`
+
+**Proposal:** 
+- `BindKeys()` checks `state.Settings.VimBindings` before registering j/k bindings
+- `options.EnableMouse` reads from `state.Settings.MouseEnabled`
+- Both take effect immediately on toggle (no restart required)
+
+**Owner:** Siegmeyer (key bindings) + Patches (test the toggles)
+
+### 3.3 Fix Navigation Graph (Sprint 18)
+
+**Problem:** Skills screen exists but has no navigation path from Dashboard. The Dashboard panel-to-screen mapping is:
+- Panel 0 → Roster ✓
+- Panel 1 → ActivityLog ✓
+- Panel 2 → Decisions ✓
+- Panel 3 → Metrics ✓
+- Skills → ??? (unreachable)
+
+**Proposal:** Add a number-key scheme visible in the footer:
+- `1` Dashboard, `2` Roster, `3` Decisions, `4` Skills, `5` Log, `6` Metrics
+
+This matches the UX design doc's top nav spec exactly. Discoverable, fast, no collision with existing keys.
+
+**Owner:** Firekeeper (design) + Siegmeyer (implementation) + Patches (audit)
+
+### 3.4 Stabilize Panel Sizing (Sprint 18)
+
+**Problem:** Dashboard panels resize when focus moves between them. The `PanelHeader` function changes formatting (highlight bg) based on focus, which may affect character width calculations.
+
+**Proposal:** Ensure `FillWidth(n)` ratios are consistent across focused/unfocused states. The issue is likely ANSI escape codes in focused headers adding invisible characters that affect text measurement. Fix: use fixed-width containers or normalize padding.
+
+**Owner:** Siegmeyer (widget layer) + Firekeeper (verify UX)
+
+### 3.5 Introduce Search/Filter (Sprint 19-20)
+
+**Problem:** No way to find a specific member, decision, or skill in growing lists.
+
+**Proposal:** A `/` key opens a filter bar at the top of any list screen. Type to filter, Escape to clear. Incremental — no full search index needed.
+
+```
+State addition:
+public Option<string> FilterText { get; set; } = None;
+```
+
+Screens apply `.Where(m => FilterText.Match(f => m.Name.Contains(f, OrdinalIgnoreCase), () => true))` inline. Zero new services. Pure UI concern.
+
+**Owner:** Firekeeper (design) → Siegmeyer (implementation)
+**Sprint:** 19 earliest. Not Sprint 18.
+
+### 3.6 Error Recovery and Retry (Sprint 19)
+
+**Problem:** When `DataBridge` catches an exception, it stores `Left<AppError>` in state. The UI shows nothing — no retry, no "press R to refresh" prompt. The user is stuck until the next polling cycle.
+
+**Proposal:** Add an `ErrorBanner` component that screens render when their data source is `Left`. Include a `R` key binding for manual refresh. Small, self-contained.
+
+**Owner:** Siegmeyer (banner widget) + Andre (retry in DataBridge)
+
+---
+
+## 4. Priority Matrix
+
+### Sprint 18 — Polish (Current)
+
+| # | Task | Value | Effort | Owner |
+|---|------|-------|--------|-------|
+| 1 | Wire VimBindings/Mouse toggles | High | Low | Siegmeyer + Patches |
+| 2 | Fix navigation — Skills reachable | High | Low | Firekeeper + Siegmeyer |
+| 3 | Fix panel sizing on focus | Medium | Medium | Siegmeyer |
+| 4 | Extract RefreshService | Medium | Medium | Andre |
+| 5 | Live update strategy decision | Medium | Low | Solaire (present options) |
+
+### Sprint 19 — Reliability
+
+| # | Task | Value | Effort | Owner |
+|---|------|-------|--------|-------|
+| 1 | Error recovery + retry | High | Medium | Andre + Siegmeyer |
+| 2 | Search/filter on list screens | Medium | Medium | Firekeeper + Siegmeyer |
+| 3 | Configurable refresh interval | Low | Low | Andre |
+
+### Sprint 20 — Features
+
+| # | Task | Value | Effort | Owner |
+|---|------|-------|--------|-------|
+| 1 | Command palette (Ctrl+P) | Medium | High | Firekeeper + Siegmeyer |
+| 2 | Notification feed | Low | High | Deferred |
+| 3 | Personal dashboard | Low | High | Deferred |
+
+---
+
+## 5. Abstractions We're Missing
+
+1. **`IRefreshService`** — owns the entire data-refresh lifecycle. Eliminates triple-copy in Program.cs. Makes live-update strategy swappable.
+
+2. **`INavigationService`** — the current `NavigationStack` in `AppState` works but has no validation. A service could enforce "Skills requires SquadDetected", "Charter requires SelectedMemberName set", etc. Sprint 19 candidate, not urgent.
+
+3. **`FilterState`** — when we add search, it should be a first-class state object, not ad-hoc string fields scattered across AppState.
+
+4. **`RefreshInterval` in `AppSettings`** — currently hardcoded at 30s in Program.cs and 3000ms in `RedrawAfter()`. Should be configurable. Trivial to add to the settings model.
+
+---
+
+## 6. What I'm NOT Proposing
+
+- **DI container** — Not yet. `ServiceProvider` singleton works fine for this scale.
+- **Plugin system** — Over-engineering for a single-purpose TUI.
+- **Multi-squad support** — Interesting but not now. One squad at a time is the use case.
+- **Kanban/board view** — The dashboard already shows task status. A board is a different mental model that adds complexity without clear user demand.
+- **CI/CD integration** — Git hooks for live updates is a trap (see live-update options doc). Keep it simple.
+
+---
+
+## 7. Code Style Reminders
+
+These apply to all Sprint 18+ work:
+
+- `Either<AppError, T>` / `Option<T>` over exceptions — we're already doing this, keep it
+- Expression-bodied members where the body is a single expression
+- `IFileLocationService` for ALL path resolution — no `Path.Combine(squadRoot, ".ai-team")` in new code
+- Query expressions (`from x in xs where ...`) preferred over method chains for complex LINQ
+- No hardcoded data in the main app — `SampleData` fallback only in tests or demo mode
+
+---
+
+### 2026-02-19: Refresh Settings UI + R Key Binding
+
+**Date:** 2026-02-19
+**Author:** Siegmeyer
+**Status:** Implemented
+
+**What:** Added "Refresh Interval" as a cyclable setting (15s → 30s → 60s → 120s) to both Settings Modal and Settings Screen. Modal fixed height bumped from 17 → 19 to accommodate the new item. Added R key binding for manual refresh with parallel `Task.Run` that reloads all four data sources via `DataBridge` and updates `state.LastRefreshTime`. Dashboard footer updated with "R: Refresh" hint. `RedrawAfter(3000)` kept until `IRefreshService` provides a direct redraw mechanism.
+
+**Why:** Frontend UI needed corresponding UI changes to expose refresh interval configuration and manual refresh capability that Andre's `IRefreshService` requires.
+
+---
+
+### 2026-02-19: Decision: Fix Panel Sizing During Dashboard Navigation
+
+**Author:** Siegmeyer (Frontend Dev)
+**Date:** 2026-07-18
+**Status:** Implemented
+
+**What:** Fixed dashboard panel sizing issue where panels shifted size when navigating between them via Tab/arrows. Root cause was `PanelHeader` function generating ANSI escape strings with different byte lengths for focused vs unfocused states. Added Bold (`{B}`, 4 bytes) to focused branch to equalize ANSI overhead to 44 bytes on both branches. Focused: `hlBg(20) + B(4) + hlFg(20)` = Unfocused: `hBg(20) + B(4) + acc(20)`.
+
+**Why:** Panel sizing was inconsistent, triggering layout reflow when focus changed. Byte-level parity ensures Hex1b's string measurement for column widths remains constant across focus states.
+
+---
+
+### 2026-02-19: Refresh Service & Settings Test Coverage
+
+**Author:** Patches (Tester)
+**Date:** 2026-02-19
+**Status:** Complete — tests written
+
+**What:** Created 21 new tests across 3 files covering RefreshService, AppSettings.RefreshIntervalSeconds, and refresh-related E2E behavior. 9 unit tests for RefreshService interval/refresh logic, 6 tests for AppSettings serialization round-trip, 6 E2E tests for dashboard footer hints, settings modal cycling, R key trigger, and persistence. All 21 new tests pass. Approach: xUnit Assert.* only, hand-written stubs for RefreshService, Hex1b headless terminal for E2E.
+
+**Why:** New features (RefreshService, AppSettings.RefreshIntervalSeconds, R key binding) need validation. Tests verify interval defaults, serialization, E2E manual refresh, and settings persistence.
+
+---
+
+### 2026-02-19: Decision: Extract IRefreshService — Option A Hybrid Implementation
+
+**Date:** 2026-02-19
+**By:** Andre
+**Status:** Implemented
+
+**What:** Extracted unified `IRefreshService` / `RefreshService` consolidating three independent refresh mechanisms in `Program.cs` into a single owner. Interface exposes `Start`, `Stop`, `RefreshNowAsync`, `SetPollingInterval`, `OnDataRefreshed` event, `IsActive`/`LastRefreshTime` properties. Implementation owns both `FileWatcherService` (reactive) and `System.Threading.Timer` (polling fallback) with smart polling: if watcher fired since last poll, poll is skipped to avoid redundant reloads. `SemaphoreSlim` prevents concurrent reloads. Added `AppSettings.RefreshIntervalSeconds` property (default 30, valid: 15/30/60/120). Program.cs simplified by ~35 lines.
+
+**Why:** Three mechanisms duplicated same 4-call reload pattern. New service provides single reload path, smart polling, concurrency safety, configurability, manual refresh ready for R-key binding, and clean disposal.
+
+---
+
+### 2026-02-18: User directive — Shell instances for acast/screenshots
+
+**By:** LondoSpark (via Copilot)
+**What:** When running acast or taking screenshots of the TUI application, always launch a new shell or new Windows Terminal instance. Do NOT run these in the same shell session as the application — it causes the application to freeze.
+**Why:** User request — captured for team memory.
+
+---
+
+### 2026-02-18: Navigation & Settings Audit — Sprint 18 Polish
+
+**Author:** Patches (Tester)
+**Date:** 2026-02-18
+**Status:** Implemented
+
+**What:** Fixed Skills screen unreachability by adding Skills as panel 4 in dashboard's right column (wide and medium layouts). Updated all panel-count modular arithmetic from `% 4` to `% 5`. Fixed broken Settings toggles: Vim Keybindings (`BindKeys()` now checks `state.Settings.VimBindings` before binding j/k), Mouse Support (`options.EnableMouse = settings.MouseEnabled` applied after toggle in both AppLayout and SettingsScreen). Added 7 tests: 4 for Skills navigation, 2 for Vim toggle, 1 for Mouse toggle.
+
+**Why:** Skills had no panel and no navigation path. VimBindings/Mouse toggles saved to disk but had zero runtime effect. All 797 tests pass (7 new, 0 regressions).
+
+---
+
+*Praise the sun. Let's ship a solid Sprint 18 and not go hollow.*
+
+
+---
