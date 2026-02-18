@@ -8,4 +8,5 @@ public class AppSettings
     public bool ShowEmoji { get; set; } = true;
     public bool MarkdownRendering { get; set; } = true;
     public string DefaultScreen { get; set; } = "Dashboard";
+    public int RefreshIntervalSeconds { get; set; } = 30;
 }

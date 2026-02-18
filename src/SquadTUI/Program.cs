@@ -40,50 +40,10 @@ _ = Task.Run(async () =>
     state.IsLoading = false;
 });
 
-// Start file watcher for live dashboard updates
-using var fileWatcher = new FileWatcherService();
+// Hybrid refresh: FileWatcher (reactive) + configurable polling (fallback)
+using var refreshService = new RefreshService(bridge, state);
 if (state.SquadRootPath != null)
-{
-    fileWatcher.OnFilesChanged += () =>
-    {
-        state.HasPendingRefresh = true;
-        _ = Task.Run(async () =>
-        {
-            var membersTask = bridge.LoadRosterDataAsync();
-            var tasksTask = bridge.LoadTasksFromRosterAsync();
-            var decisionsTask = bridge.LoadDecisionsDataAsync();
-            var logsTask = bridge.LoadLogDataAsync();
-            await Task.WhenAll(membersTask, tasksTask, decisionsTask, logsTask);
-            state.Members = await membersTask;
-            state.Tasks = await tasksTask;
-            state.Decisions = await decisionsTask;
-            state.LogEntries = await logsTask;
-            state.LastRefreshTime = DateTime.Now;
-            state.HasPendingRefresh = false;
-        });
-    };
-    fileWatcher.Start(state.SquadRootPath);
-}
-
-// Periodic polling timer — refreshes data every 30 seconds
-using var pollingTimer = new System.Threading.Timer(_ =>
-{
-    if (state.SquadRootPath == null) return;
-    _ = Task.Run(async () =>
-    {
-        var membersTask = bridge.LoadRosterDataAsync();
-        var tasksTask = bridge.LoadTasksFromRosterAsync();
-        var decisionsTask = bridge.LoadDecisionsDataAsync();
-        var logsTask = bridge.LoadLogDataAsync();
-        await Task.WhenAll(membersTask, tasksTask, decisionsTask, logsTask);
-        state.Members = await membersTask;
-        state.Tasks = await tasksTask;
-        state.Decisions = await decisionsTask;
-        state.LogEntries = await logsTask;
-        state.LastRefreshTime = DateTime.Now;
-        state.HasPendingRefresh = false;
-    });
-}, null, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(30));
+    refreshService.Start(state.SquadRootPath);
 
 await using var terminal= Hex1bTerminal.CreateBuilder()
     .WithHex1bApp((app, options) =>
