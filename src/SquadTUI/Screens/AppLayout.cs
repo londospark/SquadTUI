@@ -24,7 +24,7 @@ public static class AppLayout
 
         var keys = state.CurrentScreen switch
         {
-            Screen.Dashboard => $"  {D}Tab/←→: Focus Panel  Enter: Open  T: Theme  S: Settings  Q: Quit  F1: Help{R}",
+            Screen.Dashboard => $"  {D}Tab/←→: Focus Panel  Enter: Open  R: Refresh  T: Theme  S: Settings  Q: Quit  F1: Help{R}",
             Screen.Roster => $"  {D}j/k: Navigate  Enter: Detail  A: Add  D: Remove  Esc: Back  Q: Quit  F1: Help{R}",
             Screen.MemberDetail => $"  {D}E: Edit Charter  Esc: Back  Q: Quit  F1: Help{R}",
             Screen.Decisions => $"  {D}j/k: Navigate  Esc: Back  Q: Quit  F1: Help{R}",
@@ -85,7 +85,7 @@ public static class AppLayout
                     z.VStack(modal =>
                     {
                         return RenderSettingsModalContent(modal, state, app, options);
-                    }).FixedWidth(56).FixedHeight(17)
+                    }).FixedWidth(56).FixedHeight(19)
                 ).OnClickAway(() => { state.ShowSettingsModal = false; })
             ]).WithInputBindings(keys => BindSettingsModalKeys(keys, state, app, options));
         }
@@ -226,7 +226,8 @@ public static class AppLayout
         "Mouse Support",
         "Emoji Display",
         "Markdown Rendering",
-        "Default Screen"
+        "Default Screen",
+        "Refresh Interval"
     ];
 
     private static Hex1bWidget[] RenderSettingsModalContent(
@@ -255,7 +256,8 @@ public static class AppLayout
             $"  {Icon("🖱️", "◆", em)}  Mouse Support    {FormatToggle(state.Settings.MouseEnabled)}",
             $"  {Icon("😀", "◆", em)} Emoji Display    {FormatToggle(state.Settings.ShowEmoji)}",
             $"  {Icon("📝", "▪", em)} Markdown Render  {FormatToggle(state.Settings.MarkdownRendering)}",
-            $"  {Icon("🏠", "▸", em)} Default Screen   {B}{state.Settings.DefaultScreen}{R}"
+            $"  {Icon("🏠", "▸", em)} Default Screen   {B}{state.Settings.DefaultScreen}{R}",
+            $"  {Icon("🔄", "▸", em)} Refresh Interval {B}{state.Settings.RefreshIntervalSeconds}s{R}"
         } as IReadOnlyList<string>;
 
         return
@@ -313,6 +315,12 @@ public static class AppLayout
                 var curScreenIdx = Array.IndexOf(screenNames, settings.DefaultScreen);
                 if (curScreenIdx < 0) curScreenIdx = 0;
                 settings.DefaultScreen = screenNames[(curScreenIdx + 1) % screenNames.Length];
+                break;
+            case 6: // Refresh Interval — cycle
+                var intervals = new[] { 15, 30, 60, 120 };
+                var curIdx = Array.IndexOf(intervals, settings.RefreshIntervalSeconds);
+                if (curIdx < 0) curIdx = 1; // default to 30s
+                settings.RefreshIntervalSeconds = intervals[(curIdx + 1) % intervals.Length];
                 break;
         }
         SettingsService.Save(settings);
@@ -517,6 +525,26 @@ public static class AppLayout
             if (state.CurrentScreen == Screen.Metrics)
                 state.ShowBurndown = !state.ShowBurndown;
         }, "Toggle Burndown");
+        keys.Key(Hex1bKey.R).Action(() =>
+        {
+            if (state.CurrentScreen != Screen.NoSquad)
+            {
+                var bridge = new DataBridge(ServiceProvider.Instance);
+                _ = Task.Run(async () =>
+                {
+                    var membersTask = bridge.LoadRosterDataAsync();
+                    var tasksTask = bridge.LoadTasksFromRosterAsync();
+                    var decisionsTask = bridge.LoadDecisionsDataAsync();
+                    var logsTask = bridge.LoadLogDataAsync();
+                    await Task.WhenAll(membersTask, tasksTask, decisionsTask, logsTask);
+                    state.Members = await membersTask;
+                    state.Tasks = await tasksTask;
+                    state.Decisions = await decisionsTask;
+                    state.LogEntries = await logsTask;
+                    state.LastRefreshTime = DateTime.Now;
+                });
+            }
+        }, "Refresh");
 
         // Case-insensitive bindings: Shift+Key handles uppercase letter input
         keys.Shift().Key(Hex1bKey.Q).Action(() => { app.RequestStop(); }, "Quit");
@@ -654,6 +682,26 @@ public static class AppLayout
             if (state.CurrentScreen == Screen.Metrics)
                 state.ShowBurndown = !state.ShowBurndown;
         }, "Toggle Burndown");
+        keys.Shift().Key(Hex1bKey.R).Action(() =>
+        {
+            if (state.CurrentScreen != Screen.NoSquad)
+            {
+                var bridge = new DataBridge(ServiceProvider.Instance);
+                _ = Task.Run(async () =>
+                {
+                    var membersTask = bridge.LoadRosterDataAsync();
+                    var tasksTask = bridge.LoadTasksFromRosterAsync();
+                    var decisionsTask = bridge.LoadDecisionsDataAsync();
+                    var logsTask = bridge.LoadLogDataAsync();
+                    await Task.WhenAll(membersTask, tasksTask, decisionsTask, logsTask);
+                    state.Members = await membersTask;
+                    state.Tasks = await tasksTask;
+                    state.Decisions = await decisionsTask;
+                    state.LogEntries = await logsTask;
+                    state.LastRefreshTime = DateTime.Now;
+                });
+            }
+        }, "Refresh");
         keys.Key(Hex1bKey.Tab).OverridesCapture().Action(() =>
         {
             if (state.CurrentScreen == Screen.Dashboard)

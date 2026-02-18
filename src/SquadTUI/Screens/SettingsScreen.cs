@@ -15,7 +15,8 @@ public static class SettingsScreen
         "Vim Keybindings",
         "Mouse Support",
         "Emoji Display",
-        "Markdown Rendering"
+        "Markdown Rendering",
+        "Refresh Interval"
     ];
 
     public static Hex1bWidget Render(WidgetContext<VStackWidget> v, AppState state, Hex1bApp app, dynamic options)
@@ -39,7 +40,8 @@ public static class SettingsScreen
             $"  {Icon("⌨️", "◆", em)}  Vim Keybindings  {FormatToggle(settings.VimBindings)}",
             $"  {Icon("🖱️", "◆", em)}  Mouse Support    {FormatToggle(settings.MouseEnabled)}",
             $"  {Icon("😀", "◆", em)} Emoji Display    {FormatToggle(settings.ShowEmoji)}",
-            $"  {Icon("📝", "▪", em)} Markdown Render  {FormatToggle(settings.MarkdownRendering)}"
+            $"  {Icon("📝", "▪", em)} Markdown Render  {FormatToggle(settings.MarkdownRendering)}",
+            $"  {Icon("🔄", "▸", em)} Refresh Interval {B}{settings.RefreshIntervalSeconds}s{R}"
         } as IReadOnlyList<string>;
 
         return v.HStack(h =>
@@ -104,6 +106,9 @@ public static class SettingsScreen
         4 => ($"{Icon("📝", "▪", em)} Markdown Rendering",
               "Render markdown formatting in charter and log views.",
               settings.MarkdownRendering ? "Enabled" : "Disabled"),
+        5 => ($"{Icon("🔄", "▸", em)} Refresh Interval",
+              "How often data is automatically refreshed. Cycles through 15s, 30s, 60s, 120s.",
+              $"{settings.RefreshIntervalSeconds}s"),
         _ => ("", "", "")
     };
 
@@ -132,6 +137,12 @@ public static class SettingsScreen
                 break;
             case 4:
                 settings.MarkdownRendering = !settings.MarkdownRendering;
+                break;
+            case 5: // Refresh Interval — cycle
+                var intervals = new[] { 15, 30, 60, 120 };
+                var curIdx = Array.IndexOf(intervals, settings.RefreshIntervalSeconds);
+                if (curIdx < 0) curIdx = 1; // default to 30s
+                settings.RefreshIntervalSeconds = intervals[(curIdx + 1) % intervals.Length];
                 break;
         }
         SettingsService.Save(settings);
