@@ -300,6 +300,7 @@ public static class AppLayout
                 break;
             case 2:
                 settings.MouseEnabled = !settings.MouseEnabled;
+                options.EnableMouse = settings.MouseEnabled;
                 break;
             case 3:
                 settings.ShowEmoji = !settings.ShowEmoji;
@@ -440,36 +441,39 @@ public static class AppLayout
             if (state.ConfirmingRemove)
                 state.ConfirmingRemove = false;
         }, "Cancel Remove");
-        keys.Key(Hex1bKey.J).Action(() =>
+        if (state.Settings.VimBindings)
         {
-            if (state.CurrentScreen == Screen.Roster)
-                state.RosterSelectedIndex = Math.Min(state.RosterSelectedIndex + 1, (state.Members.GetOrEmpty().Count is var mc && mc > 0 ? mc : 6) - 1);
-            else if (state.CurrentScreen == Screen.Decisions)
-                state.DecisionSelectedIndex = Math.Min(state.DecisionSelectedIndex + 1, (state.Decisions.GetOrEmpty().Count is var dc && dc > 0 ? dc : 4) - 1);
-            else if (state.CurrentScreen == Screen.ActivityLog)
-                state.LogSelectedIndex = Math.Min(state.LogSelectedIndex + 1, (state.LogEntries.GetOrEmpty().Count is var lc && lc > 0 ? lc : 3) - 1);
-            else if (state.CurrentScreen == Screen.Skills)
-                state.SkillSelectedIndex = Math.Min(state.SkillSelectedIndex + 1, (state.Skills.GetOrEmpty().Count is var sc && sc > 0 ? sc : 5) - 1);
-            else if (state.CurrentScreen == Screen.Settings)
-                state.SettingsSelectedIndex = Math.Min(state.SettingsSelectedIndex + 1, 4);
-            else if (state.CurrentScreen == Screen.Charter)
-                state.CharterScrollOffset++;
-        }, "Down");
-        keys.Key(Hex1bKey.K).Action(() =>
-        {
-            if (state.CurrentScreen == Screen.Roster)
-                state.RosterSelectedIndex = Math.Max(state.RosterSelectedIndex - 1, 0);
-            else if (state.CurrentScreen == Screen.Decisions)
-                state.DecisionSelectedIndex = Math.Max(state.DecisionSelectedIndex - 1, 0);
-            else if (state.CurrentScreen == Screen.ActivityLog)
-                state.LogSelectedIndex = Math.Max(state.LogSelectedIndex - 1, 0);
-            else if (state.CurrentScreen == Screen.Skills)
-                state.SkillSelectedIndex = Math.Max(state.SkillSelectedIndex - 1, 0);
-            else if (state.CurrentScreen == Screen.Settings)
-                state.SettingsSelectedIndex = Math.Max(state.SettingsSelectedIndex - 1, 0);
-            else if (state.CurrentScreen == Screen.Charter)
-                state.CharterScrollOffset = Math.Max(state.CharterScrollOffset - 1, 0);
-        }, "Up");
+            keys.Key(Hex1bKey.J).Action(() =>
+            {
+                if (state.CurrentScreen == Screen.Roster)
+                    state.RosterSelectedIndex = Math.Min(state.RosterSelectedIndex + 1, (state.Members.GetOrEmpty().Count is var mc && mc > 0 ? mc : 6) - 1);
+                else if (state.CurrentScreen == Screen.Decisions)
+                    state.DecisionSelectedIndex = Math.Min(state.DecisionSelectedIndex + 1, (state.Decisions.GetOrEmpty().Count is var dc && dc > 0 ? dc : 4) - 1);
+                else if (state.CurrentScreen == Screen.ActivityLog)
+                    state.LogSelectedIndex = Math.Min(state.LogSelectedIndex + 1, (state.LogEntries.GetOrEmpty().Count is var lc && lc > 0 ? lc : 3) - 1);
+                else if (state.CurrentScreen == Screen.Skills)
+                    state.SkillSelectedIndex = Math.Min(state.SkillSelectedIndex + 1, (state.Skills.GetOrEmpty().Count is var sc && sc > 0 ? sc : 5) - 1);
+                else if (state.CurrentScreen == Screen.Settings)
+                    state.SettingsSelectedIndex = Math.Min(state.SettingsSelectedIndex + 1, 4);
+                else if (state.CurrentScreen == Screen.Charter)
+                    state.CharterScrollOffset++;
+            }, "Down");
+            keys.Key(Hex1bKey.K).Action(() =>
+            {
+                if (state.CurrentScreen == Screen.Roster)
+                    state.RosterSelectedIndex = Math.Max(state.RosterSelectedIndex - 1, 0);
+                else if (state.CurrentScreen == Screen.Decisions)
+                    state.DecisionSelectedIndex = Math.Max(state.DecisionSelectedIndex - 1, 0);
+                else if (state.CurrentScreen == Screen.ActivityLog)
+                    state.LogSelectedIndex = Math.Max(state.LogSelectedIndex - 1, 0);
+                else if (state.CurrentScreen == Screen.Skills)
+                    state.SkillSelectedIndex = Math.Max(state.SkillSelectedIndex - 1, 0);
+                else if (state.CurrentScreen == Screen.Settings)
+                    state.SettingsSelectedIndex = Math.Max(state.SettingsSelectedIndex - 1, 0);
+                else if (state.CurrentScreen == Screen.Charter)
+                    state.CharterScrollOffset = Math.Max(state.CharterScrollOffset - 1, 0);
+            }, "Up");
+        }
         keys.Key(Hex1bKey.C).Action(() =>
         {
             if (state.CurrentScreen == Screen.NoSquad)
@@ -585,36 +589,39 @@ public static class AppLayout
             if (state.ConfirmingRemove)
                 state.ConfirmingRemove = false;
         }, "Cancel Remove");
-        keys.Shift().Key(Hex1bKey.J).Action(() =>
+        if (state.Settings.VimBindings)
         {
-            if (state.CurrentScreen == Screen.Roster)
-                state.RosterSelectedIndex = Math.Min(state.RosterSelectedIndex + 1, (state.Members.GetOrEmpty().Count is var mc && mc > 0 ? mc : 6) - 1);
-            else if (state.CurrentScreen == Screen.Decisions)
-                state.DecisionSelectedIndex = Math.Min(state.DecisionSelectedIndex + 1, (state.Decisions.GetOrEmpty().Count is var dc && dc > 0 ? dc : 4) - 1);
-            else if (state.CurrentScreen == Screen.ActivityLog)
-                state.LogSelectedIndex = Math.Min(state.LogSelectedIndex + 1, (state.LogEntries.GetOrEmpty().Count is var lc && lc > 0 ? lc : 3) - 1);
-            else if (state.CurrentScreen == Screen.Skills)
-                state.SkillSelectedIndex = Math.Min(state.SkillSelectedIndex + 1, (state.Skills.GetOrEmpty().Count is var sc && sc > 0 ? sc : 5) - 1);
-            else if (state.CurrentScreen == Screen.Settings)
-                state.SettingsSelectedIndex = Math.Min(state.SettingsSelectedIndex + 1, 4);
-            else if (state.CurrentScreen == Screen.Charter)
-                state.CharterScrollOffset++;
-        }, "Down");
-        keys.Shift().Key(Hex1bKey.K).Action(() =>
-        {
-            if (state.CurrentScreen == Screen.Roster)
-                state.RosterSelectedIndex = Math.Max(state.RosterSelectedIndex - 1, 0);
-            else if (state.CurrentScreen == Screen.Decisions)
-                state.DecisionSelectedIndex = Math.Max(state.DecisionSelectedIndex - 1, 0);
-            else if (state.CurrentScreen == Screen.ActivityLog)
-                state.LogSelectedIndex = Math.Max(state.LogSelectedIndex - 1, 0);
-            else if (state.CurrentScreen == Screen.Skills)
-                state.SkillSelectedIndex = Math.Max(state.SkillSelectedIndex - 1, 0);
-            else if (state.CurrentScreen == Screen.Settings)
-                state.SettingsSelectedIndex = Math.Max(state.SettingsSelectedIndex - 1, 0);
-            else if (state.CurrentScreen == Screen.Charter)
-                state.CharterScrollOffset = Math.Max(state.CharterScrollOffset - 1, 0);
-        }, "Up");
+            keys.Shift().Key(Hex1bKey.J).Action(() =>
+            {
+                if (state.CurrentScreen == Screen.Roster)
+                    state.RosterSelectedIndex = Math.Min(state.RosterSelectedIndex + 1, (state.Members.GetOrEmpty().Count is var mc && mc > 0 ? mc : 6) - 1);
+                else if (state.CurrentScreen == Screen.Decisions)
+                    state.DecisionSelectedIndex = Math.Min(state.DecisionSelectedIndex + 1, (state.Decisions.GetOrEmpty().Count is var dc && dc > 0 ? dc : 4) - 1);
+                else if (state.CurrentScreen == Screen.ActivityLog)
+                    state.LogSelectedIndex = Math.Min(state.LogSelectedIndex + 1, (state.LogEntries.GetOrEmpty().Count is var lc && lc > 0 ? lc : 3) - 1);
+                else if (state.CurrentScreen == Screen.Skills)
+                    state.SkillSelectedIndex = Math.Min(state.SkillSelectedIndex + 1, (state.Skills.GetOrEmpty().Count is var sc && sc > 0 ? sc : 5) - 1);
+                else if (state.CurrentScreen == Screen.Settings)
+                    state.SettingsSelectedIndex = Math.Min(state.SettingsSelectedIndex + 1, 4);
+                else if (state.CurrentScreen == Screen.Charter)
+                    state.CharterScrollOffset++;
+            }, "Down");
+            keys.Shift().Key(Hex1bKey.K).Action(() =>
+            {
+                if (state.CurrentScreen == Screen.Roster)
+                    state.RosterSelectedIndex = Math.Max(state.RosterSelectedIndex - 1, 0);
+                else if (state.CurrentScreen == Screen.Decisions)
+                    state.DecisionSelectedIndex = Math.Max(state.DecisionSelectedIndex - 1, 0);
+                else if (state.CurrentScreen == Screen.ActivityLog)
+                    state.LogSelectedIndex = Math.Max(state.LogSelectedIndex - 1, 0);
+                else if (state.CurrentScreen == Screen.Skills)
+                    state.SkillSelectedIndex = Math.Max(state.SkillSelectedIndex - 1, 0);
+                else if (state.CurrentScreen == Screen.Settings)
+                    state.SettingsSelectedIndex = Math.Max(state.SettingsSelectedIndex - 1, 0);
+                else if (state.CurrentScreen == Screen.Charter)
+                    state.CharterScrollOffset = Math.Max(state.CharterScrollOffset - 1, 0);
+            }, "Up");
+        }
         keys.Shift().Key(Hex1bKey.C).Action(() =>
         {
             if (state.CurrentScreen == Screen.NoSquad)
@@ -650,22 +657,22 @@ public static class AppLayout
         keys.Key(Hex1bKey.Tab).OverridesCapture().Action(() =>
         {
             if (state.CurrentScreen == Screen.Dashboard)
-                state.DashboardFocusedPanel = (state.DashboardFocusedPanel + 1) % 4;
+                state.DashboardFocusedPanel = (state.DashboardFocusedPanel + 1) % 5;
         }, "Next Panel");
         keys.Shift().Key(Hex1bKey.Tab).OverridesCapture().Action(() =>
         {
             if (state.CurrentScreen == Screen.Dashboard)
-                state.DashboardFocusedPanel = (state.DashboardFocusedPanel + 3) % 4;
+                state.DashboardFocusedPanel = (state.DashboardFocusedPanel + 4) % 5;
         }, "Prev Panel");
         keys.Key(Hex1bKey.RightArrow).Action(() =>
         {
             if (state.CurrentScreen == Screen.Dashboard)
-                state.DashboardFocusedPanel = (state.DashboardFocusedPanel + 1) % 4;
+                state.DashboardFocusedPanel = (state.DashboardFocusedPanel + 1) % 5;
         }, "Next Panel");
         keys.Key(Hex1bKey.LeftArrow).Action(() =>
         {
             if (state.CurrentScreen == Screen.Dashboard)
-                state.DashboardFocusedPanel = (state.DashboardFocusedPanel + 3) % 4;
+                state.DashboardFocusedPanel = (state.DashboardFocusedPanel + 4) % 5;
         }, "Prev Panel");
         keys.Key(Hex1bKey.Enter).Action(() =>
         {
@@ -677,6 +684,7 @@ public static class AppLayout
                     1 => Screen.ActivityLog,
                     2 => Screen.Decisions,
                     3 => Screen.Metrics,
+                    4 => Screen.Skills,
                     _ => (Screen?)null
                 };
                 if (target.HasValue)

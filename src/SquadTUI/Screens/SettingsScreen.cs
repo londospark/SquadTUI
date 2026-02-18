@@ -125,6 +125,7 @@ public static class SettingsScreen
                 break;
             case 2:
                 settings.MouseEnabled = !settings.MouseEnabled;
+                options.EnableMouse = settings.MouseEnabled;
                 break;
             case 3:
                 settings.ShowEmoji = !settings.ShowEmoji;
