@@ -8,7 +8,7 @@ public class FileWatcherService : IDisposable
 {
     private FileSystemWatcher? _watcher;
     private DateTime _lastChange = DateTime.MinValue;
-    private readonly TimeSpan _debounce = TimeSpan.FromSeconds(2);
+    private readonly TimeSpan _debounce = TimeSpan.FromMilliseconds(500);
 
     public event Action? OnFilesChanged;
     public bool IsWatching { get; private set; }

@@ -7,8 +7,11 @@ namespace SquadTUI.Tests.E2E;
 [Collection("E2E")]
 public class ThemeSwitchingTests
 {
-    [Fact]
-    public async Task ThemeCycle_PressT_CyclesThroughThemes()
+    [Theory]
+    [InlineData(3, "cycle through themes")]
+    [InlineData(4, "wrap around after last theme")]
+    [InlineData(1, "single theme change")]
+    public async Task ThemeCycle_PressT_CyclesCorrectly(int pressCount, string scenario)
     {
         await using var terminal = TestAppBuilder.Build();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -18,8 +21,8 @@ public class ThemeSwitchingTests
         var snapshot = terminal.CreateSnapshot();
         Assert.True(snapshot.ContainsText("Dashboard"));
 
-        // Press T three times to cycle through themes
-        for (int i = 0; i < 3; i++)
+        // Press T specified number of times
+        for (int i = 0; i < pressCount; i++)
         {
             var sequence = new Hex1bTerminalInputSequenceBuilder()
                 .Key(Hex1bKey.T)
@@ -29,62 +32,11 @@ public class ThemeSwitchingTests
         }
 
         // App should still render correctly after theme cycling
-        var snapshot2 = terminal.CreateSnapshot();
-        Assert.True(snapshot2.ContainsText("Dashboard"));
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task ThemeCycle_PressT_WrapsAroundAfterLastTheme()
-    {
-        await using var terminal = TestAppBuilder.Build();
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Dashboard"));
-
-        // Press T 4 times to wrap around to initial theme
-        for (int i = 0; i < 4; i++)
-        {
-            var sequence = new Hex1bTerminalInputSequenceBuilder()
-                .Key(Hex1bKey.T)
-                .Build();
-            await sequence.ApplyAsync(terminal);
-            await Task.Delay(200);
-        }
-
         var finalSnapshot = terminal.CreateSnapshot();
-        Assert.True(finalSnapshot.ContainsText("Dashboard"));
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task ThemeCycle_AppRendersCorrectlyAfterThemeChange()
-    {
-        await using var terminal = TestAppBuilder.Build();
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Dashboard"));
-
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.T)
-            .Build();
-        await sequence.ApplyAsync(terminal);
-        await Task.Delay(200);
-
-        // After theme change, nav and content should still render
-        var snapshot2 = terminal.CreateSnapshot();
-        Assert.True(snapshot2.ContainsText("Dashboard"));
-        Assert.True(snapshot2.ContainsText("Roster"));
+        Assert.True(finalSnapshot.ContainsText("Dashboard"), 
+            $"Dashboard should render after {scenario}");
+        Assert.True(finalSnapshot.ContainsText("Roster"),
+            $"Roster should be visible after {scenario}");
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

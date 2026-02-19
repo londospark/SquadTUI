@@ -2,6 +2,7 @@ using Hex1b;
 using Hex1b.Widgets;
 using SquadTUI.Models;
 using SquadTUI.Rendering;
+using SquadTUI.Services;
 using static SquadTUI.Rendering.IconHelper;
 
 namespace SquadTUI.Screens;
@@ -36,7 +37,19 @@ public static class RosterScreen
                 left.Text(t.Separator(30)),
                 left.Text(""),
                 left.List(listItems)
-                    .OnSelectionChanged(e => { state.RosterSelectedIndex = e.SelectedIndex; })
+                    .OnSelectionChanged(e =>
+                    {
+                        state.RosterSelectedIndex = e.SelectedIndex;
+                        // Load charter for newly selected member
+                        var name = members[e.SelectedIndex].Name;
+                        var bridge = new DataBridge(ServiceProvider.Instance);
+                        _ = Task.Run(async () => state.CharterContent = await bridge.LoadCharterContentAsync(name));
+                    })
+                    .OnItemActivated(e =>
+                    {
+                        state.SelectedMemberName = members[e.ActivatedIndex].Name;
+                        state.NavigateTo(Screen.MemberDetail);
+                    })
                     .Fill()
             ],
             detailContent: detail =>
@@ -101,8 +114,6 @@ public static class RosterScreen
                 }
 
                 return widgets.ToArray();
-            },
-            listWeight: 2,
-            detailWeight: 3);
+            });
     }
 }

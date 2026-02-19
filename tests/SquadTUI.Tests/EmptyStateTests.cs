@@ -30,45 +30,27 @@ public class EmptyStateTests
         Assert.Contains("# Charter", charter);
     }
 
-    [Fact]
-    public void RosterSelectedIndex_ClampedToZero_WhenMembersEmpty()
+    [Theory]
+    [InlineData("Roster")]
+    [InlineData("Decision")]
+    [InlineData("Skill")]
+    [InlineData("Log")]
+    public void SelectedIndex_ClampedToZero_WhenCollectionEmpty(string collectionName)
     {
         var state = new AppState();
-        var members = state.Members.GetOrEmpty();
-        Assert.Empty(members);
-        // Clamp should produce 0 when count is 0 (list is empty, index stays at 0)
-        var idx = Math.Clamp(state.RosterSelectedIndex, 0, Math.Max(0, members.Count - 1));
-        Assert.Equal(0, idx);
-    }
-
-    [Fact]
-    public void DecisionSelectedIndex_ClampedToZero_WhenDecisionsEmpty()
-    {
-        var state = new AppState();
-        var decisions = state.Decisions.GetOrEmpty();
-        Assert.Empty(decisions);
-        var idx = Math.Clamp(state.DecisionSelectedIndex, 0, Math.Max(0, decisions.Count - 1));
-        Assert.Equal(0, idx);
-    }
-
-    [Fact]
-    public void SkillSelectedIndex_ClampedToZero_WhenSkillsEmpty()
-    {
-        var state = new AppState();
-        var skills = state.Skills.GetOrEmpty();
-        Assert.Empty(skills);
-        var idx = Math.Clamp(state.SkillSelectedIndex, 0, Math.Max(0, skills.Count - 1));
-        Assert.Equal(0, idx);
-    }
-
-    [Fact]
-    public void LogSelectedIndex_ClampedToZero_WhenLogEntriesEmpty()
-    {
-        var state = new AppState();
-        var logs = state.LogEntries.GetOrEmpty();
-        Assert.Empty(logs);
-        var idx = Math.Clamp(state.LogSelectedIndex, 0, Math.Max(0, logs.Count - 1));
-        Assert.Equal(0, idx);
+        
+        var (collection, index) = collectionName switch
+        {
+            "Roster" => ((System.Collections.IList)state.Members.GetOrEmpty(), state.RosterSelectedIndex),
+            "Decision" => ((System.Collections.IList)state.Decisions.GetOrEmpty(), state.DecisionSelectedIndex),
+            "Skill" => ((System.Collections.IList)state.Skills.GetOrEmpty(), state.SkillSelectedIndex),
+            "Log" => ((System.Collections.IList)state.LogEntries.GetOrEmpty(), state.LogSelectedIndex),
+            _ => throw new ArgumentException($"Unknown collection: {collectionName}")
+        };
+        
+        Assert.Empty(collection);
+        var clampedIdx = Math.Clamp(index, 0, Math.Max(0, collection.Count - 1));
+        Assert.Equal(0, clampedIdx);
     }
 
     [Fact]
@@ -86,40 +68,25 @@ public class EmptyStateTests
         Assert.True(sprints.Count == 0 && tasks.Count == 0);
     }
 
-    [Fact]
-    public void RosterScreen_EmptyMembers_ShouldTriggerEmptyState()
+    [Theory]
+    [InlineData("Roster", "Members")]
+    [InlineData("Decisions", "Decisions")]
+    [InlineData("ActivityLog", "LogEntries")]
+    [InlineData("Skills", "Skills")]
+    public void Screen_EmptyCollection_ShouldTriggerEmptyState(string screenName, string propertyName)
     {
         var state = new AppState();
-        var members = state.Members.GetOrEmpty();
-        // RosterScreen checks: if (members.Count == 0)
-        Assert.Equal(0, members.Count);
-    }
-
-    [Fact]
-    public void DecisionsScreen_EmptyDecisions_ShouldTriggerEmptyState()
-    {
-        var state = new AppState();
-        var decisions = state.Decisions.GetOrEmpty();
-        // DecisionsScreen checks: if (decisions.Count == 0)
-        Assert.Equal(0, decisions.Count);
-    }
-
-    [Fact]
-    public void ActivityLogScreen_EmptyLogEntries_ShouldTriggerEmptyState()
-    {
-        var state = new AppState();
-        var logs = state.LogEntries.GetOrEmpty();
-        // ActivityLogScreen checks: if (logs.Count == 0)
-        Assert.Equal(0, logs.Count);
-    }
-
-    [Fact]
-    public void SkillsScreen_EmptySkills_ShouldTriggerEmptyState()
-    {
-        var state = new AppState();
-        var skills = state.Skills.GetOrEmpty();
-        // SkillsScreen checks: if (skills.Count == 0)
-        Assert.Equal(0, skills.Count);
+        
+        var collection = propertyName switch
+        {
+            "Members" => (System.Collections.IList)state.Members.GetOrEmpty(),
+            "Decisions" => (System.Collections.IList)state.Decisions.GetOrEmpty(),
+            "LogEntries" => (System.Collections.IList)state.LogEntries.GetOrEmpty(),
+            "Skills" => (System.Collections.IList)state.Skills.GetOrEmpty(),
+            _ => throw new ArgumentException($"Unknown property: {propertyName}")
+        };
+        
+        Assert.Equal(0, collection.Count);
     }
 
     [Fact]
@@ -192,11 +159,10 @@ public class EmptyStateTests
     {
         var state = new AppState
         {
-            Members = Right<AppError, IReadOnlyList<SquadMember>>(new List<SquadMember>
-            {
+            Members = Right<AppError, IReadOnlyList<SquadMember>>([
                 new("Alice", "Lead", MemberStatus.Active),
                 new("Bob", "Dev", MemberStatus.Active),
-            })
+            ])
         };
         Assert.Null(state.SelectedMemberName);
 

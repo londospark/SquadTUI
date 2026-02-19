@@ -8,6 +8,12 @@
 [![GitHub](https://img.shields.io/badge/Repo-GitHub-black)](https://github.com/londospark/SquadTUI)
 [![.NET 10](https://img.shields.io/badge/.NET-10-purple)](https://dotnet.microsoft.com/)
 
+## 🎬 Demo
+
+[![asciicast](https://asciinema.org/a/PLACEHOLDER.svg)](https://asciinema.org/a/PLACEHOLDER)
+
+> **Note:** The `PLACEHOLDER` above will be replaced with the real asciinema recording ID after upload.
+
 ## ✨ Features
 
 - **📊 Dashboard** — Real-time overview of squad activity, active tasks, and team metrics
@@ -24,14 +30,6 @@
 - **⌨️ Keyboard Navigation** — Vim-friendly shortcuts (`j`/`k`/`h`/`l`) with arrow key support
 - **🖱️ Mouse Support** — Clickable nav tabs, scroll, and select with your mouse
 
-## 🎬 Demo
-
-A recorded demo is available at `docs/images/demo.cast` — play it locally with [asciinema](https://asciinema.org/):
-
-```bash
-asciinema play docs/images/demo.cast
-```
-
 ## 📸 Screenshots
 
 ### Dashboard
@@ -43,22 +41,10 @@ asciinema play docs/images/demo.cast
 ### Decisions
 ![Decisions](docs/images/screenshot-decisions.svg)
 
-### Skills
-![Skills](docs/images/screenshot-skills.svg)
-
-### Activity Log
-![Activity Log](docs/images/screenshot-activity.svg)
-
-### Metrics
-![Metrics](docs/images/screenshot-metrics.svg)
-
-### Settings
-![Settings](docs/images/screenshot-settings.svg)
-
 ### Help
 ![Help](docs/images/screenshot-help.svg)
 
-*Screenshots captured on a 120×30 terminal with the Ocean theme using [hex1b CLI](https://hex1b.dev/). See [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md) for how to capture fresh screenshots.*
+*Screenshots captured on a 120×30 terminal with the Ocean theme using [hex1b CLI](https://hex1b.dev/). Additional screenshots available in `docs/images/` — see [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md) for how to capture fresh screenshots.*
 
 ## 🚀 Installation
 
@@ -140,62 +126,23 @@ npx github:bradygaster/squad
 
 SquadTUI includes a dedicated **Metrics** screen (press `6`) and a **Dashboard** summary for tracking squad performance at a glance.
 
-### What the Metrics Screen Shows
-
+**What the Metrics Screen Shows:**
 - **Sprint Progress** — Visual progress bar showing completion percentage with task counts
 - **Task Breakdown** — Done, in-progress, pending, and blocked counts with status icons
 - **Velocity** — Completed tasks per sprint cycle with trend direction
 - **Per-Member Contributions** — Bar chart of completed + active tasks per team member
 - **Member Status** — Individual breakdown of each member's task distribution
 
-### Sprint Data Structure
-
-Sprint history is modeled with `SprintMetrics` and `MemberContribution` records:
-
-```
-SprintMetrics
-├── SprintNumber, SprintName, StartDate, EndDate
-├── PlannedTasks, CompletedTasks, CarriedOver
-├── Contributions[] → MemberContribution
-│   ├── MemberName, TasksCompleted, TasksAssigned, PointsEarned
-│   └── Utilization (computed: completed / assigned)
-├── CompletionRate (computed: completed / planned)
-└── Velocity (completed tasks per sprint)
-```
-
-Cross-sprint aggregates (average velocity, velocity trend, team utilization) are available via `SampleData` helpers.
-
-### Dashboard Metrics Summary
-
-The Dashboard screen (`1`) shows a live squad status panel including:
-- Active member count and team roster with status badges
-- Task progress bar and counts (active, done, pending, blocked)
-- Sprint velocity and throughput at a glance
-- Recent activity log and decision timeline
-
-### Keyboard Shortcuts
-
-| Key | Action |
-|-----|--------|
-| `6` | Jump to Metrics screen |
-| `V` | Toggle velocity / burndown chart view |
-| `j` / `k` | Scroll within metrics panels |
-| `T` | Cycle theme (affects chart colors) |
-
-### Responsive Layouts
-
-Metrics adapt to terminal width:
+**Responsive Layouts:**
 - **Wide (≥120 cols)** — 3-column: progress + chart + member detail
 - **Medium (80–119)** — 2-column: progress + chart side-by-side
 - **Narrow (<80)** — Single column: stacked summary
-
-![Metrics Screen](docs/images/screenshot-metrics.svg)
 
 ## 🛠️ Tech Stack
 
 - **Framework:** [.NET 10](https://dotnet.microsoft.com/)
 - **TUI Library:** [Hex1b 0.87.0](https://hex1b.dev/) — Modern, declarative terminal UI framework
-- **Language:** C# 13
+- **Language:** C# 14
 - **Testing:** xUnit + Hex1b headless testing (`TestAppBuilder`)
 - **Platform Support:** Windows, macOS, Linux (x64 and ARM64)
 - **Architecture:** Clean separation — Models, Services, Screens, Rendering, Themes

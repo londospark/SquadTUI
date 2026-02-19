@@ -107,12 +107,14 @@ public sealed class RefreshService : IRefreshService
         var tasksTask = _bridge.LoadTasksFromRosterAsync();
         var decisionsTask = _bridge.LoadDecisionsDataAsync();
         var logsTask = _bridge.LoadLogDataAsync();
-        await Task.WhenAll(membersTask, tasksTask, decisionsTask, logsTask);
+        var skillsTask = _bridge.LoadSkillsDataAsync();
+        await Task.WhenAll(membersTask, tasksTask, decisionsTask, logsTask, skillsTask);
 
         _state.Members = await membersTask;
         _state.Tasks = await tasksTask;
         _state.Decisions = await decisionsTask;
         _state.LogEntries = await logsTask;
+        _state.Skills = await skillsTask;
 
         LastRefreshTime = DateTime.Now;
         _state.LastRefreshTime = LastRefreshTime;

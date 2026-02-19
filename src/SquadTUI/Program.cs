@@ -1,5 +1,6 @@
 using Hex1b;
 using Hex1b.Input;
+using SquadTUI.Models;
 using SquadTUI.Screens;
 using SquadTUI.Services;
 using SquadTUI.Themes;
@@ -37,6 +38,12 @@ _ = Task.Run(async () =>
     state.Skills = await skillsTask;
     state.LogEntries = await logsTask;
     state.Tasks = await tasksTask;
+    // Load charter for first member
+    var loadedMembers = state.Members.GetOrEmpty();
+    if (loadedMembers.Count > 0)
+    {
+        state.CharterContent = await bridge.LoadCharterContentAsync(loadedMembers[0].Name);
+    }
     state.IsLoading = false;
 });
 

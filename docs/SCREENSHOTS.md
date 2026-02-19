@@ -73,14 +73,17 @@ hex1b capture screenshot <terminal-id> --format html --output docs/images/screen
 
 ### Step 4: Navigate between screens
 
-Use `hex1b keys` to send keystrokes:
+Use `hex1b keys` to send keystrokes. SquadTUI uses stack-based navigation:
 
 ```bash
-# Navigate to Roster
-hex1b keys <terminal-id> --text "2"
+# From Dashboard: focus a panel with Right/Left arrows, then Enter to drill in
+# Panel mapping: 0=Roster, 1=ActivityLog, 2=Decisions, 3=Metrics, 4=Skills
+hex1b keys <terminal-id> --key Enter          # Drill into focused panel (default: Roster)
+hex1b keys <terminal-id> --key Right          # Focus next dashboard panel
+hex1b keys <terminal-id> --key Escape         # Go back to previous screen
 
-# Navigate to Decisions
-hex1b keys <terminal-id> --text "3"
+# Open settings modal
+hex1b keys <terminal-id> --text "S"
 
 # Cycle theme
 hex1b keys <terminal-id> --text "T"

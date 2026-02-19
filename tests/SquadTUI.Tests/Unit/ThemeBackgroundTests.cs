@@ -26,7 +26,7 @@ public class ThemeBackgroundTests
     [Fact]
     public void AllThemes_HaveDistinctBackgroundColors()
     {
-        var backgrounds = new List<string>();
+        List<string> backgrounds = [];
         for (int i = 0; i < ThemeManager.ThemeNames.Length; i++)
         {
             var theme = ThemeManager.GetTheme(i);
@@ -84,7 +84,7 @@ public class ThemeBackgroundTests
     [Fact]
     public void AllThemes_HaveDistinctDividerColors()
     {
-        var dividers = new List<string>();
+        List<string> dividers = [];
         for (int i = 0; i < ThemeManager.ThemeNames.Length; i++)
         {
             var theme = ThemeManager.GetTheme(i);

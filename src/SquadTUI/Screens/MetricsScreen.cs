@@ -107,7 +107,7 @@ public static class MetricsScreen
                         return w.ToArray();
                     }).FillWidth(1).FillHeight()),
                 ]).Fill(),
-            ])),
+            ]).Fill()),
 
             // Medium layout (≥80 cols): 2-column
             r.WhenMinWidth(80, r => r.VStack(outer =>
@@ -141,7 +141,7 @@ public static class MetricsScreen
                         right.BarChart(chartData).Fill(),
                     ]).FillWidth(1).FillHeight()),
                 ]).Fill(),
-            ])),
+            ]).Fill()),
 
             // Narrow layout: single column
             r.Otherwise(r => new BackgroundPanelWidget(t.PanelBg, r.VStack(col =>
@@ -161,7 +161,7 @@ public static class MetricsScreen
                         .Fill(),
                 };
                 return w.ToArray();
-            }))),
+            }).Fill())),
         ]).Fill().RedrawAfter(3000);
     }
 }

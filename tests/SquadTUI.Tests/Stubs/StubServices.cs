@@ -17,6 +17,7 @@ public class StubTeamService : ITeamService
     public Exception? CurrentTasksException { get; set; }
     public Exception? AddMemberException { get; set; }
     public Exception? RemoveMemberException { get; set; }
+    public IReadOnlyDictionary<string, DateTime>? ActivityTimesResult { get; set; }
 
     public Task<TeamRoster> GetRosterAsync(CancellationToken ct = default) =>
         RosterException is not null
@@ -38,6 +39,10 @@ public class StubTeamService : ITeamService
         AddMemberException is not null
             ? throw AddMemberException
             : Task.CompletedTask;
+
+    public Task<IReadOnlyDictionary<string, DateTime>> GetAgentActivityTimesAsync(CancellationToken ct = default) =>
+        Task.FromResult(ActivityTimesResult
+            ?? (IReadOnlyDictionary<string, DateTime>)new Dictionary<string, DateTime>());
 
     public Task RemoveMemberAsync(string name, CancellationToken ct = default) =>
         RemoveMemberException is not null

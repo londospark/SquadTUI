@@ -351,6 +351,52 @@ public class TeamService : ITeamService
             Directory.Delete(agentDir, true);
     }
 
+    public Task<IReadOnlyDictionary<string, DateTime>> GetAgentActivityTimesAsync(CancellationToken ct = default)
+    {
+        var times = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
+        var agentsDir = _fileLocations.GetAgentsDirectory();
+        if (!Directory.Exists(agentsDir))
+            return Task.FromResult<IReadOnlyDictionary<string, DateTime>>(times);
+
+        foreach (var agentDir in Directory.GetDirectories(agentsDir))
+        {
+            var agentName = Path.GetFileName(agentDir);
+            var latestMtime = DateTime.MinValue;
+
+            // Check history.md mtime
+            var historyPath = _fileLocations.GetHistoryPath(agentName);
+            if (File.Exists(historyPath))
+            {
+                var mtime = File.GetLastWriteTimeUtc(historyPath);
+                if (mtime > latestMtime) latestMtime = mtime;
+            }
+
+            // Check charter.md mtime
+            var charterPath = _fileLocations.GetCharterPath(agentName);
+            if (File.Exists(charterPath))
+            {
+                var mtime = File.GetLastWriteTimeUtc(charterPath);
+                if (mtime > latestMtime) latestMtime = mtime;
+            }
+
+            // Check inbox files authored by this agent
+            var inboxPath = _fileLocations.GetDecisionsInboxPath();
+            if (Directory.Exists(inboxPath))
+            {
+                foreach (var file in Directory.GetFiles(inboxPath, $"{agentName}-*.md"))
+                {
+                    var mtime = File.GetLastWriteTimeUtc(file);
+                    if (mtime > latestMtime) latestMtime = mtime;
+                }
+            }
+
+            if (latestMtime > DateTime.MinValue)
+                times[agentName] = latestMtime;
+        }
+
+        return Task.FromResult<IReadOnlyDictionary<string, DateTime>>(times);
+    }
+
     private static MemberStatus ParseMemberStatus(string text) =>
         text.Replace("✅", "").Replace("📋", "").Replace("🔄", "").Trim().ToLowerInvariant() switch
         {

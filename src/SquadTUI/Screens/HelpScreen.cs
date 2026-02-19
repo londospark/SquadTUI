@@ -65,7 +65,7 @@ public static class HelpScreen
                 outer.Text(""),
                 outer.Text(t.Separator(44)),
                 outer.Text($"  {t.D}Press ? or Escape to dismiss{t.R}"),
-            ])),
+            ]).Fill()),
 
             // Narrow: single column
             r.Otherwise(r => new BackgroundPanelWidget(t.PanelBg, r.VStack(stack =>
@@ -109,8 +109,8 @@ public static class HelpScreen
                 stack.Text(""),
                 stack.Text(t.Separator(32)),
                 stack.Text($"  {t.D}Press ? or Escape to dismiss{t.R}"),
-            ]))),
-        ]).WithInputBindings(keys =>
+            ]).Fill())),
+        ]).Fill().WithInputBindings(keys =>
         {
             keys.Key(Hex1bKey.F1).Action(() =>
             {

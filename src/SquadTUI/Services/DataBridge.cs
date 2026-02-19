@@ -21,7 +21,34 @@ public class DataBridge
         try
         {
             var roster = await _services.Team.GetRosterAsync(ct);
-            return Right<AppError, IReadOnlyList<SquadMember>>(roster.Members ?? []);
+            var members = roster.Members ?? [];
+
+            // Merge current task info into members so dashboard can display it
+            var currentTasks = await _services.Team.GetCurrentTasksAsync(ct)
+                ?? (IReadOnlyDictionary<string, string>)new Dictionary<string, string>();
+
+            // Merge file-mtime activity data to solve "everyone shows active" problem
+            var activityTimes = await _services.Team.GetAgentActivityTimesAsync(ct);
+
+            members = members.Select(m =>
+            {
+                var updated = m;
+
+                if (updated.CurrentTask.IsNone &&
+                    currentTasks.TryGetValue(updated.Name, out var task))
+                {
+                    updated = updated with { CurrentTask = Some(task) };
+                }
+
+                if (activityTimes.TryGetValue(updated.Name.ToLowerInvariant(), out var lastActivity))
+                {
+                    updated = updated with { LastActivity = Some(lastActivity) };
+                }
+
+                return updated;
+            }).ToList();
+
+            return Right<AppError, IReadOnlyList<SquadMember>>(members);
         }
         catch (Exception ex)
         {

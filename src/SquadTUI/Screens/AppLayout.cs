@@ -66,7 +66,7 @@ public static class AppLayout
             [
                 NoSquadScreen.Render(v, state, app),
                 RenderFooter(v, state)
-            ]).WithInputBindings(keys => BindKeys(keys, state, app, options));
+            ]).Fill().WithInputBindings(keys => BindKeys(keys, state, app, options));
         }
 
         // Settings modal as centered overlay on top of current screen
@@ -79,7 +79,7 @@ public static class AppLayout
                 [
                     RenderCurrentScreen(v, state, app, options),
                     RenderFooter(v, state)
-                ]),
+                ]).Fill(),
                 // Layer 1: backdrop + centered settings modal
                 z.Backdrop(
                     z.VStack(modal =>
@@ -87,7 +87,7 @@ public static class AppLayout
                         return RenderSettingsModalContent(modal, state, app, options);
                     }).FixedWidth(56).FixedHeight(19)
                 ).OnClickAway(() => { state.ShowSettingsModal = false; })
-            ]).WithInputBindings(keys => BindSettingsModalKeys(keys, state, app, options));
+            ]).Fill().WithInputBindings(keys => BindSettingsModalKeys(keys, state, app, options));
         }
 
         // Main view — render current screen directly (no tabs)
@@ -95,7 +95,7 @@ public static class AppLayout
         [
             RenderCurrentScreen(v, state, app, options),
             RenderFooter(v, state)
-        ]).WithInputBindings(keys => BindKeys(keys, state, app, options));
+        ]).Fill().WithInputBindings(keys => BindKeys(keys, state, app, options));
     }
 
     private static Hex1bWidget RenderCurrentScreen(
@@ -333,6 +333,18 @@ public static class AppLayout
             state.SelectedThemeIndex = (state.SelectedThemeIndex + 1) % ThemeManager.ThemeNames.Length;
             options.Theme = ThemeManager.GetTheme(state.SelectedThemeIndex);
         }, "Theme");
+        BindCI(keys, Hex1bKey.H, () =>
+        {
+            if (state.NavigationStack.Count > 0)
+                state.NavigateBack();
+        }, "Previous Screen");
+        BindCI(keys, Hex1bKey.L, () =>
+        {
+            var screens = new[] { Screen.Dashboard, Screen.Roster, Screen.Decisions, Screen.Skills, Screen.ActivityLog, Screen.Metrics };
+            var current = Array.IndexOf(screens, state.CurrentScreen);
+            if (current >= 0)
+                state.NavigateTo(screens[(current + 1) % screens.Length]);
+        }, "Next Screen");
         BindCI(keys, Hex1bKey.S, () =>
         {
             if (state.CurrentScreen != Screen.NoSquad)
@@ -543,7 +555,23 @@ public static class AppLayout
                     state.DashboardFocusedPanel = 0;
                 }
             }
+            else if (state.CurrentScreen == Screen.Roster)
+            {
+                var members = state.Members.GetOrEmpty();
+                if (members.Count > 0)
+                {
+                    var selectedIdx = Math.Clamp(state.RosterSelectedIndex, 0, members.Count - 1);
+                    state.SelectedMemberName = members[selectedIdx].Name;
+                    state.NavigateTo(Screen.MemberDetail);
+                }
+            }
         }, "Drill In");
+        keys.Key(Hex1bKey.D1).Action(() => state.NavigateTo(Screen.Dashboard), "Jump to Dashboard");
+        keys.Key(Hex1bKey.D2).Action(() => state.NavigateTo(Screen.Roster), "Jump to Roster");
+        keys.Key(Hex1bKey.D3).Action(() => state.NavigateTo(Screen.Decisions), "Jump to Decisions");
+        keys.Key(Hex1bKey.D4).Action(() => state.NavigateTo(Screen.Skills), "Jump to Skills");
+        keys.Key(Hex1bKey.D5).Action(() => state.NavigateTo(Screen.ActivityLog), "Jump to Log");
+        keys.Key(Hex1bKey.D6).Action(() => state.NavigateTo(Screen.Metrics), "Jump to Metrics");
     }
 
     /// <summary>

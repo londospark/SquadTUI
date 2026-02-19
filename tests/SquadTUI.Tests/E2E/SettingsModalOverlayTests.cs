@@ -104,10 +104,13 @@ public class SettingsModalOverlayTests
         try { await runTask; } catch (OperationCanceledException) { }
     }
 
-    [Fact]
-    public async Task SettingsModal_DoesNotAffectScreenSizing_AtWideWidth()
+    [Theory]
+    [InlineData(160, 40)]
+    [InlineData(60, 24)]
+    [InlineData(120, 30)]
+    public async Task SettingsModal_DoesNotAffectScreenSizing_AtVariousWidths(int width, int height)
     {
-        await using var terminal = TestAppBuilder.Build(width: 160, height: 40);
+        await using var terminal = TestAppBuilder.Build(width: width, height: height);
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         var runTask = terminal.RunAsync(cts.Token);
         await Task.Delay(200);
@@ -119,29 +122,8 @@ public class SettingsModalOverlayTests
         await Task.Delay(200);
 
         var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Settings"));
-        Assert.NotNull(snapshot);
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task SettingsModal_DoesNotAffectScreenSizing_AtNarrowWidth()
-    {
-        await using var terminal = TestAppBuilder.Build(width: 60, height: 24);
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        var seq = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.S)
-            .Build();
-        await seq.ApplyAsync(terminal);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Settings"));
+        Assert.True(snapshot.ContainsText("Settings"), 
+            $"Settings modal should render at {width}x{height}");
         Assert.NotNull(snapshot);
 
         cts.Cancel();

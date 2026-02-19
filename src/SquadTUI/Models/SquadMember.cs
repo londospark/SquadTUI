@@ -7,5 +7,6 @@ public record SquadMember(
     string Role,
     MemberStatus Status = MemberStatus.Active,
     Option<string> CurrentTask = default,
-    Option<string> CharterPath = default
+    Option<string> CharterPath = default,
+    Option<DateTime> LastActivity = default
 );

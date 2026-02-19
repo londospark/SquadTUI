@@ -11,6 +11,17 @@ public static class DashboardScreen
 {
     public static Hex1bWidget Render(WidgetContext<VStackWidget> v, AppState state, Hex1bApp app)
     {
+        if (state.IsLoading)
+        {
+            return v.VStack(loading =>
+            [
+                loading.Text(""),
+                loading.Text(""),
+                loading.Text("  Loading..."),
+                loading.Text(""),
+            ]).Fill();
+        }
+
         var members = state.Members.GetOrEmpty();
         var tasks = state.Tasks.GetOrEmpty();
         var activeCount = members.Count(m => m.Status == MemberStatus.Active);
@@ -132,7 +143,7 @@ public static class DashboardScreen
                         return w.ToArray();
                     }).FillWidth(1).FillHeight()),
                 ]).Fill()
-            ])),
+            ]).Fill()),
 
             // Medium layout (≥80 cols): 2-column
             r.WhenMinWidth(80, r => r.VStack(outer =>
@@ -191,9 +202,7 @@ public static class DashboardScreen
                         return w.ToArray();
                     }).FillWidth(1).FillHeight()),
                 ]).Fill()
-            ])),
-
-            // Narrow layout: single column
+            ]).Fill()),
             r.Otherwise(r => new BackgroundPanelWidget(t.PanelBg, r.VStack(col =>
             {
                 var w = new List<Hex1bWidget>
@@ -213,7 +222,7 @@ public static class DashboardScreen
                 foreach (var d in decisions.Take(2))
                     w.Add(col.Text($"  {t.D}{d.Date}{t.R}  {d.Title}  {t.D}({d.Author}){t.R}"));
                 return w.ToArray();
-            }))),
+            }).Fill())),
         ]).Fill().RedrawAfter(3000);
     }
 
