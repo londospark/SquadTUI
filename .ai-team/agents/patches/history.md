@@ -306,3 +306,42 @@ Dashboard was redesigned (by Siegmeyer) to use new panel titles ("👥 Team Rost
 ---
 
 📌 Team update (2026-02-18): Patches created 3 acast demo scripts for TUI showcase (dashboard, navigation, theme/settings). Wrote comprehensive usability report. **Critical finding:** Help screen documents `?` keybinding but no `?` key binding exists (only F1 works). Additional findings: no loading indicator, vim bindings conditional but undocumented, subtle panel focus highlight — decided by Patches
+
+### 2026-02-19: Bug Filing — 5 Issues Filed on GitHub
+
+**What was done:**
+- Full codebase audit of all keybindings in `AppLayout.cs` cross-referenced against all documented keybindings in `HelpScreen.cs`
+- Verified each discrepancy by searching for `Hex1bKey.*` bindings across all source files
+- Filed 5 bug issues on londospark/SquadTUI:
+
+**Issues filed:**
+
+1. **#69 — No loading indicator: `IsLoading` state set but never read by any screen**
+   - `Program.cs` sets `state.IsLoading = true/false` during async data load
+   - No screen ever checks `IsLoading` or `ErrorMessage` — empty panels during load with no feedback
+
+2. **#70 — Help screen documents `h/l` previous/next screen navigation that is not implemented**
+   - Help shows `h / l Previous / next screen` but no H or L key bindings exist in `AppLayout.BindKeys()`
+
+3. **#71 — Help screen displays `?` as keybinding to toggle help, but only F1 actually works**
+   - Help shows `? Toggle this help` and `Press ? or Escape to dismiss`
+   - Only `F1` and `Escape` are bound — no `?` binding exists anywhere
+   - Critical UX bug: the app teaches users a non-functional keybinding
+
+4. **#72 — Help screen documents `1-6` screen jump keys that are not implemented**
+   - Help shows `1-6 Jump to screen` but no D1-D6 key bindings exist in `AppLayout.BindKeys()`
+
+5. **#73 — Roster screen footer shows `Enter: Detail` but Enter does not navigate to MemberDetail**
+   - Footer says `Enter: Detail` on Roster screen
+   - Enter handler in `BindKeys` only handles Dashboard panel drill-in — Roster case missing
+   - `state.SelectedMemberName` is never set during navigation, so MemberDetailScreen would show wrong member even if fixed
+   - MemberDetail screen exists but is unreachable from Roster
+
+**Pattern identified:**
+The Help screen was written as a UX design document, not as documentation of implemented behavior. Multiple documented keybindings (`?`, `1-6`, `h/l`) were never wired up. The Roster Enter handler was partially implemented (footer text exists, detail screen exists) but the actual navigation code connecting them was never written.
+
+**Methodology:**
+- Extracted all `Hex1bKey.*` bindings from `AppLayout.cs` and `HelpScreen.cs` via grep
+- Cross-referenced every line in HelpScreen.cs against actual bindings
+- Verified footer text in `RenderFooter()` against `BindKeys()` handler coverage
+- Traced `SelectedMemberName` assignments across entire codebase
