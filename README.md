@@ -10,9 +10,7 @@
 
 ## 🎬 Demo
 
-[![asciicast](https://asciinema.org/a/PLACEHOLDER.svg)](https://asciinema.org/a/PLACEHOLDER)
-
-> **Note:** The `PLACEHOLDER` above will be replaced with the real asciinema recording ID after upload.
+[![asciicast](https://asciinema.org/a/lVT6isM9iBu0634a.svg)](https://asciinema.org/a/lVT6isM9iBu0634a)
 
 ## ✨ Features
 
