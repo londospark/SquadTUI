@@ -639,6 +639,493 @@ After migrating from TabPanel to stack-based navigation, the Skills screen becam
 
 ## What Was Done
 
+---
+
+### 2026-02-18: Data source catalog and gap analysis
+
+**By:** Solaire
+
+**What:** Complete catalog of all data sources consumed by SquadTUI, how change detection works for each, and a gap analysis identifying data we cannot get from `.ai-team/` files alone — with recommendations for external sources.
+
+**Why:** LondoSpark wants to understand what data we have, what we're missing, and what tools/APIs we'd need to build richer features (real-time agent activity, GitHub integration, session awareness).
+
+---
+
+## 1. Current Data Sources
+
+### 1.1 Team Roster — `team.md`
+
+| Attribute | Value |
+|-----------|-------|
+| **File** | `.ai-team/team.md` (or `.squad/team.md`) |
+| **Format** | Markdown with tables |
+| **Service** | `TeamService.GetRosterAsync()` |
+| **Change detection** | `FileWatcherService` (reactive, 2s debounce) + polling timer (configurable, default 30s) |
+| **Data provided** | Member names, roles, status (Active/Idle/Working/Offline), charter paths, project description |
+| **Missing data** | No "last seen" timestamp, no session count, no task history beyond current. Status is manually set in the file — there's no automatic status from Copilot runtime. |
+
+### 1.2 Agent Charters — `agents/*/charter.md`
+
+| Attribute | Value |
+|-----------|-------|
+| **Files** | `.ai-team/agents/{name}/charter.md` |
+| **Format** | Markdown (freeform with structured sections) |
+| **Service** | `DataBridge.LoadCharterContentAsync(memberName)` → raw file read |
+| **Change detection** | FileWatcher covers the `agents/` subtree |
+| **Data provided** | Agent identity, role description, expertise, working style |
+| **Missing data** | No structured frontmatter — currently parsed as raw markdown. Could benefit from YAML frontmatter for machine-readable fields (expertise tags, skill references). |
+
+### 1.3 Agent Histories — `agents/*/history.md`
+
+| Attribute | Value |
+|-----------|-------|
+| **Files** | `.ai-team/agents/{name}/history.md` |
+| **Format** | Markdown with `### date — topic` headings |
+| **Service** | `TeamService.GetCurrentTasksAsync()` → `ExtractLatestTaskFromHistory()` |
+| **Change detection** | FileWatcher covers `agents/` subtree |
+| **Data provided** | Latest task/learning entry per agent (used to infer "current work") |
+| **Missing data** | Only extracts the *last* `###` heading. No full history parsing, no task timeline, no contribution counting. Rich data is sitting in these files but we only scrape the surface. |
+
+### 1.4 Decisions — `decisions.md` + `decisions/inbox/*.md`
+
+| Attribute | Value |
+|-----------|-------|
+| **Files** | `.ai-team/decisions.md` + `.ai-team/decisions/inbox/*.md` |
+| **Format** | Markdown with `### date: title` + `**By:**`, `**What:**`, `**Why:**` fields |
+| **Service** | `DecisionService.GetDecisionsAsync()` |
+| **Change detection** | FileWatcher covers both paths |
+| **Data provided** | Decision title, date, author, what/why content, source file path + line number |
+| **Missing data** | No status field (proposed/accepted/superseded). No linking between decisions. No search/filter in the service layer. Inbox files have no merge workflow awareness. |
+
+### 1.5 Session Logs — `log/*.md`
+
+| Attribute | Value |
+|-----------|-------|
+| **Files** | `.ai-team/log/*.md` |
+| **Format** | Markdown with date-prefixed filenames, structured sections (Participants, Decisions, Outcomes, What Was Done) |
+| **Service** | `OrchestrationLogService.GetEntriesAsync()` |
+| **Change detection** | FileWatcher covers `log/` |
+| **Data provided** | Timestamp, topic, participants, summary, decisions made, outcomes, work done |
+| **Missing data** | No duration tracking. No session linkage (which sessions belong to the same sprint). No machine-readable metadata. |
+
+### 1.6 Orchestration Logs — `orchestration-log/*.md`
+
+| Attribute | Value |
+|-----------|-------|
+| **Files** | `.ai-team/orchestration-log/*.md` |
+| **Format** | Same as session logs |
+| **Service** | `OrchestrationLogService.GetEntriesAsync()` (merged with `log/`) |
+| **Change detection** | FileWatcher covers `orchestration-log/` |
+| **Data provided** | Same as session logs — both directories are parsed identically |
+| **Missing data** | Same gaps as session logs. Currently this directory is empty in our project — all logs are in `log/`. |
+
+### 1.7 Skills — `skills/*/SKILL.md`
+
+| Attribute | Value |
+|-----------|-------|
+| **Files** | `.ai-team/skills/{slug}/SKILL.md` |
+| **Format** | Markdown with YAML frontmatter (`name`, `description`, `source`, `confidence`) |
+| **Service** | `SkillService.GetSkillsAsync()` |
+| **Change detection** | FileWatcher covers `skills/` subtree |
+| **Data provided** | Skill name, description, source, confidence level, full body content |
+| **Missing data** | No usage tracking (which agents use which skills). No versioning. |
+
+### 1.8 Ceremonies — `ceremonies.md`
+
+| Attribute | Value |
+|-----------|-------|
+| **Files** | `.ai-team/ceremonies.md` |
+| **Format** | Markdown with tables per ceremony (trigger, when, condition, facilitator, participants, time budget, enabled) |
+| **Service** | **NONE** — not currently parsed or displayed |
+| **Change detection** | FileWatcher covers the file (it's in the squad root) but no service reads it |
+| **Data provided** | Nothing to the TUI currently |
+| **Missing data** | Entire file is ignored. Could show ceremony schedule, upcoming reviews, retro cadence. |
+
+### 1.9 Routing — `routing.md`
+
+| Attribute | Value |
+|-----------|-------|
+| **Files** | `.ai-team/routing.md` |
+| **Format** | Markdown with routing table and rules |
+| **Service** | **NONE** — not currently parsed or displayed |
+| **Change detection** | FileWatcher covers the file but no service reads it |
+| **Data provided** | Nothing to the TUI currently |
+| **Missing data** | Entire file is ignored. Could show work routing rules, help users understand agent responsibilities. |
+
+### 1.10 Casting State — `casting/*.json`
+
+| Attribute | Value |
+|-----------|-------|
+| **Files** | `.ai-team/casting/registry.json`, `policy.json`, `history.json` |
+| **Format** | JSON |
+| **Service** | **NONE** — not currently parsed or displayed |
+| **Change detection** | FileWatcher covers the directory but no service reads it |
+| **Data provided** | Nothing to the TUI currently |
+| **Missing data** | Contains rich data: agent-to-universe mapping, casting history, universe capacity, creation timestamps. Could power a "team identity" panel or casting history view. |
+
+### 1.11 User Settings — `~/.config/squadtui/settings.json`
+
+| Attribute | Value |
+|-----------|-------|
+| **File** | `~/.config/squadtui/settings.json` |
+| **Format** | JSON |
+| **Service** | `SettingsService.Load()` / `.Save()` |
+| **Change detection** | **None** — loaded once at startup, saved on change. No watcher. |
+| **Data provided** | Theme, vim bindings toggle, mouse toggle, emoji toggle, markdown rendering toggle, default screen, refresh interval |
+| **Missing data** | No per-project settings override. No recent-projects list. |
+
+### 1.12 GitHub Models (defined but unused)
+
+| Attribute | Value |
+|-----------|-------|
+| **File** | `src/SquadTUI/Models/GitHubModels.cs` |
+| **Format** | C# records |
+| **Service** | **NONE** — models defined but no service fetches GitHub data |
+| **Change detection** | N/A |
+| **Data provided** | Nothing — these are type definitions only (`GitHubIssue`, `GitHubMilestone`, `GitHubLabel`) |
+| **Missing data** | Everything. No GitHub API integration exists. |
+
+---
+
+## 2. Change Detection Architecture
+
+The current system uses a **hybrid refresh model** (`RefreshService`):
+
+1. **FileSystemWatcher** (reactive): Watches the entire `.ai-team/` (or `.squad/`) directory tree. Fires on file create/change/delete/rename with a 2-second debounce. Triggers full data reload.
+2. **Polling timer** (fallback): Configurable interval (default 30s via `AppSettings.RefreshIntervalSeconds`). Smart-skips if the watcher already fired since the last poll. Catches changes the watcher might miss (network drives, some editors that use atomic writes).
+3. **Render timer**: `DashboardScreen` and `MetricsScreen` call `.RedrawAfter(3000)` for 3-second UI refresh cycles. This repaints the screen but doesn't reload data — it just re-renders with whatever's in `AppState`.
+4. **Concurrency guard**: `SemaphoreSlim(1,1)` in `RefreshService` prevents overlapping reloads.
+
+**What gets reloaded on refresh:** Members, Tasks, Decisions, LogEntries. Skills are loaded at startup only (not included in `ReloadAllAsync()`).
+
+**What does NOT get reloaded:** Skills, Dashboard aggregate data, SprintHistory, CharterContent. These are only loaded on startup or on-demand navigation.
+
+---
+
+## 3. Data We Cannot Get from `.ai-team/` Files
+
+### 3.1 Real-Time Agent Activity
+
+**The gap:** We can tell who's *on the roster*, but not who's *currently spawned and working*. The `MemberStatus` in `team.md` is a static label. We have no way to know:
+- Is Siegmeyer currently in a Copilot session right now?
+- How long has Andre been working on the current task?
+- What prompt was given to trigger the current session?
+
+**Why it matters:** The dashboard shows status badges, but they're lies. Everyone shows "✅ Active" because that's what `team.md` says. Real-time awareness would let us show "🔵 Working" only when an agent is actually doing something.
+
+### 3.2 Session State
+
+**The gap:** No visibility into:
+- Whether a Copilot coding agent session is active
+- Which agent persona is loaded in the current session
+- Session duration, token usage, tool calls made
+- Whether the session completed successfully or was abandoned
+
+**Why it matters:** Session awareness would power features like "live session feed" or "time spent per task."
+
+### 3.3 Git Activity
+
+**The gap:** We already shell out to `git rev-parse --show-toplevel` for root detection and `git mv` for migration, but we don't track:
+- Recent commits (who committed what, when)
+- Branch state (current branch, open feature branches)
+- Uncommitted changes (dirty working tree)
+- PR-associated branches
+
+**Why it matters:** Commits are the ground truth for what work actually happened. Correlating commits with agent sessions would give us real velocity data instead of the placeholder metrics we show today.
+
+### 3.4 GitHub State
+
+**The gap:** We have `GitHubModels.cs` with records for issues, milestones, and labels — but zero implementation. No service fetches from GitHub API. We can't show:
+- Open issues / PRs
+- CI/CD pipeline status
+- Code review queue
+- Milestone progress
+
+**Why it matters:** The TUI wants to be the "command center" for squad work. Half that work happens on GitHub. Without it, we're showing a partial picture.
+
+---
+
+## 4. External Sources to Fill the Gaps
+
+### 4.1 Git CLI
+
+**Availability:** Already used (process spawn to `git`). Zero new dependencies.
+
+**What it gives us:**
+- `git log --format=...` → recent commits with author, date, message
+- `git branch -a` → all branches
+- `git status --porcelain` → working tree state
+- `git diff --stat` → change summary
+
+**Recommendation:** ✅ **Do this first.** Lowest friction, highest value. Create a `GitService` that wraps these commands. We already have the process-spawning pattern from `ServiceProvider.DiscoverProjectRoot()` and `MigrationService`.
+
+**Risks:** Process spawning is slow. Cache results with a TTL matching the polling interval.
+
+### 4.2 GitHub CLI (`gh`) / GitHub API
+
+**Availability:** If `gh` CLI is installed, it handles auth transparently. Alternatively, use `Octokit.NET` or raw HTTP with a PAT.
+
+**What it gives us:**
+- `gh issue list` / `gh pr list` → open issues and PRs
+- `gh run list` → CI/CD status
+- `gh api` → anything the REST API exposes
+
+**Recommendation:** ✅ **Do this second.** Create a `GitHubService` that shells out to `gh` CLI (same pattern as git). Graceful degradation if `gh` isn't installed — show "GitHub integration unavailable" instead of crashing.
+
+**We also have GitHub MCP tools available in this session** (`github-mcp-server-*`). These could be used by *agents* working on the TUI, but the TUI itself needs its own runtime integration — it can't call MCP tools at runtime.
+
+### 4.3 Copilot Extension/SDK API
+
+**Availability:** There is no public "Copilot SDK" that exposes session state programmatically. Copilot Coding Agent works through GitHub's infrastructure:
+
+- **Copilot agent sessions** are GitHub-side. There's no local socket, no IPC, no API endpoint the TUI can query to ask "is a coding agent running right now?"
+- **The `.ai-team/` file writes** are the only signal we get — when an agent writes to `decisions/inbox/`, `log/`, or `agents/*/history.md`, we know work happened. But we can't observe it in real-time.
+- **GitHub Actions status** via `gh run list` can tell us if a Copilot-triggered workflow is running — but that's GitHub CI, not the agent itself.
+
+**Recommendation:** ⚠️ **Not actionable today.** There is no Copilot extension SDK that exposes the data we want. The best proxy is file system observation (which we already do) combined with git/GitHub API for commit and PR activity. If GitHub ever exposes a Copilot session API, we should integrate it — but don't architect around a hypothetical.
+
+### 4.4 MCP Server Integration (Hex1b Diagnostics)
+
+**Availability:** We already have `.WithDiagnostics()` on the terminal builder, which enables Hex1b MCP integration for *external tools to inspect the TUI*. This is the reverse direction — it lets tools look into SquadTUI, not SquadTUI look outward.
+
+**What it gives us:** Nothing for data sourcing. It's for screenshot capture, automation, and testing.
+
+**Recommendation:** ❌ **Not relevant for data gaps.** Keep for tooling/CI purposes.
+
+### 4.5 File System Heuristics for Agent Activity
+
+**The creative workaround:** Even without a Copilot SDK, we can infer agent activity:
+
+1. **Watch for file writes with agent-prefixed filenames** in `decisions/inbox/` (e.g., `solaire-*.md` appearing means Solaire just worked)
+2. **Watch `agents/*/history.md` modification times** — a recent mtime means that agent was recently active
+3. **Correlate git commits** with agent names — if a commit message or branch name contains "solaire", Solaire was working
+4. **Check for `.copilot-*` temporary files** or other Copilot session artifacts in the working tree
+
+**Recommendation:** ✅ **Low-hanging fruit.** Enhance `TeamService` to use file mtimes as an "inferred activity" signal. A member whose `history.md` was modified in the last 10 minutes gets `MemberStatus.Working` automatically.
+
+---
+
+## 5. Priority Recommendations
+
+| Priority | Action | Effort | Value |
+|----------|--------|--------|-------|
+| **P0** | Parse `ceremonies.md`, `routing.md`, and `casting/*.json` — we already watch these files but ignore the data | Small | Medium |
+| **P1** | Add `GitService` for recent commits, branches, working tree state | Medium | High |
+| **P1** | Infer agent activity from file mtimes + inbox writes | Small | High |
+| **P2** | Add `GitHubService` via `gh` CLI for issues, PRs, CI status | Medium | High |
+| **P2** | Include Skills in `ReloadAllAsync()` (currently startup-only) | Tiny | Small |
+| **P3** | Full history parsing from `agents/*/history.md` for timeline/contribution data | Medium | Medium |
+| **P3** | Structured frontmatter for charters | Small | Small |
+| **Deferred** | Copilot session API integration — blocked on SDK availability | N/A | N/A |
+
+---
+
+## 6. Architecture Note
+
+All new services should follow the established pattern:
+- Interface in `IXxxService.cs`
+- Implementation takes `IFileLocationService` (or project root for git/GitHub)
+- Registered in `ServiceProvider`
+- Exposed through `DataBridge.LoadXxxAsync()` methods
+- State stored in `AppState` with `Either<AppError, T>` for error visibility
+- Included in `RefreshService.ReloadAllAsync()` for live updates
+
+For `GitService` and `GitHubService`, add graceful degradation — the TUI must work without git installed and without `gh` CLI. These are enhancement layers, not hard dependencies.
+
+---
+
+### 2026-02-19: Help Screen `?` Keybinding Discrepancy
+
+**By:** Patches
+
+**What:** The Help screen (HelpScreen.cs line 59) displays `? Toggle this help` as a documented keyboard shortcut, but **no `?` key binding exists anywhere in AppLayout.cs**. Only F1 toggles the Help screen. A user reading the Help text will press `?` and nothing will happen.
+
+**Why this matters:** The Help screen is the canonical reference for keyboard shortcuts. If it teaches the wrong shortcut, users lose trust in all documented keybindings. This was confirmed by reviewing all `BindKeys()`, `BindModalKeys()`, and `BindSettingsModalKeys()` methods in AppLayout.cs — none bind `?` or `Hex1bKey.Slash` with Shift.
+
+**Recommended fix (choose one):**
+1. Bind `?` to toggle help (add `keys.Shift().Key(Hex1bKey.Slash).Action(...)` in `BindKeys()`)
+2. Change the help text from `?` to `F1` on HelpScreen.cs line 59
+
+**Impact:** Firekeeper (UX) and Siegmeyer (screens) should coordinate on which fix. Option 1 is more discoverable but requires confirming `Hex1bKey.Slash` exists in the Hex1b API.
+
+---
+
+# Decision: Use BindCI helper for case-insensitive key bindings
+
+**Author:** Firekeeper (UX/Design)
+**Date:** 2026-02-17
+**Status:** Implemented
+
+## Context
+
+Hex1b treats `Key(Hex1bKey.Q)` as lowercase `q`. To handle uppercase `Q` (Shift or Caps Lock), every key binding must be duplicated with `Shift().Key(Hex1bKey.Q)`. This caused ~160 lines of exact copy-paste in AppLayout.cs across three binding methods.
+
+## Decision
+
+Introduce `BindCI(InputBindingsBuilder keys, Hex1bKey key, Action action, string label)` — a private helper in AppLayout that registers both lowercase and Shift+Key variants in one call. All letter-key bindings now use `BindCI()` instead of manual duplication.
+
+Non-letter keys (Escape, Enter, F1, Tab, arrows) don't need this — they're case-insensitive by nature.
+
+## Consequences
+
+- **Net deletion:** ~160 lines removed from AppLayout.cs
+- **Convention:** All future letter-key bindings in AppLayout should use `BindCI()` 
+- **No behavior change:** Exact same keys are bound, just without copy-paste
+
+---
+
+### 2026-02-18: User directive
+**By:** LondoSpark (via Copilot)
+**What:** Use acast to generate small demos of the TUI instead of screenshots. Run acast in a separate shell/terminal instance to avoid freezing the application.
+**Why:** User request — prefer automated terminal recordings over static screenshots for demonstrating TUI behavior.
+
+---
+
+# Dashboard Data Sources — Agent Status & Current Task Analysis
+
+**By:** Andre
+**Date:** 2026-02-19
+
+## Problem Statement
+
+On the dashboard, every agent except Scribe shows as "active" and every agent shows "No Active Task". The user expects the dashboard to reflect what agents are actually doing.
+
+## Root Cause Analysis
+
+### Issue 1: Status Always "Active" (Except Scribe)
+
+**Data flow:**
+```
+team.md → TeamService.ParseMemberStatus() → SquadMember.Status → DashboardScreen
+```
+
+The Status column in `team.md` contains **static roster designations**, not real-time activity:
+
+| Agent | team.md Status | Parsed As | Badge |
+|-------|---------------|-----------|-------|
+| Solaire | ✅ Active | Active | ✅ |
+| Siegmeyer | ✅ Active | Active | ✅ |
+| Andre | ✅ Active | Active | ✅ |
+| Patches | ✅ Active | Active | ✅ |
+| Firekeeper | ✅ Active | Active | ✅ |
+| Scribe | 📋 Silent | Idle | 🟡 |
+| Ralph | 🔄 Monitor | Active | ✅ |
+
+`ParseMemberStatus()` in `TeamService.cs:354` maps the stripped text:
+- "active" → Active, "silent" → Idle, "monitor" → Active, default → Active
+
+This is **working as designed** — the problem is that `team.md` describes what role each agent plays in the squad (always active, background-only, monitoring), not whether they're currently in a Copilot session or working on something. These values only change when the roster itself changes.
+
+### Issue 2: CurrentTask Always "No Active Task"
+
+**Data flow (broken):**
+```
+TeamService.GetRosterAsync()
+  → creates SquadMember(name, role, status, CharterPath: path)
+  → CurrentTask is NEVER set → defaults to Option<string>.None
+  → Dashboard reads m.CurrentTask.IfNone("No active task")
+  → Always "No active task"
+```
+
+The data EXISTS but doesn't flow to the right place:
+
+```
+TeamService.GetCurrentTasksAsync()
+  → reads history.md last ### heading per agent
+  → reads decisions/inbox/ filenames per agent
+  → returns Dictionary<string, string>
+```
+
+`DataBridge.LoadTasksFromRosterAsync()` calls `GetCurrentTasksAsync()` and creates `SquadTask` objects that populate `state.Tasks` — but `state.Members[].CurrentTask` is never updated. The dashboard reads `m.CurrentTask`, which is always None.
+
+**Fix applied:** Modified `DataBridge.LoadRosterDataAsync()` to also call `GetCurrentTasksAsync()` and merge task titles into `SquadMember.CurrentTask` using `m with { CurrentTask = Some(task) }`. This bridges the gap so the dashboard shows the most recent task from each agent's history.
+
+## Available Data Sources in .ai-team/
+
+| Source | Location | What It Contains | Update Frequency |
+|--------|----------|-----------------|-----------------|
+| Team roster | `team.md` | Static role/status designations | Rarely (manual edit) |
+| Agent history | `agents/{name}/history.md` | Completed work entries (### headings) | Per-session (agent writes after work) |
+| Agent charter | `agents/{name}/charter.md` | Role definition, what agent owns | Rarely |
+| Session logs | `log/*.md` | Session summaries, participants, outcomes | Per-session (Scribe writes) |
+| Orchestration log | `orchestration-log/*.md` | Multi-agent coordination records | Per-orchestration (if exists) |
+| Decision inbox | `decisions/inbox/*.md` | Pending decisions by agent | Whenever agents make decisions |
+| Decisions | `decisions.md` | Merged team decisions | When Scribe merges inbox |
+
+## What Each Source Can Tell Us About Agent Activity
+
+### Currently Used (after fix)
+- **history.md** — Last `###` heading gives the most recently completed task. `GetCurrentTasksAsync()` extracts this, and the fix now merges it into `SquadMember.CurrentTask`. **Limitation:** This is the last *completed* work, not necessarily what the agent is *currently* doing.
+- **decisions/inbox/** — Filenames like `andre-dashboard-data-sources.md` indicate recent output by that agent. Already parsed as a fallback in `GetCurrentTasksAsync()`.
+
+### Not Yet Used (potential improvements)
+- **Session logs** (`log/*.md`) — Contain participant lists. Could derive "who was most recently active" by checking the most recent log that mentions each agent.
+- **Git activity** — `git log --author=<agent-name> --since="1 hour ago"` could detect if an agent has recently committed. This would be a real-time signal but requires git to be available and assumes agents commit with their names.
+- **File modification times** — `File.GetLastWriteTime()` on agent directories could indicate recency of activity.
+- **Copilot session data** — No public API exists to detect active Copilot sessions or which agents are currently running. The `squad` CLI spawns agents as Copilot sessions, but there's no way to query session state from the outside.
+
+## How to Make Status Reflect Reality
+
+### Tier 1: Heuristic-based (implementable now)
+
+Derive status from available file data:
+
+```csharp
+// Pseudo-logic for determining real-time-ish status
+if (lastGitCommitByAgent < 5.minutes.ago) return Working;      // recently committed
+if (lastHistoryEntryDate == today) return Active;               // worked today
+if (lastLogParticipation == today) return Active;               // participated in session today
+if (rosterStatus == "silent") return Idle;                      // background agent
+if (lastHistoryEntryDate > 3.days.ago) return Idle;             // no recent work
+return Offline;                                                  // stale
+```
+
+Data needed:
+1. Parse dates from history.md `###` headings (already partially done)
+2. Parse participant lists from `log/*.md` entries
+3. Optional: `git log` integration for recent commit detection
+
+### Tier 2: Active signaling (requires squad CLI changes)
+
+Agents write a "heartbeat" file when they start/finish work:
+
+```
+.ai-team/agents/{name}/status.json
+{
+  "status": "working",
+  "task": "Implementing dashboard data sources",
+  "since": "2026-02-19T14:30:00Z",
+  "session_id": "abc123"
+}
+```
+
+The squad CLI or coordinator could update this when dispatching work. SquadTUI would read it. This would give accurate real-time status but requires upstream changes.
+
+### Tier 3: SDK integration (future)
+
+If the Copilot SDK or GitHub API ever exposes Copilot session state (which sessions are active, what model they're using, etc.), that would be the definitive source. Currently no such API exists.
+
+## Recommendations
+
+1. **✅ DONE** — Fix the `CurrentTask` gap so dashboard shows the most recent task from history.md. This is the minimal fix.
+
+2. **Next step** — Add a `GetAgentLastActiveDate()` method to `TeamService` that checks history.md heading dates, log participation, and file modification times. Use this to derive a more honest status (Active if worked today, Idle if not).
+
+3. **Consider** — Adding a `status.json` heartbeat file to the `.ai-team/agents/{name}/` directory that the squad CLI or coordinator writes when dispatching work. This would give SquadTUI accurate real-time status.
+
+4. **Track** — Monitor the `squad` CLI repo for any session management features that could provide agent activity data.
+
+## Impact of Fix Applied
+
+Before: All agents show "No active task" on the dashboard.
+After: Agents show their most recent work from history.md (e.g., "Screenshots and demo capture — hex1b CLI patterns" for Andre, "Help Screen Keybinding Implementation" for Firekeeper, etc.).
+
+The status issue (everyone except Scribe showing Active) is **not a bug** — it accurately reflects team.md. The question is whether team.md's static designations are the right data source for "status". My recommendation is Tier 1 heuristics as the next improvement.
+
+---
+
+## What Was Done
+
 Created 21 new tests across 3 files covering the RefreshService, AppSettings.RefreshIntervalSeconds, and refresh-related E2E behavior.
 
 ### Test Files Created

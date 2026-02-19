@@ -87,3 +87,18 @@ Our Definition of Done says "tests pass" but we weren't enforcing "tests pass *i
 - **Timer disposal:** `using var pollingTimer` ensures cleanup when the app exits.
 - **DashboardScreen already had `RedrawAfter(3000)`** which triggers re-render every 3 seconds — this was already working but the timestamp it displayed was stale because nothing was updating it.
 - **User stories written to:** `.ai-team/decisions/inbox/solaire-user-stories.md` — 5 stories covering architecture observability, decision search, sprint velocity, code review queue, and decision drafting from TUI.
+
+### 2026-02-18 — Data Source Audit and Gap Analysis
+
+- **Full audit completed:** 12 data sources cataloged — 7 actively parsed (team.md, charters, histories, decisions, session logs, orchestration logs, skills), 3 present but not parsed (ceremonies.md, routing.md, casting/*.json), 1 code-only (GitHubModels.cs), 1 external (user settings).
+- **Change detection architecture documented:** Hybrid `RefreshService` — FileSystemWatcher (reactive, 2s debounce) + polling timer (30s default, smart-skip when watcher fires). `ReloadAllAsync()` covers Members, Tasks, Decisions, LogEntries but NOT Skills or Charters.
+- **Key gap: Skills not refreshed.** `SkillService` loads at startup only — not included in `ReloadAllAsync()`. This means new skills added while the TUI is running won't appear until restart.
+- **Key gap: No Copilot session awareness.** There is no public Copilot SDK or API to query "is an agent currently running?" Best proxy is file mtime heuristics on `history.md` and `decisions/inbox/` writes.
+- **Key gap: GitHub integration is model-only.** `GitHubModels.cs` defines `GitHubIssue`, `GitHubMilestone`, `GitHubLabel` records but no service fetches data. Need `GitHubService` wrapping `gh` CLI.
+- **Recommended priority:** (P0) Parse ceremonies/routing/casting files, (P1) Add `GitService` + file mtime heuristics for inferred activity, (P2) Add `GitHubService` via `gh` CLI.
+- **Decision written to:** `.ai-team/decisions.md` (merged)
+- **Docs written to:** `docs/data-sources.md`
+
+---
+
+📌 Team update (2026-02-18): Solaire completed comprehensive data source catalog identifying 12 sources (7 active, 3 unused, 1 GitHub-only). Documented hybrid refresh architecture (FileWatcher + polling). Identified gaps: no real-time agent activity, session state, git integration, GitHub integration. Recommended P0–P3 priorities: parse ceremonies/routing/casting, add GitService + file mtime heuristics, add GitHubService via gh CLI. Concluded Copilot SDK not available — file mtime approach is recommended — decided by Solaire

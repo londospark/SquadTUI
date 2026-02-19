@@ -125,3 +125,7 @@ Performed full UX audit of all screens and key bindings. Key changes:
 - HelpScreen content must be kept in sync when keybindings change in AppLayout
 - The `PreviousScreen` property on AppState is now unused; NavigationStack is the canonical nav pattern
 
+
+---
+
+📌 Team update (2026-02-18): Firekeeper extracted BindCI helper to eliminate ~160 lines of Shift+Key duplication in AppLayout. Updated HelpScreen keybindings to match current stack navigation (Tab/Enter/Escape, F1 for help). Reconciled StatusBadges.cs with IconHelper.cs removing duplication. Codified BindCI as convention for all letter-key bindings — decided by Firekeeper

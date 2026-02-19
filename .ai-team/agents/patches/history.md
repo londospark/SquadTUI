@@ -270,3 +270,39 @@ Dashboard was redesigned (by Siegmeyer) to use new panel titles ("👥 Team Rost
 
 📌 **From decisions:** SampleData.cs will move to test project only; production code uses real data with empty-state fallback. Implement monadic error handling (Result<T>/Option<T> via LanguageExt) — no exceptions in application flow. This affects all E2E tests that currently reference SampleData fixture data.
 
+### 2026-02-19: acast Demo Scripts & Usability Report
+
+**What was done:**
+- Built SquadTUI (Release, net10.0) — clean build, no errors.
+- Verified acast is installed at `%USERPROFILE%\go\bin\acast.exe` and functional.
+- Created 3 focused demo scripts in `docs/demos/` for acast recording:
+  - `demo-dashboard-tour.ps1` — panel focus cycling, drill-in to Roster, back navigation (~25s)
+  - `demo-navigation-flow.ps1` — stack navigation through all screens, j/k list nav, burndown toggle (~45s)
+  - `demo-theme-settings.ps1` — theme cycling (4 themes), settings modal, help screen (~30s)
+- Created `docs/demos/README.md` with recording/post-processing instructions.
+- Wrote comprehensive usability report (`docs/demos/USABILITY-REPORT.md`) based on code analysis and 790 E2E tests.
+
+**Key usability findings:**
+1. **Help screen `?` keybinding is a lie** — documented but not implemented. Only F1 works. Critical UX bug.
+2. **No loading indicator** — `state.IsLoading` is set but never read by any screen. Empty dashboards during data load.
+3. **Vim bindings are conditional but Help doesn't say so** — j/k shown as available but only work when VimBindings setting is ON.
+4. **No breadcrumb or screen indicator** — when drilled into sub-screens, user has no visual cue of their position in the navigation stack.
+5. **Dashboard panel focus is subtle** — highlighted header color shift is easy to miss, especially at narrow widths.
+
+**What works well:**
+- Responsive layout across 10+ terminal widths — never crashes, degrades gracefully.
+- Theme system with 4 themes, instant switching, persistent settings.
+- Stack navigation with state preservation (selection indices survive round-trips).
+- Case-insensitive keybindings (q/Q, s/S both work) — thoughtful capslock handling.
+- NoSquad onboarding screen is the best first-run UX in the app.
+
+**acast learnings:**
+- acast `record` requires a TTY — cannot be automated from headless/CI/non-interactive sessions.
+- Demo scripts must use redirected stdin (`ProcessStartInfo.RedirectStandardInput`) to drive the TUI within an acast session.
+- Post-processing pipeline: `record → cut → quantize → convert-to-gif`. Always quantize to remove idle pauses.
+- acast has no `--command` flag — recording starts a sub-shell, scripts run inside it.
+
+
+---
+
+📌 Team update (2026-02-18): Patches created 3 acast demo scripts for TUI showcase (dashboard, navigation, theme/settings). Wrote comprehensive usability report. **Critical finding:** Help screen documents `?` keybinding but no `?` key binding exists (only F1 works). Additional findings: no loading indicator, vim bindings conditional but undocumented, subtle panel focus highlight — decided by Patches

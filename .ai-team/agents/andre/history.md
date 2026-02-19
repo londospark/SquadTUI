@@ -128,3 +128,22 @@ Honest answer: I was heads-down on service integration and trusted that "it comp
 
 📌 **From decisions:** SampleData moves to test project; production uses real data with empty-state fallback. DataBridge returns Either<AppError, T> using LanguageExt. IFileLocationService centralizes all path resolution for .squad/ vs .ai-team/ handling. Implement ISprintService for real sprint metrics (MetricsScreen currently hardcoded).
 
+### 2026-02-19: Dashboard data flow investigation — agent status & current task
+
+**Problem:** Dashboard showed all agents as "Active" (except Scribe as "Idle") and all showed "No Active Task".
+
+**Root cause — Status:** `ParseMemberStatus()` reads the Status column from `team.md`, which contains static roster designations ("✅ Active", "📋 Silent", "🔄 Monitor"), not real-time activity. "Silent" maps to Idle; everything else maps to Active. This is technically correct for what team.md represents, but not what users expect from a "status" badge.
+
+**Root cause — CurrentTask:** `GetRosterAsync()` creates `SquadMember` records WITHOUT setting `CurrentTask` (defaults to `Option.None`). The `GetCurrentTasksAsync()` method DOES extract tasks from history.md files, but those results flow into separate `SquadTask` objects in `state.Tasks` — never back into `SquadMember.CurrentTask`. The dashboard reads `m.CurrentTask.IfNone("No active task")`, so it's always "No active task".
+
+**Fix applied:** Modified `DataBridge.LoadRosterDataAsync()` to also call `GetCurrentTasksAsync()` and merge task titles into each `SquadMember.CurrentTask` field. Now the dashboard shows each agent's most recent work from history.md.
+
+**What I learned:**
+- Data flow gaps are subtle: the data existed in `GetCurrentTasksAsync()` but never connected to where the UI reads it. Two separate code paths both loaded roster data but populated different state properties.
+- "Status" in team.md is a role designation, not activity state. Real-time status would require heuristics (git activity, file timestamps, session logs) or an explicit heartbeat mechanism.
+- Detailed analysis written to `.ai-team/decisions/inbox/andre-dashboard-data-sources.md`.
+
+
+---
+
+📌 Team update (2026-02-18): Andre fixed dashboard CurrentTask gap by wiring DataBridge.LoadRosterDataAsync() to merge task data from GetCurrentTasksAsync(). Documented that team.md Status column is static roster data, not real-time activity. Provided Tier 1-3 recommendations for inferring activity from file mtimes, logs, git commits. Identified that "active" status is working as designed — decided by Andre
