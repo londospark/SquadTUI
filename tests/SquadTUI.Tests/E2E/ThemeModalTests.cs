@@ -7,26 +7,7 @@ namespace SquadTUI.Tests.E2E;
 [Collection("E2E")]
 public class ThemeModalTests
 {
-    [Fact]
-    public async Task PressS_OpensSettingsModal()
-    {
-        await using var terminal = TestAppBuilder.Build();
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        var sequence = new Hex1bTerminalInputSequenceBuilder()
-            .Key(Hex1bKey.S)
-            .Build();
-        await sequence.ApplyAsync(terminal);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Settings"));
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
+    // PressS_OpensSettingsModal consolidated to AppNavigationTests
 
     [Fact]
     public async Task SettingsModal_ShowsSettingsList()

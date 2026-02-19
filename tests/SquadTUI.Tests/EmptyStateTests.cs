@@ -7,58 +7,10 @@ namespace SquadTUI.Tests;
 
 /// <summary>
 /// P1 — Empty state tests: verify screens handle empty/missing data gracefully.
+/// Basic empty-state GetOrEmpty and CharterContent.IsNone coverage is in ErrorHandlingTests.
 /// </summary>
 public class EmptyStateTests
 {
-    [Fact]
-    public void AppState_EmptyMembers_GetOrEmptyReturnsEmptyList()
-    {
-        var state = new AppState();
-        Assert.Empty(state.Members.GetOrEmpty());
-    }
-
-    [Fact]
-    public void AppState_EmptyDecisions_GetOrEmptyReturnsEmptyList()
-    {
-        var state = new AppState();
-        Assert.Empty(state.Decisions.GetOrEmpty());
-    }
-
-    [Fact]
-    public void AppState_EmptySkills_GetOrEmptyReturnsEmptyList()
-    {
-        var state = new AppState();
-        Assert.Empty(state.Skills.GetOrEmpty());
-    }
-
-    [Fact]
-    public void AppState_EmptyLogEntries_GetOrEmptyReturnsEmptyList()
-    {
-        var state = new AppState();
-        Assert.Empty(state.LogEntries.GetOrEmpty());
-    }
-
-    [Fact]
-    public void AppState_EmptyTasks_GetOrEmptyReturnsEmptyList()
-    {
-        var state = new AppState();
-        Assert.Empty(state.Tasks.GetOrEmpty());
-    }
-
-    [Fact]
-    public void AppState_EmptySprintHistory_GetOrEmptyReturnsEmptyList()
-    {
-        var state = new AppState();
-        Assert.Empty(state.SprintHistory.GetOrEmpty());
-    }
-
-    [Fact]
-    public void AppState_CharterContent_NoneByDefault()
-    {
-        var state = new AppState();
-        Assert.True(state.CharterContent.IsNone);
-    }
-
     [Fact]
     public void CharterContent_None_MatchReturnsDefaultMessage()
     {

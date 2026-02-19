@@ -94,19 +94,5 @@ public class ThemeBackgroundTests
         Assert.Equal(dividers.Distinct().Count(), dividers.Count());
     }
 
-    [Theory]
-    [InlineData(0, "Ocean")]
-    [InlineData(1, "Heist")]
-    [InlineData(2, "Sunset")]
-    [InlineData(3, "HighContrast")]
-    [InlineData(4, "Forest")]
-    [InlineData(5, "Cyberpunk")]
-    [InlineData(6, "Midnight")]
-    [InlineData(7, "Ember")]
-    [InlineData(8, "Arctic")]
-    [InlineData(9, "Retro")]
-    public void Theme_HasExpectedName(int index, string expectedName)
-    {
-        Assert.Equal(expectedName, ThemeManager.ThemeNames[index]);
-    }
+    // Theme_HasExpectedName Theory consolidated to ThemeManagerTests.ThemeNames_MatchExpectedOrder
 }

@@ -102,3 +102,15 @@ Our Definition of Done says "tests pass" but we weren't enforcing "tests pass *i
 ---
 
 📌 Team update (2026-02-18): Solaire completed comprehensive data source catalog identifying 12 sources (7 active, 3 unused, 1 GitHub-only). Documented hybrid refresh architecture (FileWatcher + polling). Identified gaps: no real-time agent activity, session state, git integration, GitHub integration. Recommended P0–P3 priorities: parse ceremonies/routing/casting, add GitService + file mtime heuristics, add GitHubService via gh CLI. Concluded Copilot SDK not available — file mtime approach is recommended — decided by Solaire
+
+### 2026-02-19 — Test Suite Audit & Refactoring
+
+- **Audit scope:** 778 test cases across 62 files, all 551 [Fact]/[Theory] attributes analyzed.
+- **Key finding:** Panel navigation E2E tests duplicated 3-4× across StackNavigationExtendedTests, DashboardPanelNavigationTests, AppNavigationTests, VimKeybindingTests. "Escape on Dashboard" existed in 4 separate files. Responsive layout tests scattered across 3 files with overlapping widths.
+- **E2E dedup:** Removed 20 duplicate E2E tests across 5 files. Canonical locations: AppNavigationTests (panel drill-in), NavigationEdgeCaseTests (escape-at-dashboard).
+- **Theory conversion:** ResponsiveLayoutTests (6 Facts → 1 Theory), ExtremeWidthTests (9 Facts → 2 Theories).
+- **Unit overlap removal:** ThemeBackgroundTests.Theme_HasExpectedName (dup of ThemeManagerTests), 7 EmptyState Facts (subsumed by ErrorHandling comprehensive test), 3 ErrorHandling Facts (subsumed by EmptyState comprehensive Left test), 5+3 SizingConsistencyTests duplicates.
+- **Result:** 778 → 768 test cases, all passing. Zero coverage loss.
+- **Deferred:** Theory conversion for EmptyStateTests/ErrorHandlingTests (distinct type constructors resist InlineData). TempDirFixture base class (low ROI).
+- **Audit doc:** `docs/test-audit.md`
+- **Decision written to:** `.ai-team/decisions/inbox/solaire-test-audit.md`

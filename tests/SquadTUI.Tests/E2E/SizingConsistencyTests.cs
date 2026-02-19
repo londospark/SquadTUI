@@ -6,7 +6,8 @@ namespace SquadTUI.Tests.E2E;
 
 /// <summary>
 /// Tests for layout sizing consistency: panels maintain size during focus
-/// changes, no layout shift when navigating, responsive breakpoints work.
+/// changes, no layout shift when navigating.
+/// Responsive breakpoint coverage is in ResponsiveLayoutTests and ExtremeWidthTests.
 /// </summary>
 [Collection("E2E")]
 public class SizingConsistencyTests
@@ -78,100 +79,6 @@ public class SizingConsistencyTests
         var snapshot = terminal.CreateSnapshot();
         Assert.True(snapshot.ContainsText("Dashboard"));
         Assert.True(snapshot.ContainsText("Team Roster"));
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Theory]
-    [InlineData(60, 24)]
-    [InlineData(80, 24)]
-    [InlineData(100, 30)]
-    [InlineData(120, 30)]
-    [InlineData(160, 40)]
-    public async Task ResponsiveBreakpoints_RenderWithoutCrash(int width, int height)
-    {
-        await using var terminal = TestAppBuilder.Build(width: width, height: height);
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        Assert.NotNull(snapshot);
-        Assert.True(snapshot.ContainsText("Dashboard") || snapshot.ContainsText("SquadTUI"));
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task WideLayout_ShowsThreeColumns()
-    {
-        await using var terminal = TestAppBuilder.Build(width: 120, height: 30);
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        // Wide layout (≥120 cols) shows 3 columns with Team Roster panel visible.
-        // Note: "Decisions" text can be split by ANSI escape codes in panel
-        // headers at this width, so we assert on stable fragments only.
-        Assert.True(snapshot.ContainsText("Team Roster"));
-        Assert.True(snapshot.ContainsText("Activity"));
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task MediumLayout_ShowsTwoColumns()
-    {
-        await using var terminal = TestAppBuilder.Build(width: 80, height: 30);
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Team"));
-        Assert.True(snapshot.ContainsText("Decisions"));
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task NarrowLayout_ShowsSingleColumn()
-    {
-        await using var terminal = TestAppBuilder.Build(width: 60, height: 24);
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("SquadTUI"));
-
-        cts.Cancel();
-        try { await runTask; } catch (OperationCanceledException) { }
-    }
-
-    [Fact]
-    public async Task SubScreen_RendersCorrectlyAfterDrillIn()
-    {
-        await using var terminal = TestAppBuilder.Build(width: 120, height: 30);
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        var runTask = terminal.RunAsync(cts.Token);
-        await Task.Delay(200);
-
-        // Drill into Roster from Dashboard
-        var seq = new Hex1bTerminalInputSequenceBuilder()
-            .Enter()
-            .Build();
-        await seq.ApplyAsync(terminal);
-        await Task.Delay(200);
-
-        var snapshot = terminal.CreateSnapshot();
-        Assert.True(snapshot.ContainsText("Team Roster"));
-        Assert.NotNull(snapshot);
 
         cts.Cancel();
         try { await runTask; } catch (OperationCanceledException) { }

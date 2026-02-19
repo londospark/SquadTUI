@@ -272,36 +272,7 @@ public class ErrorHandlingTests
     #endregion
 
     #region AppState with Left errors
-
-    [Fact]
-    public void AppState_WithLeftMembers_GetOrEmptyReturnsEmpty()
-    {
-        var state = new AppState
-        {
-            Members = Left<AppError, IReadOnlyList<SquadMember>>(new ServiceError("Roster", "fail")),
-        };
-        Assert.Empty(state.Members.GetOrEmpty());
-    }
-
-    [Fact]
-    public void AppState_WithLeftDecisions_GetOrEmptyReturnsEmpty()
-    {
-        var state = new AppState
-        {
-            Decisions = Left<AppError, IReadOnlyList<DecisionEntry>>(new NoDataError("decisions")),
-        };
-        Assert.Empty(state.Decisions.GetOrEmpty());
-    }
-
-    [Fact]
-    public void AppState_WithLeftTasks_GetOrEmptyReturnsEmpty()
-    {
-        var state = new AppState
-        {
-            Tasks = Left<AppError, IReadOnlyList<SquadTask>>(new FileNotFoundError("tasks.yaml")),
-        };
-        Assert.Empty(state.Tasks.GetOrEmpty());
-    }
+    // Individual WithLeft* tests consolidated to EmptyStateTests.AppState_LeftErrors_AllScreens_GetOrEmpty_ReturnEmptyLists
 
     [Fact]
     public void AppState_DefaultState_AllEithersAreRightEmpty()
