@@ -22,34 +22,26 @@ public static class SettingsScreen
     public static Hex1bWidget Render(WidgetContext<VStackWidget> v, AppState state, Hex1bApp app, dynamic options)
     {
         var settings = state.Settings;
-        var ti = state.SelectedThemeIndex;
-        var acc = ThemeManager.GetAccentCode(ti);
-        var sec = ThemeManager.GetSecondaryAccent(ti);
-        var R = PanelRenderer.Reset;
-        var B = PanelRenderer.Bold;
-        var D = PanelRenderer.Dim;
-        var em = settings.ShowEmoji;
+        var t = new ThemeContext(state.SelectedThemeIndex, settings.ShowEmoji);
 
         var selectedIdx = Math.Clamp(state.SettingsSelectedIndex, 0, SettingLabels.Length - 1);
-        var panelBg = ThemeManager.GetPanelBgColor(ti);
-        var detailBg = ThemeManager.GetPanelDetailBgColor(ti);
 
         var listItems = new List<string>
         {
-            $"  {Icon("🎨", "◆", em)} Theme            {FormatThemeValue(settings.ThemeName)}",
-            $"  {Icon("⌨️", "◆", em)}  Vim Keybindings  {FormatToggle(settings.VimBindings)}",
-            $"  {Icon("🖱️", "◆", em)}  Mouse Support    {FormatToggle(settings.MouseEnabled)}",
-            $"  {Icon("😀", "◆", em)} Emoji Display    {FormatToggle(settings.ShowEmoji)}",
-            $"  {Icon("📝", "▪", em)} Markdown Render  {FormatToggle(settings.MarkdownRendering)}",
-            $"  {Icon("🔄", "▸", em)} Refresh Interval {B}{settings.RefreshIntervalSeconds}s{R}"
+            $"  {Icon("🎨", "◆", t.Em)} Theme            {FormatThemeValue(settings.ThemeName)}",
+            $"  {Icon("⌨️", "◆", t.Em)}  Vim Keybindings  {FormatToggle(settings.VimBindings)}",
+            $"  {Icon("🖱️", "◆", t.Em)}  Mouse Support    {FormatToggle(settings.MouseEnabled)}",
+            $"  {Icon("😀", "◆", t.Em)} Emoji Display    {FormatToggle(settings.ShowEmoji)}",
+            $"  {Icon("📝", "▪", t.Em)} Markdown Render  {FormatToggle(settings.MarkdownRendering)}",
+            $"  {Icon("🔄", "▸", t.Em)} Refresh Interval {t.B}{settings.RefreshIntervalSeconds}s{t.R}"
         } as IReadOnlyList<string>;
 
         return v.HStack(h =>
         [
-            new BackgroundPanelWidget(panelBg, h.VStack(left =>
+            new BackgroundPanelWidget(t.PanelBg, h.VStack(left =>
             [
-                left.Text($"  {B}{acc}{Icon("⚙️", "◆", em)}  Settings{R}"),
-                left.Text($"  {sec}{new string('━', 30)}{R}"),
+                left.Text($"  {t.B}{t.Acc}{Icon("⚙️", "◆", t.Em)}  Settings{t.R}"),
+                left.Text(t.Separator(30)),
                 left.Text(""),
                 left.List(listItems)
                     .OnSelectionChanged(e => { state.SettingsSelectedIndex = e.SelectedIndex; })
@@ -60,22 +52,22 @@ public static class SettingsScreen
                     .Fill()
             ]).FillWidth(1).FillHeight()),
 
-            new BackgroundPanelWidget(detailBg, h.VStack(detail =>
+            new BackgroundPanelWidget(t.DetailBg, h.VStack(detail =>
             {
-                var (label, description, currentValue) = GetSettingDetail(selectedIdx, settings, em);
+                var (label, description, currentValue) = GetSettingDetail(selectedIdx, settings, t.Em);
                 var widgets = new List<Hex1bWidget>
                 {
-                    detail.Text($"  {B}{acc}{Icon("📋", "▪", em)} Setting Details{R}"),
-                    detail.Text($"  {sec}{new string('━', 36)}{R}"),
+                    detail.Text($"  {t.B}{t.Acc}{Icon("📋", "▪", t.Em)} Setting Details{t.R}"),
+                    detail.Text(t.Separator()),
                     detail.Text(""),
-                    detail.Text($"  {B}{acc}{label}{R}"),
-                    detail.Text($"  {D}{description}{R}"),
+                    detail.Text($"  {t.B}{t.Acc}{label}{t.R}"),
+                    detail.Text($"  {t.D}{description}{t.R}"),
                     detail.Text(""),
-                    detail.Text($"  {sec}{new string('━', 36)}{R}"),
+                    detail.Text(t.Separator()),
                     detail.Text(""),
-                    detail.Text($"  {D}Current:{R}  {B}{currentValue}{R}"),
+                    detail.Text($"  {t.D}Current:{t.R}  {t.B}{currentValue}{t.R}"),
                     detail.Text(""),
-                    detail.Text($"  {D}Press Enter to change{R}"),
+                    detail.Text($"  {t.D}Press Enter to change{t.R}"),
                 };
 
                 return widgets.ToArray();
@@ -112,7 +104,7 @@ public static class SettingsScreen
         _ => ("", "", "")
     };
 
-    private static void ToggleSetting(AppState state, int index, dynamic options)
+    public static void ToggleSetting(AppState state, int index, dynamic options)
     {
         var settings = state.Settings;
         switch (index)

@@ -3,7 +3,6 @@ using Hex1b.Charts;
 using Hex1b.Widgets;
 using SquadTUI.Models;
 using SquadTUI.Rendering;
-using SquadTUI.Themes;
 using static SquadTUI.Rendering.IconHelper;
 
 namespace SquadTUI.Screens;
@@ -23,50 +22,33 @@ public static class MetricsScreen
         var tasks = state.Tasks.GetOrEmpty();
         var members = state.Members.GetOrEmpty();
         if (sprints.Count == 0 && tasks.Count == 0)
-        {
-            var D0 = PanelRenderer.Dim;
-            var R0 = PanelRenderer.Reset;
-            return v.VStack(empty => [
-                empty.Text(""),
-                empty.Text($"  {D0}No sprint data available. Ensure your .squad/ directory contains task and log data.{R0}"),
-            ]).Fill();
-        }
-        var em = state.Settings.ShowEmoji;
-        var acc = ThemeManager.GetAccentCode(state.SelectedThemeIndex);
-        var sec = ThemeManager.GetSecondaryAccent(state.SelectedThemeIndex);
-        var R = PanelRenderer.Reset;
-        var B = PanelRenderer.Bold;
-        var D = PanelRenderer.Dim;
-        var hBg = ThemeManager.GetPanelHeaderBg(state.SelectedThemeIndex);
-        var panelBg = ThemeManager.GetPanelBgColor(state.SelectedThemeIndex);
-        var detailBg = ThemeManager.GetPanelDetailBgColor(state.SelectedThemeIndex);
-        var altBg = ThemeManager.GetPanelAltBgColor(state.SelectedThemeIndex);
+            return ScreenHelper.EmptyState(v, "No sprint data available. Ensure your .squad/ directory contains task and log data.");
+
+        var t = new ThemeContext(state.SelectedThemeIndex, state.Settings.ShowEmoji);
 
         // Task status counts
-        var done = tasks.Count(t => t.Status == Models.SquadTaskStatus.Done);
-        var active = tasks.Count(t => t.Status == Models.SquadTaskStatus.InProgress);
-        var pending = tasks.Count(t => t.Status == Models.SquadTaskStatus.Pending);
-        var blocked = tasks.Count(t => t.Status == Models.SquadTaskStatus.Blocked);
+        var done = tasks.Count(tk => tk.Status == SquadTaskStatus.Done);
+        var active = tasks.Count(tk => tk.Status == SquadTaskStatus.InProgress);
+        var pending = tasks.Count(tk => tk.Status == SquadTaskStatus.Pending);
+        var blocked = tasks.Count(tk => tk.Status == SquadTaskStatus.Blocked);
 
-        // Sprint chart data: velocity or burndown
+        // Sprint chart data
         var velocityData = sprints.Select(s => new ChartItem(s.SprintName.Split(' ')[0], s.CompletedTasks)).ToArray();
         var burndownData = sprints.Select(s => new ChartItem(s.SprintName.Split(' ')[0], s.CarriedOver)).ToArray();
         var chartData = state.ShowBurndown ? burndownData : velocityData;
 
-        // Compute metrics from state data
+        // Compute metrics
         var totalPlanned = sprints.Sum(s => s.PlannedTasks);
         var totalDone = sprints.Sum(s => s.CompletedTasks);
         var overallCompletionRate = totalPlanned > 0 ? Math.Round((double)totalDone / totalPlanned * 100, 1) : 0;
         var averageVelocity = sprints.Count > 0 ? Math.Round(sprints.Average(s => (double)s.Velocity), 1) : 0;
         var velocityTrend = sprints.Count >= 2 ? sprints[^1].Velocity - sprints[^2].Velocity : 0;
 
-        // Task status breakdown
         var statusData = new ChartItem[]
         {
             new("Done", done), new("Active", active), new("Pending", pending), new("Blocked", blocked)
         };
 
-        // Header labels
         var modeLabel = state.ShowBurndown ? "Burndown View" : "Velocity View";
         var chartTitle = state.ShowBurndown ? "Remaining Work Trend" : "Tasks Completed per Sprint";
         var chartSubtitle = state.ShowBurndown ? "Remaining tasks carried over per sprint" : "Completed tasks per sprint cycle";
@@ -77,56 +59,51 @@ public static class MetricsScreen
             // Wide layout (≥120 cols): 3-column
             r.WhenMinWidth(120, r => r.VStack(outer =>
             [
-                outer.Text($"  {hBg}{B}{acc}{Icon("📈", "▪", em)} Sprint Metrics — {modeLabel}{R}  {D}(press V to toggle){R}"),
-                outer.Text($"  {D}{sec}Performance overview across {sprints.Count} sprint cycles{R}"),
+                outer.Text($"  {t.HBg}{t.B}{t.Acc}{Icon("📈", "▪", t.Em)} Sprint Metrics — {modeLabel}{t.R}  {t.D}(press V to toggle){t.R}"),
+                outer.Text($"  {t.D}{t.Sec}Performance overview across {sprints.Count} sprint cycles{t.R}"),
                 outer.Text(""),
 
                 outer.HStack(h =>
                 [
-                    // Left: Sprint overview stats + task status breakdown
-                    new BackgroundPanelWidget(panelBg, h.VStack(left =>
+                    new BackgroundPanelWidget(t.PanelBg, h.VStack(left =>
                     [
-                        left.Text($"  {B}{acc}▌{R} {B}{acc}Sprint Overview{R}"),
+                        left.Text($"  {t.B}{t.Acc}▌{t.R} {t.B}{t.Acc}Sprint Overview{t.R}"),
                         left.Text(""),
-                        left.Text($"  {D}Completion Rate:{R}  {B}{overallCompletionRate}%{R}"),
-                        left.Text($"  {D}Avg Velocity:{R}    {B}{averageVelocity}{R} {D}tasks/sprint{R}"),
-                        left.Text($"  {D}Trend:{R}           {trendArrow} {B}{Math.Abs(velocityTrend)}{R}{D} tasks{R}"),
+                        left.Text($"  {t.D}Completion Rate:{t.R}  {t.B}{overallCompletionRate}%{t.R}"),
+                        left.Text($"  {t.D}Avg Velocity:{t.R}    {t.B}{averageVelocity}{t.R} {t.D}tasks/sprint{t.R}"),
+                        left.Text($"  {t.D}Trend:{t.R}           {trendArrow} {t.B}{Math.Abs(velocityTrend)}{t.R}{t.D} tasks{t.R}"),
                         left.Text(""),
-                        left.Text($"  {B}{acc}▌{R} {B}{acc}Task Status{R}"),
+                        left.Text($"  {t.B}{t.Acc}▌{t.R} {t.B}{t.Acc}Task Status{t.R}"),
                         left.Text(""),
                         left.BreakdownChart(statusData)
                             .ShowPercentages(true)
                             .Fill(),
                     ]).FillWidth(1).FillHeight()),
 
-                    // Center: Velocity or Burndown chart
-                    new BackgroundPanelWidget(detailBg, h.VStack(mid =>
+                    new BackgroundPanelWidget(t.DetailBg, h.VStack(mid =>
                     [
-                        mid.Text($"  {B}{acc}▌{R} {B}{acc}{Icon("📊", "▪", em)} {chartTitle}{R}"),
-                        mid.Text($"  {D}{chartSubtitle}{R}"),
+                        mid.Text($"  {t.B}{t.Acc}▌{t.R} {t.B}{t.Acc}{Icon("📊", "▪", t.Em)} {chartTitle}{t.R}"),
+                        mid.Text($"  {t.D}{chartSubtitle}{t.R}"),
                         mid.Text(""),
                         mid.BarChart(chartData).Fill(),
                     ]).FillWidth(2).FillHeight()),
 
-                    // Right: Per-member contributions across sprints
-                    new BackgroundPanelWidget(altBg, h.VStack(right =>
+                    new BackgroundPanelWidget(t.AltBg, h.VStack(right =>
                     {
                         var w = new List<Hex1bWidget>
                         {
-                            right.Text($"  {B}{acc}▌{R} {B}{acc}{Icon("👥", "◆", em)} Member Contributions{R}"),
+                            right.Text($"  {t.B}{t.Acc}▌{t.R} {t.B}{t.Acc}{Icon("👥", "◆", t.Em)} Member Contributions{t.R}"),
                             right.Text(""),
                         };
                         foreach (var s in sprints)
                         {
-                            w.Add(right.Text($"  {B}{s.SprintName}{R}  {D}({s.CompletionRate}% done){R}"));
+                            w.Add(right.Text($"  {t.B}{s.SprintName}{t.R}  {t.D}({s.CompletionRate}% done){t.R}"));
                             foreach (var c in s.Contributions.Where(c => c.TasksCompleted > 0))
-                            {
-                                w.Add(right.Text($"    {D}{c.MemberName}: {Icon("✅", "+", em)} {c.TasksCompleted}/{c.TasksAssigned}{R}"));
-                            }
+                                w.Add(right.Text($"    {t.D}{c.MemberName}: {Icon("✅", "+", t.Em)} {c.TasksCompleted}/{c.TasksAssigned}{t.R}"));
                             w.Add(right.Text(""));
                         }
-                        w.Add(right.Text($"  {sec}{new string('━', 28)}{R}"));
-                        w.Add(right.Text($"  {D}Team size:{R}  {B}{members.Count}{R} {D}members{R}"));
+                        w.Add(right.Text(t.Separator(28)));
+                        w.Add(right.Text($"  {t.D}Team size:{t.R}  {t.B}{members.Count}{t.R} {t.D}members{t.R}"));
                         return w.ToArray();
                     }).FillWidth(1).FillHeight()),
                 ]).Fill(),
@@ -135,33 +112,31 @@ public static class MetricsScreen
             // Medium layout (≥80 cols): 2-column
             r.WhenMinWidth(80, r => r.VStack(outer =>
             [
-                outer.Text($"  {hBg}{B}{acc}{Icon("📈", "▪", em)} Sprint Metrics — {modeLabel}{R}  {D}(press V to toggle){R}"),
-                outer.Text($"  {D}{sec}Performance overview across {sprints.Count} sprint cycles{R}"),
+                outer.Text($"  {t.HBg}{t.B}{t.Acc}{Icon("📈", "▪", t.Em)} Sprint Metrics — {modeLabel}{t.R}  {t.D}(press V to toggle){t.R}"),
+                outer.Text($"  {t.D}{t.Sec}Performance overview across {sprints.Count} sprint cycles{t.R}"),
                 outer.Text(""),
 
                 outer.HStack(h =>
                 [
-                    // Left: Sprint stats + breakdown
-                    new BackgroundPanelWidget(panelBg, h.VStack(left =>
+                    new BackgroundPanelWidget(t.PanelBg, h.VStack(left =>
                     [
-                        left.Text($"  {B}{acc}▌{R} {B}{acc}Sprint Overview{R}"),
+                        left.Text($"  {t.B}{t.Acc}▌{t.R} {t.B}{t.Acc}Sprint Overview{t.R}"),
                         left.Text(""),
-                        left.Text($"  {D}Completion Rate:{R}  {B}{overallCompletionRate}%{R}"),
-                        left.Text($"  {D}Avg Velocity:{R}    {B}{averageVelocity}{R} {D}tasks/sprint{R}"),
-                        left.Text($"  {D}Trend:{R}           {trendArrow} {B}{Math.Abs(velocityTrend)}{R}{D} tasks{R}"),
+                        left.Text($"  {t.D}Completion Rate:{t.R}  {t.B}{overallCompletionRate}%{t.R}"),
+                        left.Text($"  {t.D}Avg Velocity:{t.R}    {t.B}{averageVelocity}{t.R} {t.D}tasks/sprint{t.R}"),
+                        left.Text($"  {t.D}Trend:{t.R}           {trendArrow} {t.B}{Math.Abs(velocityTrend)}{t.R}{t.D} tasks{t.R}"),
                         left.Text(""),
-                        left.Text($"  {B}{acc}▌{R} {B}{acc}Task Status{R}"),
+                        left.Text($"  {t.B}{t.Acc}▌{t.R} {t.B}{t.Acc}Task Status{t.R}"),
                         left.Text(""),
                         left.BreakdownChart(statusData)
                             .ShowPercentages(true)
                             .Fill(),
                     ]).FillWidth(1).FillHeight()),
 
-                    // Right: Velocity/Burndown chart
-                    new BackgroundPanelWidget(detailBg, h.VStack(right =>
+                    new BackgroundPanelWidget(t.DetailBg, h.VStack(right =>
                     [
-                        right.Text($"  {B}{acc}▌{R} {B}{acc}{Icon("📊", "▪", em)} {chartTitle}{R}"),
-                        right.Text($"  {D}{chartSubtitle}{R}"),
+                        right.Text($"  {t.B}{t.Acc}▌{t.R} {t.B}{t.Acc}{Icon("📊", "▪", t.Em)} {chartTitle}{t.R}"),
+                        right.Text($"  {t.D}{chartSubtitle}{t.R}"),
                         right.Text(""),
                         right.BarChart(chartData).Fill(),
                     ]).FillWidth(1).FillHeight()),
@@ -169,17 +144,17 @@ public static class MetricsScreen
             ])),
 
             // Narrow layout: single column
-            r.Otherwise(r => new BackgroundPanelWidget(panelBg, r.VStack(col =>
+            r.Otherwise(r => new BackgroundPanelWidget(t.PanelBg, r.VStack(col =>
             {
                 var w = new List<Hex1bWidget>
                 {
-                    col.Text($"  {hBg}{B}{acc}{Icon("📈", "▪", em)} Sprint Metrics{R}"),
-                    col.Text($"  {D}{modeLabel} (V to toggle){R}"),
+                    col.Text($"  {t.HBg}{t.B}{t.Acc}{Icon("📈", "▪", t.Em)} Sprint Metrics{t.R}"),
+                    col.Text($"  {t.D}{modeLabel} (V to toggle){t.R}"),
                     col.Text(""),
-                    col.Text($"  {D}Completion:{R} {B}{overallCompletionRate}%{R}  {D}Velocity:{R} {B}{averageVelocity}{R}"),
-                    col.Text($"  {D}Trend:{R} {trendArrow} {B}{Math.Abs(velocityTrend)}{R}{D} tasks{R}"),
+                    col.Text($"  {t.D}Completion:{t.R} {t.B}{overallCompletionRate}%{t.R}  {t.D}Velocity:{t.R} {t.B}{averageVelocity}{t.R}"),
+                    col.Text($"  {t.D}Trend:{t.R} {trendArrow} {t.B}{Math.Abs(velocityTrend)}{t.R}{t.D} tasks{t.R}"),
                     col.Text(""),
-                    col.Text($"  \x1b[32m{Icon("✅", "+", em)} {done}{R}  \x1b[33m{Icon("🔄", ">", em)} {active}{R}  {D}{Icon("⏳", "~", em)} {pending}{R}  \x1b[31m{Icon("🚫", "-", em)} {blocked}{R}"),
+                    col.Text($"  \x1b[32m{Icon("✅", "+", t.Em)} {done}{t.R}  \x1b[33m{Icon("🔄", ">", t.Em)} {active}{t.R}  {t.D}{Icon("⏳", "~", t.Em)} {pending}{t.R}  \x1b[31m{Icon("🚫", "-", t.Em)} {blocked}{t.R}"),
                     col.Text(""),
                     col.BreakdownChart(statusData)
                         .ShowPercentages(true)

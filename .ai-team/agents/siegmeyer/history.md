@@ -343,3 +343,24 @@ The user has stated NO BORDERS multiple times. Yet `┌─┐│└─┘` box-d
 
 📌 **From decisions:** Implement stack-based navigation (Tab/Shift+Tab for panel focus, Enter to drill, Escape to pop). Settings is centered modal overlay using BackdropWidget. Remove manual ANSI background codes, replace with ThemePanel. Add 6 new themes (Forest, Cyberpunk, Midnight, Ember, Arctic, Retro). Adopt unused Hex1b widgets (Progress, Scroll, Border, Table, TimeSeriesChart, ColumnChart).
 
+### Sprint 18 — Rendering Helper Extraction & Screen Refactoring
+
+**ThemeContext helper (`Rendering/ThemeContext.cs`):**
+- New class bundles all theme-derived ANSI codes (`Acc`, `Sec`, `R`, `B`, `D`, `HBg`) and `Hex1bColor` values (`PanelBg`, `DetailBg`, `AltBg`) plus `HlBg`/`HlFg` and `Em` (emoji flag).
+- Constructor takes `(int themeIndex, bool showEmoji)` — replaces 8-10 lines of boilerplate per screen.
+- `Separator(int width = 36)` renders `━` rule lines. `SectionHeader(emoji, ascii, title)` renders styled section headers.
+- All 11 screens + AppLayout modals now use `var t = new ThemeContext(...)` instead of manual `ThemeManager.Get*()` calls.
+
+**StatusBadges helper (`Rendering/StatusBadges.cs`):**
+- Static `Member(MemberStatus, bool showEmoji)` and `Task(SquadTaskStatus, bool showEmoji)` methods.
+- Replaces 3 duplicated private `GetStatusBadge`/`GetTaskBadge` methods across DashboardScreen, RosterScreen, MemberDetailScreen.
+
+**ScreenHelper (`Rendering/ScreenHelper.cs`):**
+- `EmptyState(v, message)` renders consistent "no data" screens with dim styling.
+- `ListDetailLayout(v, t, listContent, detailContent, listWeight, detailWeight)` encapsulates HStack + two BackgroundPanelWidget panels — used by RosterScreen, ActivityLogScreen, DecisionsScreen, SkillsScreen.
+
+**SettingsScreen.ToggleSetting made public:**
+- Changed from `private` to `public static` so it can be called from other contexts.
+
+**Impact:** Eliminated ~120 lines of duplicated theme boilerplate across 11 screens. Eliminated 3 duplicated status badge methods. Standardized empty state and list-detail layout patterns. All 818 tests pass.
+
