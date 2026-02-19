@@ -103,14 +103,14 @@ Our Definition of Done says "tests pass" but we weren't enforcing "tests pass *i
 
 📌 Team update (2026-02-18): Solaire completed comprehensive data source catalog identifying 12 sources (7 active, 3 unused, 1 GitHub-only). Documented hybrid refresh architecture (FileWatcher + polling). Identified gaps: no real-time agent activity, session state, git integration, GitHub integration. Recommended P0–P3 priorities: parse ceremonies/routing/casting, add GitService + file mtime heuristics, add GitHubService via gh CLI. Concluded Copilot SDK not available — file mtime approach is recommended — decided by Solaire
 
-### 2026-02-19 — Test Suite Audit & Refactoring
+### 2026-02-19 — Test Suite Audit & Refactoring (Issue #64)
 
-- **Audit scope:** 778 test cases across 62 files, all 551 [Fact]/[Theory] attributes analyzed.
-- **Key finding:** Panel navigation E2E tests duplicated 3-4× across StackNavigationExtendedTests, DashboardPanelNavigationTests, AppNavigationTests, VimKeybindingTests. "Escape on Dashboard" existed in 4 separate files. Responsive layout tests scattered across 3 files with overlapping widths.
-- **E2E dedup:** Removed 20 duplicate E2E tests across 5 files. Canonical locations: AppNavigationTests (panel drill-in), NavigationEdgeCaseTests (escape-at-dashboard).
-- **Theory conversion:** ResponsiveLayoutTests (6 Facts → 1 Theory), ExtremeWidthTests (9 Facts → 2 Theories).
-- **Unit overlap removal:** ThemeBackgroundTests.Theme_HasExpectedName (dup of ThemeManagerTests), 7 EmptyState Facts (subsumed by ErrorHandling comprehensive test), 3 ErrorHandling Facts (subsumed by EmptyState comprehensive Left test), 5+3 SizingConsistencyTests duplicates.
-- **Result:** 778 → 768 test cases, all passing. Zero coverage loss.
-- **Deferred:** Theory conversion for EmptyStateTests/ErrorHandlingTests (distinct type constructors resist InlineData). TempDirFixture base class (low ROI).
+- **Audit scope:** 768 test cases across 243 test methods, refactored to 769 cases across 236 methods.
+- **Data-driven refactoring:** Converted 13 [Fact] tests to 4 [Theory] tests with InlineData patterns. EmptyStateTests (8→2 methods), ThemeSwitchingTests (3→1), SettingsModalOverlayTests (2→1, +bonus test).
+- **C# 14 features:** Applied collection expressions `[]` (EmptyStateTests, ThemeBackgroundTests), switch expressions with pattern matching (EmptyStateTests). `field` keyword not applicable — test suite uses records/auto-properties exclusively.
+- **Quality findings:** ResponsiveLayoutTests, ExtremeWidthTests, ThemeBackgroundTests, ThemeManagerTests already optimal with Theory patterns — no changes needed.
+- **Test distribution:** E2E 72%, Unit 23%, Integration 5%. Strong end-to-end coverage. Integration coverage low but appropriate (external services not yet implemented).
+- **Result:** 769 tests pass, zero regressions, ~20 lines net reduction. Self-documenting InlineData parameters improve readability.
+- **Deferred:** Navigation test consolidation (no action — distinct purposes), stale testhost cleanup (known SDK issue, not test suite problem).
 - **Audit doc:** `docs/test-audit.md`
-- **Decision written to:** `.ai-team/decisions/inbox/solaire-test-audit.md`
+- **Decision written to:** `.ai-team/decisions/inbox/solaire-test-refactoring.md`

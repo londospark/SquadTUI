@@ -147,3 +147,31 @@ Honest answer: I was heads-down on service integration and trusted that "it comp
 ---
 
 📌 Team update (2026-02-18): Andre fixed dashboard CurrentTask gap by wiring DataBridge.LoadRosterDataAsync() to merge task data from GetCurrentTasksAsync(). Documented that team.md Status column is static roster data, not real-time activity. Provided Tier 1-3 recommendations for inferring activity from file mtimes, logs, git commits. Identified that "active" status is working as designed — decided by Andre
+
+### 2026-02-19: Live update system improvements — Skills refresh, activity detection, debounce
+
+**What was done:**
+- Fixed Skills startup-only bug: added `LoadSkillsDataAsync()` to `RefreshService.ReloadAllAsync()` so Skills data refreshes on file changes alongside Members, Tasks, Decisions, and LogEntries.
+- Added `GetAgentActivityTimesAsync()` to `ITeamService`/`TeamService` — reads file mtimes from `history.md`, `charter.md`, and decision inbox files to infer real agent activity.
+- Added `LastActivity` (`Option<DateTime>`) field to `SquadMember` record, populated during roster load via `DataBridge`.
+- Reduced `FileWatcherService` debounce from 2s to 500ms for faster reactive updates.
+- Confirmed `DataBridge.LoadCharterContentAsync()` already exists for charter display — no backend change needed.
+- Updated `StubTeamService` for the new interface method.
+
+**Key insight:**
+- The "everyone shows active" problem is unsolvable from `team.md` alone — it stores static roster roles, not runtime state. File mtime heuristics are the best proxy until an explicit heartbeat mechanism exists. The `LastActivity` field gives the UI layer what it needs to show "active 5m ago" vs "idle 3d" without changing the underlying data model contract.
+
+### 2026-02-19: Keybinding fixes — Issues #69-73
+
+**What was fixed:**
+- **#69 (Loading indicator):** Added `state.IsLoading` check at the start of `DashboardScreen.Render()` that displays "Loading..." before rendering dashboard content.
+- **#70 (h/l navigation):** Added H and L key bindings using `BindCI()` helper. H navigates back (calls `state.NavigateBack()`), L cycles forward through main screens array.
+- **#72 (1-6 screen jump):** Added D1-D6 key bindings that call `state.NavigateTo()` for each screen (Dashboard, Roster, Decisions, Skills, Log, Metrics).
+- **#73 (Enter on Roster):** Added Roster case to Enter handler that sets `state.SelectedMemberName` and navigates to `Screen.MemberDetail`. Also wired `RosterScreen` List widget's `OnItemActivated` event.
+- **#71 (? key for help):** NOT FIXED — Hex1b `InputBindingsBuilder` has no `Char()` method and `Hex1bKey.Slash` doesn't exist. Team previously discussed this (see decisions.md #943-946). F1 binding works; `?` binding is not possible with current Hex1b API. Reopened issue.
+
+**Lessons learned:**
+- The `BindCI()` helper in AppLayout.cs handles case-insensitive letter keys by binding both `Key(X)` and `Shift().Key(X)`.
+- Enter handler can switch on `state.CurrentScreen` to provide screen-specific drill-in behavior.
+- Number keys use `Hex1bKey.D1` through `Hex1bKey.D6` enum values.
+- Always check team decisions before attempting API calls that don't exist — the team had already determined `Hex1bKey.Slash` doesn't work.

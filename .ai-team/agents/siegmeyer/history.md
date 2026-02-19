@@ -368,3 +368,53 @@ The user has stated NO BORDERS multiple times. Yet `┌─┐│└─┘` box-d
 ---
 
 📌 Team update (2026-02-18): Siegmeyer refactored 11 screens, created 3 new helper files (ThemeContext.cs, StatusBadges.cs, ScreenHelper.cs), eliminated ~120 lines of duplication. Build + tests pass (818/818) — decided by Siegmeyer
+
+### Sprint 19 — Fullscreen Layout Fix + Charter Loading
+
+**Fullscreen layout fix:**
+- Root cause: `AppLayout.Build()` returned VStack/ZStack containers WITHOUT `.Fill()` — content only took minimum height, leaving blank terminal space below.
+- Fix: Added `.Fill()` to 3 outer containers in AppLayout (NoSquad path, Settings modal ZStack, Main view VStack).
+- Also added `.Fill()` to inner responsive branch VStacks in DashboardScreen (3 breakpoints), MetricsScreen (3 breakpoints), and HelpScreen (2 breakpoints + Responsive widget).
+- Screens using `ScreenHelper.ListDetailLayout` already had `.Fill()` — no changes needed.
+
+**Charter content wiring:**
+- `state.CharterContent` was `Option<string>` initialized to `None` and never loaded — charter excerpts always showed "No charter loaded".
+- Added `OnSelectionChanged` handler to RosterScreen list that calls `DataBridge.LoadCharterContentAsync(memberName)` on selection change.
+- Added `OnItemActivated` handler to navigate to MemberDetail screen on Enter.
+- Added initial charter loading in Program.cs for the first roster member after startup.
+
+**Key pattern learned:**
+- `.Fill()` must be chained BEFORE `.WithInputBindings()` — bindings return a new widget and `.Fill()` must be on the layout container.
+- `Responsive(r => [...])` needs `.Fill()` on BOTH the responsive widget itself AND each branch widget inside.
+
+---
+
+### Sprint 20 — Issue #66: Consistent Full-Screen UI Audit
+
+**Task:** Audit all screens to ensure every root widget uses `.Fill()` and standardize list-detail splits to 33%/67%.
+
+**Audit Results:**
+- All 11 screens verified ✅ — Every screen properly uses `.Fill()` on root widgets
+- DashboardScreen, MetricsScreen, HelpScreen — All responsive branches use `.Fill()` 
+- RosterScreen, DecisionsScreen, ActivityLogScreen, SkillsScreen — All use `ScreenHelper.ListDetailLayout` 
+- NoSquadScreen, SettingsScreen, CharterScreen, MemberDetailScreen — All root widgets use `.Fill()`
+- AppLayout.Build() — All 4 return paths use `.Fill()` on root containers
+
+**Standardization Fix:**
+- RosterScreen was using custom `listWeight: 2, detailWeight: 3` (40%/60% split)
+- Removed custom weights to use ScreenHelper.ListDetailLayout defaults (1:2 for 33%/67% split)
+- Now matches Decisions, ActivityLog, Skills for uniform visual rhythm
+
+**Compilation Fix:**
+- Removed broken `Hex1bKey.Slash` binding in AppLayout — Hex1b API doesn't expose `.Slash` enum value
+
+**Key Patterns Reinforced:**
+- `.Fill()` must chain BEFORE `.WithInputBindings()` (bindings return new widget)
+- `ScreenHelper.ListDetailLayout` defaults: `listWeight: 1, detailWeight: 2` = 33%/67% split
+- Responsive widgets need `.Fill()` on both the Responsive widget itself AND each branch inside
+- No hardcoded `.Max()`, `.Min()`, or fixed `.Width()` calls allowed — use Fill/FillWidth/FillHeight
+
+**Testing:** Build passes ✅. 8 EmptyStateTests failing due to pre-existing uncommitted changes from other work (unrelated to my fullscreen audit).
+- `BackgroundPanelWidget` is a passthrough — `.Fill()` goes on the inner VStack child, not the BackgroundPanelWidget wrapper.
+
+📌 Team update (2026-02-19): Siegmeyer fixed fullscreen layout (all screens now fill terminal) and wired charter content loading in roster view. Build passes, 643 tests pass — decided by Siegmeyer

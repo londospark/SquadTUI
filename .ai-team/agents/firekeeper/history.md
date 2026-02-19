@@ -129,3 +129,50 @@ Performed full UX audit of all screens and key bindings. Key changes:
 ---
 
 📌 Team update (2026-02-18): Firekeeper extracted BindCI helper to eliminate ~160 lines of Shift+Key duplication in AppLayout. Updated HelpScreen keybindings to match current stack navigation (Tab/Enter/Escape, F1 for help). Reconciled StatusBadges.cs with IconHelper.cs removing duplication. Codified BindCI as convention for all letter-key bindings — decided by Firekeeper
+
+### Layout Consistency Overhaul (2026-02-19)
+
+**Audit findings:**
+- RosterScreen used non-standard 2:3 split ratio; all other list-detail screens used 1:2
+- SettingsScreen bypassed `ScreenHelper.ListDetailLayout` entirely, using manual `HStack` with 1:1 ratio
+- HelpScreen's `Responsive` widget didn't call `.Fill()`, causing it to not fill the terminal
+- MetricsScreen had broken `.Fill()` calls from another agent's changes (build errors)
+- Charter loading (`DataBridge.LoadCharterContentAsync`) was never called — MemberDetail always showed "No charter loaded"
+
+**Changes made:**
+1. Standardized RosterScreen to default `1:2` list-detail ratio
+2. Refactored SettingsScreen to use `ScreenHelper.ListDetailLayout` with standard `1:2` ratio
+3. Added `.Fill()` to HelpScreen and MetricsScreen responsive widgets
+4. Wired Enter key on Roster to navigate to MemberDetail and load charter from `.ai-team/agents/{name}/charter.md`
+
+**Codified layout standards:**
+- All list-detail screens: `ScreenHelper.ListDetailLayout` with default weights (1:2)
+- All root widgets must call `.Fill()` to fill the terminal
+- Separators: list=30, detail=36, full-width=44
+- Empty states: always `ScreenHelper.EmptyState()`
+- Headers: always `t.SectionHeader()`
+
+**Key learning:** The gap wasn't just visual inconsistency — it was that `ScreenHelper.ListDetailLayout` existed as a shared pattern but wasn't enforced. SettingsScreen predated the helper and was never migrated. Going forward, every list-detail screen MUST use the helper.
+
+### README Polish for Asciinema Demo (2026-02-19)
+
+**Task:** Prepare README.md for embedded asciinema demo with UX improvements.
+
+**Changes made:**
+1. **Added Demo section with asciinema embed** — Moved demo right after badges (before Features) using standard `[![asciicast](url)](url)` format with PLACEHOLDER ID. Added note that coordinator will replace with real ID after upload.
+2. **Updated Tech Stack** — Changed "C# 13" to "C# 14" per user request.
+3. **Consolidated Screenshots section** — Reduced from 8 screenshots to 4 most important (Dashboard, Roster, Decisions, Help). Other SVGs remain in docs/images/ but aren't embedded, reducing README length.
+4. **Kept Keyboard Shortcuts table unchanged** — Per task requirements, keys `?`, `h/l`, `1-6`, and `Enter` on Roster are currently being implemented (issues #70-72), so table will be accurate after those fixes land.
+5. **Simplified Metrics section** — Condensed subsections (What Metrics Shows, Dashboard Summary, Keyboard Shortcuts, Responsive Layouts) into single-level bullets to reduce visual weight. Removed technical Sprint Data Structure code block (belongs in docs/, not top-level README).
+
+**UX decisions:**
+- **Demo placement** — Right after badges ensures visitors see the demo in the first screenful, answering "what is this?" instantly
+- **Screenshot reduction** — 4 screenshots show the breadth (Dashboard overview, Roster list-detail, Decisions data, Help reference) without overwhelming. Users can explore docs/images/ if curious.
+- **Metrics consolidation** — The old section had 5 subsections and a code tree diagram. New version is scannable at a glance. Technical details belong in docs/ARCHITECTURE.md, not the landing README.
+- **Kept Keyboard Shortcuts intact** — Task explicitly noted another team member is implementing the keys right now, so table should reflect post-implementation state
+
+**Learnings:**
+1. **README is a landing page, not a manual** — The old version had deep technical details (Sprint data structure, per-section keyboard shortcuts) that belong in docs/. The README's job is to answer "What is this?" and "How do I start?" in 30 seconds.
+2. **Demo first, features second** — A 30-second asciinema demo is worth 1000 words. Moving it above Features ensures every visitor sees it without scrolling.
+3. **Screenshot curation matters** — 8 screenshots felt like a gallery. 4 screenshots show variety without fatigue. Quality > quantity.
+4. **Trust team coordination** — The task noted keys are being implemented by another team member. I kept the table as-is rather than "fixing" it to current state, trusting that the fixes will land and the README will be accurate post-merge.
