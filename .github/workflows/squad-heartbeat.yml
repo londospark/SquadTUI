@@ -2,8 +2,8 @@ name: Squad Heartbeat (Ralph)
 
 on:
   schedule:
-    # Every 30 minutes — adjust or remove if not needed
-    - cron: '*/30 * * * *'
+    # Every 6 hours
+    - cron: '0 */6 * * *'
 
   # React to completed work
   issues:
@@ -27,6 +27,10 @@ jobs:
   heartbeat:
     runs-on: ubuntu-latest
     steps:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
       - uses: actions/checkout@v4
 
       - name: Ralph — Check for squad work
